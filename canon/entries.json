@@ -17,7 +17,8 @@
       "status": "established",
       "start_year": -5,
       "end_year": -2,
-      "theme_id": "chronicle"
+      "theme_id": "chronicle",
+      "reuse_source": "bible/02-great-plague.md"
     },
     {
       "key": "plague-amplifier",
@@ -55,7 +56,8 @@
       "status": "established",
       "start_year": 0,
       "end_year": 0,
-      "theme_id": "chronicle"
+      "theme_id": "chronicle",
+      "reuse_source": "bible/03-cascade.md"
     },
     {
       "key": "long-storms",
