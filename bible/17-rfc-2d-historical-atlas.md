@@ -1,6 +1,6 @@
 # RFC 007 — 2D Historical Atlas (supersedes 3D-first RFC 005)
 
-**Status:** accepted mapping direction; implementation pending.
+**Status:** initial 2D slippy map with documented point locations, historical year filtering, labels and entity linking is implemented. GIS polygon/route editing, saved map views and spatial claims visualization remain planned.
 **References:** [Unified architecture](15-unified-architecture.md), [Locations/Factions](11-rfc-location-faction-systems.md), [Timeline](12-rfc-timeline-engine.md), [UI/Entry Designer](16-ux-and-entry-designer.md).
 
 ## Core decision
