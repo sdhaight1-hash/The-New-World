@@ -626,17 +626,28 @@ async function loadBoard(id){
   renderBoardList();renderBoardItems();
  }catch(error){notice(error.message,true);}
 }
-async function newBoard(){
- const title=prompt("Name this moodboard (for example: River valley architecture)");
- if(!title?.trim())return;
- const description=prompt("Describe the intended atmosphere or research question (optional)","")??"";
- let eid=null;
- if(state.entry&&confirm("Associate this board with the selected encyclopedia entry “"+state.entry.title+"”?"))eid=state.entry.id;
+function newBoard(){
+ if(!state.world)return;
+ const select=$("boardNewEntry");select.replaceChildren(new Option("General world board — not linked to an entry",""));
+ for(const entry of state.entries)select.add(new Option(entry.title+" · "+displayType(entry.type),entry.id));
+ if(state.entry)select.value=state.entry.id;
+ $("boardNewTitle").value="";
+ $("boardNewDescription").value="";
+ $("boardCreateDialog").showModal();
+ $("boardNewTitle").focus();
+}
+async function submitBoard(event){
+ event.preventDefault();
+ const title=$("boardNewTitle").value.trim();
+ if(!title)return;
+ const description=$("boardNewDescription").value;
+ const entity_id=$("boardNewEntry").value||null;
  try{
-  const data=await api(q("/api/boards",{world_id:wid()}),"POST",{title,description,entity_id:eid});
-  await boardsWorkspace();await loadBoard(data.board.id);
-  notice("New moodboard created.");
- }catch(error){notice(error.message,true);}
+  const created=await api(q("/api/boards",{world_id:wid()}),"POST",{title,description,entity_id});
+  $("boardCreateDialog").close();
+  await boardsWorkspace();await loadBoard(created.board.id);
+  notice("Moodboard created.");
+ }catch(error){notice("Unable to create board: "+error.message,true);}
 }
 async function boardDetails(){
  if(!state.board)return;
@@ -655,37 +666,82 @@ async function deleteBoard(){
  state.board=null;await boardsWorkspace();notice("Moodboard deleted; source assets preserved.");
  }catch(error){notice(error.message,true);}
 }
-async function boardAdd(kind){
+async function placeBoardCard(kind,reference=null){
  if(!state.board)return;
- let content="",media_id=null,entity_id=null,color=null;
- if(kind==="note"){
-  content=prompt("Write a note or visual direction","");if(content===null)return;
- }else if(kind==="swatch"){
-  color=prompt("Color hex code","#9cb6a0");if(color===null)return;
-  content=prompt("What does this color represent?","")??"";
- }else if(kind==="image"){
-  const media=await api(q("/api/media",{world_id:wid()}));
-  if(!media.length)return notice("Upload images through an entry's Explore tab first.",true);
-  const choices=media.slice(0,40);
-  const label=choices.map((m,i)=>(i+1)+". "+m.title).join("\n");
-  const n=prompt("Choose an image number (first 40 shown):\n"+label);
-  if(n===null)return;
-  const selected=choices[Number(n)-1];if(!selected)return notice("Choose a valid image number.",true);
-  media_id=selected.id;content=selected.title;
- }else if(kind==="entry"){
-  const entries=state.entries.slice(0,150);
-  if(!entries.length)return notice("Create a world entry first.",true);
-  const n=prompt("Choose a linked record number (first 150 shown):\n"+entries.map((e,i)=>(i+1)+". "+e.title).join("\n"));
-  if(n===null)return;
-  const selected=entries[Number(n)-1];if(!selected)return notice("Choose a valid record number.",true);
-  entity_id=selected.id;content="";
- }
  const count=state.board.items.length;
- const item={kind,content,media_id,entity_id,color,x:35+(count%4)*255,y:35+Math.floor(count/4)*225,w:230,h:185,z:count+1};
+ const item={kind,content:reference?.content??"",media_id:reference?.media_id??null,
+             entity_id:reference?.entity_id??null,color:reference?.color??null,
+             x:35+(count%4)*255,y:35+Math.floor(count/4)*225,w:230,h:185,z:count+1};
  try{
   state.board=await api(q("/api/board-item",{world_id:wid(),board_id:state.board.board.id}),"POST",item);
-  renderBoardItems();notice("Card added to board.");
- }catch(error){notice(error.message,true);}
+  renderBoardItems();notice("Reference placed on the moodboard.");
+ }catch(error){notice("Unable to add card: "+error.message,true);}
+}
+async function boardAdd(kind){
+ if(!state.board)return;
+ if(kind==="image"||kind==="entry"){await openBoardPicker(kind);return;}
+ if(kind==="note"){
+  const content=prompt("Visual note, research question or creative direction","");
+  if(content!==null)await placeBoardCard("note",{content});
+ }else if(kind==="swatch"){
+  const color=prompt("Color hex value","#9cb6a0");
+  if(color===null)return;
+  const content=prompt("Meaning or purpose of this color","")??"";
+  await placeBoardCard("swatch",{color,content});
+ }
+}
+let boardPickerKind="image",boardPickerAssets=[];
+async function openBoardPicker(kind){
+ boardPickerKind=kind;
+ $("boardPickerHeading").textContent=kind==="image"?"Choose an image":"Link a world entry";
+ $("boardPickerSearch").value="";
+ try{
+  boardPickerAssets=kind==="image"?await api(q("/api/media",{world_id:wid()})):state.entries;
+  $("boardPickerDialog").showModal();
+  renderBoardPicker();
+  $("boardPickerSearch").focus();
+ }catch(error){notice("Unable to load references: "+error.message,true);}
+}
+function renderBoardPicker(){
+ const root=$("boardPickerResults");root.replaceChildren();
+ const search=$("boardPickerSearch").value.toLowerCase().trim();
+ const selected=boardPickerAssets.filter(item=>[item.title,item.summary,item.credit,item.alt,item.type]
+  .some(value=>String(value||"").toLowerCase().includes(search)));
+ for(const item of selected){
+  const card=button("",
+   async()=>{
+    $("boardPickerDialog").close();
+    if(boardPickerKind==="image")await placeBoardCard("image",{media_id:item.id,content:item.title});
+    else await placeBoardCard("entry",{entity_id:item.id});
+   },"mood-picker-tile");
+  if(boardPickerKind==="image"){
+   const image=el("img");image.src="/media/"+wid()+"/"+item.id+"-preview";
+   image.alt=item.alt||item.title;image.loading="lazy";card.append(image);
+  }else{
+   card.append(el("span",displayType(item.type),"mood-picker-category"));
+  }
+  card.append(el("strong",item.title));
+  if(boardPickerKind==="entry"&&item.summary)card.append(el("small",item.summary.slice(0,90)));
+  root.append(card);
+ }
+ if(!selected.length)root.append(el("p",boardPickerKind==="image"?
+  "No images found. Use Upload image to add a new asset.":"No records match the search.","muted"));
+}
+async function uploadBoardImage(){
+ const file=$("boardImageFile").files?.[0];
+ if(!file)return;
+ try{
+  if(file.size>12000000||file.size===0)throw Error("Image must be between 1 byte and 12 MB.");
+  if(!["image/jpeg","image/png","image/webp"].includes(file.type))throw Error("Use PNG, JPEG or WebP.");
+  const response=await fetch(q("/api/upload",{world_id:wid()}),{
+   method:"POST",headers:{"X-World-Bible":"1","X-File-Name":encodeURIComponent(file.name),
+   "Content-Type":"application/octet-stream"},body:file
+  });
+  const result=await response.json();
+  if(!response.ok)throw Error(result.error||"Upload failed");
+  await placeBoardCard("image",{media_id:result.id,content:result.title||file.name});
+ }catch(error){notice("Upload failed: "+error.message,true);}
+ finally{$("boardImageFile").value="";}
 }
 function renderBoardItems(){
  const canvas=$("boardCanvas");canvas.replaceChildren();
@@ -934,6 +990,12 @@ function wire(){
  $("boardDelete").onclick=deleteBoard;
  $("boardAddNote").onclick=()=>boardAdd("note");
  $("boardAddImage").onclick=()=>boardAdd("image");
+ $("boardUpload").onclick=()=>$("boardImageFile").click();
+ $("boardImageFile").onchange=uploadBoardImage;
+ $("boardPickerSearch").oninput=renderBoardPicker;
+ $("boardPickerClose").onclick=()=>$("boardPickerDialog").close();
+ $("boardCreateForm").onsubmit=submitBoard;
+ $("boardCreateCancel").onclick=()=>$("boardCreateDialog").close();
  $("boardAddEntry").onclick=()=>boardAdd("entry");
  $("boardAddSwatch").onclick=()=>boardAdd("swatch");
  $("boardZoom").oninput=()=>{state.boardZoom=Number($("boardZoom").value)/100;renderBoardItems();};
