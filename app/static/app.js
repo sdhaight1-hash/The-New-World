@@ -10,7 +10,7 @@ const themes={
 function luminance(hex){const v=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(x=>x<=0.04045?x/12.92:((x+0.055)/1.055)**2.4);return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2];}
 function contrast(a,b){const [hi,lo]=[luminance(a),luminance(b)].sort((x,y)=>y-x);return (hi+0.05)/(lo+0.05);}
 
-const state={worlds:[],world:null,entries:[],entry:null,panel:"home",mode:"read",relations:[],media:[],allMedia:[],incoming:[],outgoing:[],layout:[],dirty:false,designDirty:false,networkFilter:"all",globalMedia:[],mediaUses:[],published:false};
+const state={worlds:[],world:null,entries:[],entry:null,panel:"home",mode:"read",relations:[],media:[],allMedia:[],incoming:[],outgoing:[],layout:[],dirty:false,designDirty:false,networkFilter:"all",globalMedia:[],mediaUses:[],published:false,boards:[],board:null,boardZoom:1};
 const escapeHTML=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const el=(tag,text,cls)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;if(cls)x.className=cls;return x;};
 const byId=id=>state.entries.find(e=>e.id===id);
@@ -79,7 +79,8 @@ const SPACE_META={
  atlas:{name:"Historical Atlas",label:"GEOGRAPHICAL WORKSPACE",description:"Explore mapped places, resources, and routes in 2D.",icon:"◇",accent:"#9ebf8b"},
  timeline:{name:"Chronology",label:"HISTORICAL WORKSPACE",description:"Study events and relationships across time.",icon:"◷",accent:"#d3b081"},
  network:{name:"Connections",label:"RELATIONSHIP WORKSPACE",description:"Trace the network joining people, places, and organizations.",icon:"⌘",accent:"#b49dce"},
- media:{name:"Media Library",label:"VISUAL ARCHIVE",description:"Images, source artwork, portraits and their usage.",icon:"▧",accent:"#92bcd5"}
+ media:{name:"Media Library",label:"VISUAL ARCHIVE",description:"Images, source artwork, portraits and their usage.",icon:"▧",accent:"#92bcd5"},
+ boards:{name:"Moodboards",label:"VISUAL DEVELOPMENT",description:"Compose visual references using shared world assets.",icon:"▦",accent:"#d8b58b"}
 };
 const displayType=t=>({person:"People",place:"Locations",event:"Events",organization:"Factions & organizations",family:"Families & households",object:"Objects & resources",source:"Sources & research",subject:"Topics & articles"})[t]||t.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
 const groupOrder=["place","organization","person","family","event","object","source","subject"];
@@ -120,8 +121,8 @@ function workspaceChrome(){
   if(active)b.setAttribute("aria-current","page");
   else b.removeAttribute("aria-current");
  });
- $("libraryHeading").textContent=p==="home"?"World index":p==="media"?"Record navigator":p==="network"?"Connected records":p==="timeline"?"Chronology index":p==="atlas"?"Geographical index":"Entity Explorer";
- $("navHelp").textContent=p==="media"?"Select the records these assets appear in.":p==="atlas"?"Find places and linked settlements.":p==="timeline"?"Find historical events and participants.":p==="network"?"Browse the people, places and organizations in this network.":"Browse by type or search the full encyclopedia.";
+ $("libraryHeading").textContent=p==="home"?"World index":p==="boards"?"World record palette":p==="media"?"Record navigator":p==="network"?"Connected records":p==="timeline"?"Chronology index":p==="atlas"?"Geographical index":"Entity Explorer";
+ $("navHelp").textContent=p==="boards"?"Find references to arrange on a moodboard.":p==="media"?"Select the records these assets appear in.":p==="atlas"?"Find places and linked settlements.":p==="timeline"?"Find historical events and participants.":p==="network"?"Browse the people, places and organizations in this network.":"Browse by type or search the full encyclopedia.";
  const count=state.entries.length;
  $("navStats").textContent=count+" "+(count===1?"entry":"entries")+" · "+categoryCounts().length+" types";
 }
@@ -137,6 +138,7 @@ async function refresh(){
  if(state.panel==="atlas")atlas(false);
  if(state.panel==="network")network();
  if(state.panel==="media")mediaWorkspace();
+ if(state.panel==="boards")boardsWorkspace();
  if(state.entry){state.entry=byId(state.entry.id)||null;if(state.panel==="article")render();}
  workspaceChrome();
 }
@@ -251,7 +253,7 @@ function panel(p){
  if(!safeExit())return;
  if(p!==state.panel){if(state.dirty)dirty(false);state.designDirty=false;}
  state.panel=p;
- for(const name of ["home","article","timeline","atlas","network","media"])$(name+"Panel").hidden=p!==name;
+ for(const name of ["home","article","timeline","atlas","network","media","boards"])$(name+"Panel").hidden=p!==name;
  $("welcome").hidden=p!=="article"||!!state.entry;
  workspaceChrome();
  if(p==="home")renderHome();
@@ -259,6 +261,7 @@ function panel(p){
  if(p==="atlas")atlas(true);
  if(p==="network")network();
  if(p==="media")mediaWorkspace();
+ if(p==="boards")boardsWorkspace();
  if(p==="article")render();
 }
 
@@ -589,6 +592,189 @@ async function network(){
   if(!selected.length)list.append(el("p","No relationships in this category.","empty-state"));
  }catch(e){notice("Connections unavailable: "+e.message,true);}
 }
+async function boardsWorkspace(){
+ if(!state.world)return;
+ const world=wid();
+ try{
+  const boards=await api(q("/api/boards",{world_id:world}));
+  if(wid()!==world)return;
+  state.boards=boards;
+  renderBoardList();
+  const selected=boards.find(b=>b.id===state.board?.board?.id);
+  if(selected)await loadBoard(selected.id);
+  else{state.board=null;$("boardEditor").hidden=true;$("boardEmpty").hidden=false;}
+ }catch(error){notice("Moodboards unavailable: "+error.message,true);}
+}
+function renderBoardList(){
+ const list=$("boardList");list.replaceChildren();
+ $("boardCount").textContent=String(state.boards.length);
+ for(const board of state.boards){
+  const b=button("",()=>loadBoard(board.id),"board-entry"+(state.board?.board?.id===board.id?" active":""));
+  b.append(el("strong",board.title),el("small",board.item_count+" items"+(board.entity_title?" · "+board.entity_title:"")));
+  list.append(b);
+ }
+}
+async function loadBoard(id){
+ const world=wid();
+ try{
+  const data=await api(q("/api/board",{world_id:world,id}));
+  if(world!==wid())return;
+  state.board=data;
+  $("boardEditor").hidden=false;$("boardEmpty").hidden=true;
+  $("boardTitle").textContent=data.board.title;
+  $("boardDescription").textContent=data.board.description||"Compose visual references, notes and canon links.";
+  renderBoardList();renderBoardItems();
+ }catch(error){notice(error.message,true);}
+}
+async function newBoard(){
+ const title=prompt("Name this moodboard (for example: River valley architecture)");
+ if(!title?.trim())return;
+ const description=prompt("Describe the intended atmosphere or research question (optional)","")??"";
+ let eid=null;
+ if(state.entry&&confirm("Associate this board with the selected encyclopedia entry “"+state.entry.title+"”?"))eid=state.entry.id;
+ try{
+  const data=await api(q("/api/boards",{world_id:wid()}),"POST",{title,description,entity_id:eid});
+  await boardsWorkspace();await loadBoard(data.board.id);
+  notice("New moodboard created.");
+ }catch(error){notice(error.message,true);}
+}
+async function boardDetails(){
+ if(!state.board)return;
+ const current=state.board.board;
+ const title=prompt("Moodboard title",current.title);if(title===null)return;
+ const description=prompt("Moodboard description",current.description);if(description===null)return;
+ try{
+  const data=await api(q("/api/board",{world_id:wid(),id:current.id}),"PATCH",{title,description});
+  state.board=data;await boardsWorkspace();notice("Board details saved.");
+ }catch(error){notice(error.message,true);}
+}
+async function deleteBoard(){
+ if(!state.board)return;
+ if(!confirm("Delete the moodboard “"+state.board.board.title+"” and its placements? Linked source images and encyclopedia entries will be kept."))return;
+ try{await api(q("/api/board",{world_id:wid(),id:state.board.board.id}),"DELETE");
+ state.board=null;await boardsWorkspace();notice("Moodboard deleted; source assets preserved.");
+ }catch(error){notice(error.message,true);}
+}
+async function boardAdd(kind){
+ if(!state.board)return;
+ let content="",media_id=null,entity_id=null,color=null;
+ if(kind==="note"){
+  content=prompt("Write a note or visual direction","");if(content===null)return;
+ }else if(kind==="swatch"){
+  color=prompt("Color hex code","#9cb6a0");if(color===null)return;
+  content=prompt("What does this color represent?","")??"";
+ }else if(kind==="image"){
+  const media=await api(q("/api/media",{world_id:wid()}));
+  if(!media.length)return notice("Upload images through an entry's Explore tab first.",true);
+  const choices=media.slice(0,40);
+  const label=choices.map((m,i)=>(i+1)+". "+m.title).join("\n");
+  const n=prompt("Choose an image number (first 40 shown):\n"+label);
+  if(n===null)return;
+  const selected=choices[Number(n)-1];if(!selected)return notice("Choose a valid image number.",true);
+  media_id=selected.id;content=selected.title;
+ }else if(kind==="entry"){
+  const entries=state.entries.slice(0,150);
+  if(!entries.length)return notice("Create a world entry first.",true);
+  const n=prompt("Choose a linked record number (first 150 shown):\n"+entries.map((e,i)=>(i+1)+". "+e.title).join("\n"));
+  if(n===null)return;
+  const selected=entries[Number(n)-1];if(!selected)return notice("Choose a valid record number.",true);
+  entity_id=selected.id;content="";
+ }
+ const count=state.board.items.length;
+ const item={kind,content,media_id,entity_id,color,x:35+(count%4)*255,y:35+Math.floor(count/4)*225,w:230,h:185,z:count+1};
+ try{
+  state.board=await api(q("/api/board-item",{world_id:wid(),board_id:state.board.board.id}),"POST",item);
+  renderBoardItems();notice("Card added to board.");
+ }catch(error){notice(error.message,true);}
+}
+function renderBoardItems(){
+ const canvas=$("boardCanvas");canvas.replaceChildren();
+ if(!state.board)return;
+ const items=state.board.items;
+ canvas.style.width="1400px";canvas.style.height="980px";
+ canvas.style.transformOrigin="top left";
+ canvas.style.transform="scale("+state.boardZoom+")";
+ $("boardZoomValue").textContent=Math.round(state.boardZoom*100)+"%";
+ const viewport=$("boardViewport");viewport.style.setProperty("--board-scale",state.boardZoom);
+ for(const item of items){
+  const card=el("article",undefined,"mood-card mood-"+item.kind);
+  card.style.left=item.x+"px";card.style.top=item.y+"px";
+  card.style.width=item.w+"px";card.style.height=item.h+"px";card.style.zIndex=item.z;
+  const header=el("div",undefined,"mood-card-header"),kindName=el("strong",item.kind,"mood-kind");
+  header.append(el("span","⠿","mood-grip"),kindName);
+  const edit=button("Edit",()=>editBoardCard(item.id),"mood-card-action");
+  const front=button("↑",()=>updateBoardCard(item.id,{z:Math.min(100000,Math.max(0,...state.board.items.map(x=>x.z))+1)}),"mood-card-action");
+  const remove=button("×",()=>removeBoardCard(item.id),"mood-card-action");
+  remove.setAttribute("aria-label","Remove moodboard card");
+  header.append(edit,front,remove);card.append(header);
+  const body=el("div",undefined,"mood-card-body");
+  if(item.kind==="image"&&item.media_id){
+   const img=el("img");img.src="/media/"+wid()+"/"+item.media_id+"-preview";img.alt=item.media_title||item.content;
+   img.loading="lazy";body.append(img);
+   if(item.content)body.append(el("span",item.content,"mood-caption"));
+  }else if(item.kind==="entry"){
+   const e=byId(item.entity_id);
+   body.append(el("span",e?displayType(e.type):"Entry","mood-entry-type"));
+   body.append(el("strong",e?.title||"Entry no longer exists"));
+   if(e)body.append(button("Open entry",()=>open(e.id),"mood-open"));
+  }else if(item.kind==="swatch"){
+   const sample=el("div",undefined,"mood-swatch");sample.style.backgroundColor=item.color||"#aaa";body.append(sample);
+   body.append(el("span",(item.color||"")+" "+item.content,"mood-caption"));
+  }else body.append(el("p",item.content||"A visual research note"));
+  card.append(body);
+  header.addEventListener("pointerdown",e=>{
+   if(e.target.closest("button"))return;
+   e.preventDefault();
+   const x=e.clientX,y=e.clientY,startX=item.x,startY=item.y;
+   header.setPointerCapture(e.pointerId);card.classList.add("moving");
+   const move=event=>{
+    const dx=(event.clientX-x)/state.boardZoom,dy=(event.clientY-y)/state.boardZoom;
+    card.style.left=Math.round(startX+dx)+"px";card.style.top=Math.round(startY+dy)+"px";
+   };
+   const finish=async event=>{
+    header.removeEventListener("pointermove",move);
+    header.removeEventListener("pointerup",finish);
+    header.removeEventListener("pointercancel",finish);
+    card.classList.remove("moving");
+    const dx=(event.clientX-x)/state.boardZoom,dy=(event.clientY-y)/state.boardZoom;
+    const next={x:Math.max(-20000,Math.min(20000,Math.round(startX+dx))),
+                y:Math.max(-20000,Math.min(20000,Math.round(startY+dy)))};
+    if(event.type!=="pointercancel"&&(next.x!==item.x||next.y!==item.y))await updateBoardCard(item.id,next);
+    else{card.style.left=item.x+"px";card.style.top=item.y+"px";}
+   };
+   header.addEventListener("pointermove",move);
+   header.addEventListener("pointerup",finish);
+   header.addEventListener("pointercancel",finish);
+  });
+  canvas.append(card);
+ }
+ if(!items.length)canvas.append(el("p","Add your first image, note, linked entry or color to begin composing.","mood-start"));
+}
+async function updateBoardCard(id,data){
+ if(!state.board)return;
+ try{
+  const boardId=state.board.board.id;
+  state.board=await api(q("/api/board-item",{world_id:wid(),board_id:boardId,id}),"PATCH",data);
+  renderBoardItems();
+ }catch(error){notice("Card not saved: "+error.message,true);await loadBoard(state.board.board.id);}
+}
+async function editBoardCard(id){
+ const item=state.board?.items.find(x=>x.id===id);if(!item)return;
+ const content=prompt(item.kind==="note"?"Edit note":"Edit caption or label",item.content);
+ if(content===null)return;
+ let color=item.color;
+ if(item.kind==="swatch"){
+  color=prompt("Swatch color",item.color);if(color===null)return;
+ }
+ await updateBoardCard(id,{content,...(item.kind==="swatch"?{color}:{})});
+}
+async function removeBoardCard(id){
+ if(!state.board||!confirm("Remove this placement from the board? Source records and media remain unchanged."))return;
+ try{
+  state.board=await api(q("/api/board-item",{world_id:wid(),board_id:state.board.board.id,id}),"DELETE");
+  renderBoardItems();
+ }catch(error){notice(error.message,true);}
+}
 async function mediaWorkspace(){
  if(!state.world)return;
  const world=wid();
@@ -697,7 +883,7 @@ function setupMap(){
 async function switchWorld(id){
  if(!safeExit()){$("world").value=wid();return;}state.world=state.worlds.find(w=>w.id===id);
  state.entry=null;state.published=false;state.relations=[];state.media=[];state.incoming=[];state.outgoing=[];
- state.globalMedia=[];state.mediaUses=[];state.networkFilter="all";
+ state.globalMedia=[];state.mediaUses=[];state.networkFilter="all";state.boards=[];state.board=null;
  $("search").value="";$("typeFilter").value="";$("mediaSearch").value="";$("mediaFilter").value="all";
  localStorage.setItem("wb-world",id);$("worldDescription").textContent=state.world.description||"";
  await refresh();panel("home");render();
@@ -742,6 +928,15 @@ async function importWorld(){
 }
 function wire(){
  $("publishToggle").onclick=togglePublication;
+ $("newBoard").onclick=newBoard;
+ $("boardEmptyCreate").onclick=newBoard;
+ $("boardRename").onclick=boardDetails;
+ $("boardDelete").onclick=deleteBoard;
+ $("boardAddNote").onclick=()=>boardAdd("note");
+ $("boardAddImage").onclick=()=>boardAdd("image");
+ $("boardAddEntry").onclick=()=>boardAdd("entry");
+ $("boardAddSwatch").onclick=()=>boardAdd("swatch");
+ $("boardZoom").oninput=()=>{state.boardZoom=Number($("boardZoom").value)/100;renderBoardItems();};
  $("homeNew").onclick=createEntry;
  $("homeBrowse").onclick=()=>panel("article");
  $("homeToAtlas").onclick=()=>panel("atlas");
