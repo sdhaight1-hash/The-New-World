@@ -1,0 +1,606 @@
+"""The New World reusable local-first worldbuilding HTTP server (Python 3.11+).
+
+Run: python app/server.py
+No cloud accounts or live-service dependencies. Pillow is required for image ingestion.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import io
+import json
+import mimetypes
+import os
+from pathlib import Path
+import re
+import sqlite3
+import threading
+from datetime import datetime, timezone
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlsplit, unquote
+from uuid import uuid4
+
+ROOT = Path(__file__).resolve().parent
+DB_DEFAULT = ROOT.parent / ".worldbible" / "worlds.sqlite3"
+MAX_JSON = 2_000_000
+MAX_IMAGE = 12_000_000
+ALLOWED_TYPES = {"person", "place", "event", "organization", "family", "object", "source", "subject"}
+STATUSES = {"working", "established", "disputed", "superseded"}
+THEMES = {"archive", "atlas", "chronicle", "kinship", "civic", "custom"}
+LINK_PATTERN = re.compile(r"\[\[([a-zA-Z0-9:-]{3,100})(?:\|[^\]\n]{1,180})?\]\]")
+HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
+VALID_BLOCKS = {"body", "facts", "relationships", "backlinks", "timeline", "map", "gallery", "sources"}
+DEFAULT_BLOCKS = ["body", "facts", "relationships", "backlinks", "timeline", "map", "gallery", "sources"]
+PREDICATES = {
+    "related_to", "located_in", "part_of", "member_of", "founded_by", "participated_in",
+    "biological_parent_of", "adoptive_parent_of", "step_parent_of", "partner_of",
+    "married_to", "resided_in", "traded_with", "allied_with", "claimed_by", "governed_by",
+    "owned_by", "traveled_to", "succeeded_by", "employed_by", "connected_to", "custom",
+}
+SCHEMA = """
+PRAGMA foreign_keys=ON;
+CREATE TABLE IF NOT EXISTS worlds(
+ id TEXT PRIMARY KEY, name TEXT NOT NULL, description TEXT NOT NULL DEFAULT '',
+ epoch_year INTEGER, created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS entities(
+ id TEXT PRIMARY KEY, world_id TEXT NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
+ type TEXT NOT NULL, title TEXT NOT NULL, aliases TEXT NOT NULL DEFAULT '[]',
+ summary TEXT NOT NULL DEFAULT '', body TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'working',
+ start_year INTEGER, end_year INTEGER, lat REAL, lon REAL,
+ theme_id TEXT NOT NULL DEFAULT 'archive', accent TEXT, layout TEXT NOT NULL DEFAULT '[]',
+ created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+ UNIQUE(world_id,id)
+);
+CREATE INDEX IF NOT EXISTS ix_entities_world_type ON entities(world_id,type,title);
+CREATE TABLE IF NOT EXISTS relations(
+ id TEXT PRIMARY KEY, world_id TEXT NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
+ source_id TEXT NOT NULL REFERENCES entities(id) ON DELETE RESTRICT,
+ target_id TEXT NOT NULL REFERENCES entities(id) ON DELETE RESTRICT,
+ predicate TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'working',
+ start_year INTEGER, end_year INTEGER, notes TEXT NOT NULL DEFAULT '',
+ created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_rel_source ON relations(world_id,source_id);
+CREATE INDEX IF NOT EXISTS ix_rel_target ON relations(world_id,target_id);
+CREATE TABLE IF NOT EXISTS content_links(
+ source_id TEXT NOT NULL REFERENCES entities(id) ON DELETE CASCADE,
+ target_id TEXT NOT NULL REFERENCES entities(id) ON DELETE RESTRICT,
+ PRIMARY KEY(source_id,target_id)
+);
+CREATE INDEX IF NOT EXISTS ix_link_target ON content_links(target_id);
+CREATE TABLE IF NOT EXISTS media(
+ id TEXT PRIMARY KEY, world_id TEXT NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
+ title TEXT NOT NULL, filename TEXT NOT NULL, mime TEXT NOT NULL,
+ sha256 TEXT NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL,
+ credit TEXT NOT NULL DEFAULT '', alt TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS media_uses(
+ id TEXT PRIMARY KEY, world_id TEXT NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
+ entity_id TEXT NOT NULL REFERENCES entities(id) ON DELETE CASCADE,
+ media_id TEXT NOT NULL REFERENCES media(id) ON DELETE RESTRICT,
+ role TEXT NOT NULL DEFAULT 'gallery', caption TEXT NOT NULL DEFAULT '',
+ UNIQUE(entity_id,media_id,role)
+);
+CREATE INDEX IF NOT EXISTS ix_media_uses_entity ON media_uses(entity_id);
+"""
+ENTITY_COLUMNS = ("id", "world_id", "type", "title", "aliases", "summary", "body", "status",
+                  "start_year", "end_year", "lat", "lon", "theme_id", "accent", "layout",
+                  "created_at", "updated_at")
+REL_COLUMNS = ("id", "world_id", "source_id", "target_id", "predicate", "status",
+               "start_year", "end_year", "notes", "created_at")
+
+
+def now():
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+class Error(Exception):
+    def __init__(self, message, status=400):
+        self.message, self.status = message, status
+        super().__init__(message)
+
+
+def require(condition, message, status=400):
+    if not condition:
+        raise Error(message, status)
+
+
+def canonical(row):
+    d = dict(row)
+    for key in ("aliases", "layout"):
+        if key in d:
+            d[key] = json.loads(d[key])
+    return d
+
+
+def validate_entity(data, partial=False):
+    fields = {"type", "title", "aliases", "summary", "body", "status", "start_year",
+              "end_year", "lat", "lon", "theme_id", "accent", "layout"}
+    require(isinstance(data, dict) and set(data) <= fields, "Invalid entity properties")
+    if not partial:
+        require("title" in data and "type" in data, "Title and type required")
+    if "type" in data:
+        require(data["type"] in ALLOWED_TYPES, "Unknown entity type")
+    if "title" in data:
+        require(isinstance(data["title"], str) and 0 < len(data["title"].strip()) <= 250, "Invalid title")
+    for k in ("summary", "body"):
+        if k in data:
+            require(isinstance(data[k], str) and len(data[k]) <= 2_000_000, "Invalid " + k)
+    if "status" in data:
+        require(data["status"] in STATUSES, "Invalid canon status")
+    if "aliases" in data:
+        a = data["aliases"]
+        require(isinstance(a, list) and len(a) <= 100 and all(isinstance(v, str) and 0 < len(v) <= 250 for v in a), "Invalid aliases")
+        data["aliases"] = list(dict.fromkeys(v.strip() for v in a if v.strip()))
+    if "theme_id" in data:
+        require(data["theme_id"] in THEMES, "Unknown theme")
+    if "accent" in data:
+        require(data["accent"] is None or isinstance(data["accent"], str) and HEX.fullmatch(data["accent"]), "Accent must be hex color")
+    if "layout" in data:
+        require(isinstance(data["layout"], list) and len(data["layout"]) <= len(VALID_BLOCKS), "Invalid layout")
+        require(all(isinstance(v, str) and v in VALID_BLOCKS for v in data["layout"]), "Invalid layout block")
+        require(len(set(data["layout"])) == len(data["layout"]), "Duplicate layout block")
+    for k in ("start_year", "end_year"):
+        if k in data:
+            require(data[k] is None or type(data[k]) is int and -100000 <= data[k] <= 100000, "Invalid year")
+    if "start_year" in data and "end_year" in data and data["start_year"] is not None and data["end_year"] is not None:
+        require(data["start_year"] <= data["end_year"], "End precedes start")
+    for k, bounds in (("lat", (-90, 90)), ("lon", (-180, 180))):
+        if k in data:
+            v = data[k]
+            require(v is None or type(v) in (float, int) and bounds[0] <= v <= bounds[1], "Invalid coordinate")
+    return data
+
+
+class Store:
+    def __init__(self, path=DB_DEFAULT, media_dir=None):
+        self.path = Path(path)
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.media_dir = Path(media_dir) if media_dir else self.path.parent / "media"
+        self.media_dir.mkdir(parents=True, exist_ok=True)
+        self.lock = threading.RLock()
+        self.db = sqlite3.connect(self.path, check_same_thread=False)
+        self.db.row_factory = sqlite3.Row
+        self.db.executescript(SCHEMA)
+        self.db.commit()
+
+    def close(self):
+        self.db.close()
+
+    def one(self, sql, args=()):
+        return self.db.execute(sql, args).fetchone()
+
+    def rows(self, sql, args=()):
+        return [dict(r) for r in self.db.execute(sql, args).fetchall()]
+
+    def check_world(self, wid):
+        require(self.one("SELECT 1 FROM worlds WHERE id=?", (wid,)), "World not found", 404)
+
+    def check_entity(self, wid, eid):
+        r = self.one("SELECT * FROM entities WHERE id=? AND world_id=?", (eid, wid))
+        require(r, "Entry not found in this world", 404)
+        return canonical(r)
+
+    def worlds(self):
+        return self.rows("SELECT * FROM worlds ORDER BY created_at,name")
+
+    def create_world(self, data):
+        require(isinstance(data, dict) and set(data) <= {"name", "description", "epoch_year"}, "Invalid world payload")
+        name = data.get("name")
+        require(isinstance(name, str) and 0 < len(name.strip()) <= 150, "Invalid world name")
+        desc = data.get("description", "")
+        epoch = data.get("epoch_year")
+        require(isinstance(desc, str) and len(desc) <= 3000, "Invalid description")
+        require(epoch is None or type(epoch) is int and -100000 <= epoch <= 100000, "Invalid epoch")
+        wid = str(uuid4())
+        with self.lock, self.db:
+            self.db.execute("INSERT INTO worlds VALUES(?,?,?,?,?)", (wid, name.strip(), desc, epoch, now()))
+        return self.one_world(wid)
+
+    def one_world(self, wid):
+        self.check_world(wid)
+        return dict(self.one("SELECT * FROM worlds WHERE id=?", (wid,)))
+
+    def entries(self, wid, search="", typ=None):
+        self.check_world(wid)
+        sql = "SELECT * FROM entities WHERE world_id=?"
+        args = [wid]
+        if typ:
+            require(typ in ALLOWED_TYPES, "Unknown type")
+            sql += " AND type=?"
+            args.append(typ)
+        if search:
+            require(len(search) <= 200, "Search too long")
+            sql += " AND (title LIKE ? OR aliases LIKE ? OR body LIKE ? OR summary LIKE ?)"
+            args += ["%" + search + "%"] * 4
+        sql += " ORDER BY title COLLATE NOCASE LIMIT 500"
+        return [canonical(r) for r in self.db.execute(sql, args)]
+
+    def create_entry(self, wid, data, specified_id=None):
+        self.check_world(wid)
+        data = validate_entity(dict(data))
+        eid = specified_id or str(uuid4())
+        stamp = now()
+        base = dict(id=eid, world_id=wid, type=data["type"], title=data["title"].strip(),
+                    aliases="[]", summary="", body="", status="working",
+                    start_year=None, end_year=None, lat=None, lon=None,
+                    theme_id="archive", accent=None, layout="[]",
+                    created_at=stamp, updated_at=stamp)
+        base.update(data)
+        for field in ("aliases", "layout"):
+            base[field] = json.dumps(base[field], ensure_ascii=False)
+        with self.lock, self.db:
+            self.db.execute("INSERT INTO entities(" + ",".join(ENTITY_COLUMNS) + ") VALUES(" + ",".join("?" for _ in ENTITY_COLUMNS) + ")",
+                            [base[k] for k in ENTITY_COLUMNS])
+            self._sync_links(wid, eid, data.get("body", ""))
+        return self.check_entity(wid, eid)
+
+    def _sync_links(self, wid, eid, body):
+        targets = set(LINK_PATTERN.findall(body))
+        if targets:
+            placeholders = ",".join("?" for _ in targets)
+            valid = {r["id"] for r in self.db.execute(
+                "SELECT id FROM entities WHERE world_id=? AND id IN (" + placeholders + ")", (wid, *targets))}
+            require(targets == valid, "Article contains links to missing or other-world entries")
+        self.db.execute("DELETE FROM content_links WHERE source_id=?", (eid,))
+        for target in targets:
+            self.db.execute("INSERT INTO content_links(source_id,target_id) VALUES(?,?)", (eid, target))
+
+    def update_entry(self, wid, eid, data):
+        current = self.check_entity(wid, eid)
+        data = validate_entity(dict(data), partial=True)
+        if not data:
+            return current
+        merged = {**current, **data}
+        validate_entity({k: merged[k] for k in ("type", "title", "aliases", "summary", "body", "status", "start_year", "end_year", "lat", "lon", "theme_id", "accent", "layout")})
+        data["updated_at"] = now()
+        for k in ("aliases", "layout"):
+            if k in data:
+                data[k] = json.dumps(data[k], ensure_ascii=False)
+        with self.lock, self.db:
+            self.db.execute("UPDATE entities SET " + ",".join(k + "=?" for k in data) +
+                            " WHERE id=? AND world_id=?", (*data.values(), eid, wid))
+            if "body" in data:
+                self._sync_links(wid, eid, data["body"])
+        return self.check_entity(wid, eid)
+
+    def delete_entry(self, wid, eid):
+        self.check_entity(wid, eid)
+        inbound = self.rows("SELECT source_id FROM content_links WHERE target_id=? AND source_id<>?", (eid, eid))
+        rel = self.rows("SELECT id FROM relations WHERE source_id=? OR target_id=?", (eid, eid))
+        require(not inbound and not rel, "Entry has incoming references or relationships. Remove or redirect them first.", 409)
+        with self.lock, self.db:
+            self.db.execute("DELETE FROM content_links WHERE source_id=? AND target_id=?", (eid, eid))
+            self.db.execute("DELETE FROM entities WHERE id=? AND world_id=?", (eid, wid))
+
+    def relation_list(self, wid, eid=None):
+        self.check_world(wid)
+        if eid:
+            self.check_entity(wid, eid)
+            return self.rows("SELECT * FROM relations WHERE world_id=? AND (source_id=? OR target_id=?) ORDER BY created_at", (wid, eid, eid))
+        return self.rows("SELECT * FROM relations WHERE world_id=? ORDER BY created_at", (wid,))
+
+    def create_relation(self, wid, data):
+        self.check_world(wid)
+        require(isinstance(data, dict) and set(data) <= {"source_id","target_id","predicate","status","start_year","end_year","notes"}, "Invalid relation")
+        src, dst = data.get("source_id"), data.get("target_id")
+        require(isinstance(src, str) and isinstance(dst, str) and src != dst, "Invalid source/target")
+        self.check_entity(wid, src)
+        self.check_entity(wid, dst)
+        pred = data.get("predicate", "related_to")
+        require(pred in PREDICATES, "Invalid relationship type")
+        require(data.get("status", "working") in STATUSES, "Invalid relationship status")
+        notes = data.get("notes", "")
+        require(isinstance(notes, str) and len(notes) <= 5000, "Invalid relationship notes")
+        start, end = data.get("start_year"), data.get("end_year")
+        for y in (start, end):
+            require(y is None or type(y) is int and -100000 <= y <= 100000, "Invalid year")
+        require(start is None or end is None or start <= end, "End precedes start")
+        if pred.endswith("parent_of"):
+            require(not self._is_ancestor(wid, dst, src), "Parentage cycle detected")
+        rid = str(uuid4())
+        with self.lock, self.db:
+            self.db.execute("INSERT INTO relations VALUES(?,?,?,?,?,?,?,?,?,?)",
+                            (rid, wid, src, dst, pred, data.get("status", "working"), start, end, notes, now()))
+        return dict(self.one("SELECT * FROM relations WHERE id=?", (rid,)))
+
+    def _is_ancestor(self, wid, start, target):
+        # Existing directed paths from the prospective child to the proposed parent.
+        visited = set()
+        pending = [start]
+        while pending:
+            person = pending.pop()
+            if person == target:
+                return True
+            if person in visited:
+                continue
+            visited.add(person)
+            pending.extend(r["target_id"] for r in self.rows(
+                "SELECT target_id FROM relations WHERE world_id=? AND source_id=? AND predicate IN (?,?,?)",
+                (wid, person, "biological_parent_of", "adoptive_parent_of", "step_parent_of")))
+        return False
+
+    def delete_relation(self, wid, rid):
+        self.check_world(wid)
+        r = self.one("SELECT * FROM relations WHERE id=? AND world_id=?", (rid, wid))
+        require(r, "Relationship not found", 404)
+        with self.lock, self.db:
+            self.db.execute("DELETE FROM relations WHERE id=? AND world_id=?", (rid, wid))
+
+    def backlinks(self, wid, eid):
+        self.check_entity(wid, eid)
+        return self.rows("""SELECT e.id,e.title,e.type FROM content_links l
+          JOIN entities e ON e.id=l.source_id WHERE l.target_id=? AND e.world_id=? ORDER BY e.title""", (eid, wid))
+
+    def outgoing(self, wid, eid):
+        self.check_entity(wid, eid)
+        return self.rows("""SELECT e.id,e.title,e.type FROM content_links l
+          JOIN entities e ON e.id=l.target_id WHERE l.source_id=? AND e.world_id=? ORDER BY e.title""", (eid, wid))
+
+    def media_list(self, wid, eid=None):
+        self.check_world(wid)
+        if eid:
+            self.check_entity(wid, eid)
+            return self.rows("""SELECT m.*,u.id as use_id,u.role,u.caption FROM media m JOIN media_uses u ON m.id=u.media_id
+               WHERE u.world_id=? AND u.entity_id=? ORDER BY m.created_at""", (wid, eid))
+        return self.rows("SELECT * FROM media WHERE world_id=? ORDER BY created_at DESC", (wid,))
+
+    def upload_image(self, wid, raw, filename):
+        self.check_world(wid)
+        require(0 < len(raw) <= MAX_IMAGE, "Image size out of bounds")
+        try:
+            from PIL import Image, ImageOps, UnidentifiedImageError
+        except ImportError as e:
+            raise Error("Image uploads need Pillow: pip install -r app/requirements.txt", 503) from e
+        Image.MAX_IMAGE_PIXELS = 25_000_000
+        try:
+            with Image.open(io.BytesIO(raw)) as img:
+                require(img.format in ("PNG", "JPEG", "WEBP"), "Only PNG, JPEG and WebP supported")
+                require(img.width * img.height <= 25_000_000, "Too many image pixels")
+                fmt = img.format
+                img.verify()
+            with Image.open(io.BytesIO(raw)) as img:
+                thumb = ImageOps.exif_transpose(img)
+                thumb.thumbnail((640, 640))
+                if thumb.mode not in ("RGB", "RGBA"):
+                    thumb = thumb.convert("RGB")
+                out = io.BytesIO()
+                thumb.save(out, format="WEBP", quality=80)
+                tw, th = img.size
+        except (OSError, ValueError, UnidentifiedImageError) as exc:
+            raise Error("Invalid or unsafe image") from exc
+        aid = str(uuid4())
+        safe_name = Path(filename).name[:180] or "image"
+        mime = {"PNG":"image/png","JPEG":"image/jpeg","WEBP":"image/webp"}[fmt]
+        suffix = {"PNG":".png","JPEG":".jpg","WEBP":".webp"}[fmt]
+        folder = self.media_dir / wid
+        folder.mkdir(parents=True, exist_ok=True)
+        original, preview = folder / (aid + suffix), folder / (aid + "-preview.webp")
+        try:
+            original.write_bytes(raw)
+            preview.write_bytes(out.getvalue())
+            with self.lock, self.db:
+                self.db.execute("INSERT INTO media VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                                (aid,wid,safe_name,safe_name,mime,hashlib.sha256(raw).hexdigest(),
+                                 tw,th,"","",now()))
+        except Exception:
+            original.unlink(missing_ok=True)
+            preview.unlink(missing_ok=True)
+            raise
+        return dict(self.one("SELECT * FROM media WHERE id=?", (aid,)))
+
+    def media_file(self, wid, aid, preview=False):
+        m = self.one("SELECT * FROM media WHERE world_id=? AND id=?", (wid, aid))
+        require(m, "Image not found", 404)
+        suffix = {"image/png":".png","image/jpeg":".jpg","image/webp":".webp"}[m["mime"]]
+        path = self.media_dir / wid / (aid + ("-preview.webp" if preview else suffix))
+        require(path.is_file(), "Image blob missing", 404)
+        return path, ("image/webp" if preview else m["mime"])
+
+    def add_media_use(self, wid, data):
+        require(isinstance(data, dict) and set(data) <= {"entity_id","media_id","role","caption"}, "Invalid media use")
+        entity = data.get("entity_id")
+        self.check_entity(wid, entity)
+        media = data.get("media_id")
+        require(self.one("SELECT 1 FROM media WHERE world_id=? AND id=?", (wid, media)), "Media not found", 404)
+        role = data.get("role", "gallery")
+        require(role in {"gallery", "hero", "portrait", "map", "document"}, "Unknown media role")
+        caption = data.get("caption", "")
+        require(isinstance(caption, str) and len(caption) <= 2000, "Invalid caption")
+        uid = str(uuid4())
+        with self.lock, self.db:
+            try:
+                self.db.execute("INSERT INTO media_uses VALUES(?,?,?,?,?,?)", (uid,wid,entity,media,role,caption))
+            except sqlite3.IntegrityError as exc:
+                raise Error("Image already linked with this role", 409) from exc
+        return {"id":uid, "entity_id":entity, "media_id":media, "role":role, "caption":caption}
+
+    def remove_media_use(self, wid, uid):
+        require(self.one("SELECT 1 FROM media_uses WHERE id=? AND world_id=?", (uid,wid)), "Image placement not found", 404)
+        with self.lock, self.db:
+            self.db.execute("DELETE FROM media_uses WHERE id=? AND world_id=?", (uid,wid))
+
+    def export(self, wid):
+        world = self.one_world(wid)
+        entries = self.entries(wid)
+        relations = self.relation_list(wid)
+        media = self.media_list(wid)
+        uses = self.rows("SELECT * FROM media_uses WHERE world_id=?", (wid,))
+        return {"format":"world-bible-export-v1","world":world,"entities":entries,
+                "relations":relations,"media_metadata":media,"media_uses":uses,
+                "notice":"Image binaries are not included. Back up the .worldbible/media folder separately."}
+
+
+class Handler(BaseHTTPRequestHandler):
+    server_version = "WorldBible/0.1"
+
+    def log_message(self, fmt, *args):
+        print("%s %s" % (self.address_string(), fmt % args))
+
+    def reply(self, result, status=200):
+        data = json.dumps(result, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        self.wfile.write(data)
+
+    def fail(self, exc):
+        try:
+            self.reply({"error":exc.message if isinstance(exc,Error) else "Internal server error"},
+                       exc.status if isinstance(exc,Error) else 500)
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+        if not isinstance(exc, Error):
+            print("Unhandled API exception:", repr(exc))
+
+    def json_body(self):
+        length = self.headers.get("Content-Length", "0")
+        require(length.isdigit() and int(length) <= MAX_JSON, "JSON body too large")
+        try:
+            return json.loads(self.rfile.read(int(length)))
+        except (ValueError, UnicodeError) as exc:
+            raise Error("Invalid JSON body") from exc
+
+    def check_write(self):
+        require(self.headers.get("X-World-Bible") == "1", "Missing local write header", 403)
+        origin = self.headers.get("Origin")
+        if origin:
+            from urllib.parse import urlparse
+            u = urlparse(origin)
+            require(u.scheme in ("http", "https") and u.netloc == self.headers.get("Host"), "Cross-origin write rejected", 403)
+
+    def get_arg(self, q, name):
+        v = q.get(name, [None])[0]
+        require(v is not None, "Missing parameter: " + name)
+        return v
+
+    def do_GET(self):
+        try:
+            p = urlsplit(self.path)
+            route = p.path
+            q = parse_qs(p.query)
+            s = self.server.store
+            if route == "/":
+                self.send_response(302)
+                self.send_header("Location", "/app/")
+                self.end_headers()
+                return
+            if route.startswith("/app/"):
+                rel = route[5:] or "index.html"
+                require(rel in ("index.html", "app.js", "style.css"), "Asset not found", 404)
+                f = ROOT / "static" / rel
+                require(f.is_file(), "Asset not found", 404)
+                data = f.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", mimetypes.guess_type(f.name)[0] or "application/octet-stream")
+                self.send_header("Content-Length", str(len(data)))
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'")
+                self.end_headers()
+                self.wfile.write(data)
+                return
+            if route == "/api/worlds":
+                return self.reply(s.worlds())
+            if route == "/api/entities":
+                return self.reply(s.entries(self.get_arg(q,"world_id"), q.get("search",[""])[0], q.get("type",[None])[0]))
+            if route == "/api/entity":
+                return self.reply(s.check_entity(self.get_arg(q,"world_id"), self.get_arg(q,"id")))
+            if route == "/api/relations":
+                return self.reply(s.relation_list(self.get_arg(q,"world_id"), q.get("entity_id",[None])[0]))
+            if route == "/api/backlinks":
+                return self.reply(s.backlinks(self.get_arg(q,"world_id"), self.get_arg(q,"entity_id")))
+            if route == "/api/outgoing":
+                return self.reply(s.outgoing(self.get_arg(q,"world_id"), self.get_arg(q,"entity_id")))
+            if route == "/api/media":
+                return self.reply(s.media_list(self.get_arg(q,"world_id"), q.get("entity_id",[None])[0]))
+            if route == "/api/export":
+                return self.reply(s.export(self.get_arg(q,"world_id")))
+            if route.startswith("/media/"):
+                parts = route.split("/")
+                require(len(parts) == 4 and parts[3] and parts[2], "Invalid image URL", 404)
+                file, mime = s.media_file(parts[2], parts[3].removesuffix("-preview"), parts[3].endswith("-preview"))
+                blob = file.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", mime)
+                self.send_header("Content-Length", str(len(blob)))
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.send_header("Cache-Control", "private, max-age=3600")
+                self.end_headers()
+                self.wfile.write(blob)
+                return
+            raise Error("Route not found",404)
+        except Exception as exc:
+            self.fail(exc)
+
+    def do_POST(self):
+        self.mutate("POST")
+
+    def do_PATCH(self):
+        self.mutate("PATCH")
+
+    def do_DELETE(self):
+        self.mutate("DELETE")
+
+    def mutate(self, verb):
+        try:
+            self.check_write()
+            p=urlsplit(self.path)
+            route=p.path
+            q=parse_qs(p.query)
+            s=self.server.store
+            wid=self.get_arg(q,"world_id") if route != "/api/worlds" else None
+            if route=="/api/upload" and verb=="POST":
+                count=self.headers.get("Content-Length","0")
+                require(count.isdigit() and 0<int(count)<=MAX_IMAGE,"Image body too large")
+                raw=self.rfile.read(int(count))
+                filename=unquote(self.headers.get("X-File-Name","image"))[:180]
+                return self.reply(s.upload_image(wid,raw,filename),201)
+            data=self.json_body() if verb in ("POST","PATCH") else {}
+            if route=="/api/worlds" and verb=="POST":
+                return self.reply(s.create_world(data),201)
+            if route=="/api/entities" and verb=="POST":
+                return self.reply(s.create_entry(wid,data),201)
+            if route=="/api/entity":
+                eid=self.get_arg(q,"id")
+                if verb=="PATCH":
+                    return self.reply(s.update_entry(wid,eid,data))
+                if verb=="DELETE":
+                    s.delete_entry(wid,eid)
+                    return self.reply({"deleted":eid})
+            if route=="/api/relations" and verb=="POST":
+                return self.reply(s.create_relation(wid,data),201)
+            if route=="/api/relation" and verb=="DELETE":
+                s.delete_relation(wid,self.get_arg(q,"id"))
+                return self.reply({"ok":True})
+            if route=="/api/media-use" and verb=="POST":
+                return self.reply(s.add_media_use(wid,data),201)
+            if route=="/api/media-use" and verb=="DELETE":
+                s.remove_media_use(wid,self.get_arg(q,"id"))
+                return self.reply({"ok":True})
+            raise Error("Route or method not found",404)
+        except Exception as exc:
+            self.fail(exc)
+
+
+def serve(path=DB_DEFAULT, port=8765):
+    store=Store(path)
+    httpd=ThreadingHTTPServer(("127.0.0.1",port),Handler)
+    httpd.store=store
+    print(f"World Bible running at http://127.0.0.1:{port}/app/ (Ctrl+C to stop)")
+    try:
+        httpd.serve_forever()
+    finally:
+        httpd.server_close()
+        store.close()
+
+
+if __name__=="__main__":
+    cli=argparse.ArgumentParser()
+    cli.add_argument("--db",default=str(DB_DEFAULT))
+    cli.add_argument("--port",type=int,default=8765)
+    args=cli.parse_args()
+    serve(args.db,args.port)
