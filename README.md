@@ -11,6 +11,8 @@
 - [Technology and material culture](bible/04-technology.md)
 - [Political and social development](bible/05-successor-societies.md)
 - [Connected world encyclopedia architecture](bible/08-world-bible-architecture.md)
+- [Relationship mapping and link discovery](bible/09-linking-and-discovery.md)
+- [Open the link discovery explorer](tools/discovery/index.html)
 - [Genealogy, family history, and kinship](bible/07-genealogy-dynasties.md)
 - [Genealogy data model and roadmap](genealogy/README.md)
 - [Open genealogy workbench](tools/genealogy/index.html)
