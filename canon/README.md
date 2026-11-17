@@ -2,13 +2,13 @@
 
 This directory contains the **source-grounded population manifest** for the local World Bible Studio.
 
-- [`entries.json`](entries.json) — 117 identified historical concepts, including two reused authoritative catastrophe articles, and 159 reviewed relations. When combined with the 20 in-world historical and regional source articles, a fresh Studio seed creates **125 world-content records**.
+- [`entries.json`](entries.json) — 120 identified historical concepts, including two reused authoritative catastrophe articles, and 165 reviewed relations. When combined with the 20 in-world historical and regional source articles, a fresh Studio seed creates **128 world-content records**.
 - [`../app/seed.py`](../app/seed.py) — deterministic, repeatable importer. Source article content is preserved verbatim, and editing an existing database record never causes a later seed to overwrite it.
 - [`../app/tests/test_seed.py`](../app/tests/test_seed.py) — tests record totals, related entries and backlinks, source fidelity, world isolation by IDs, stable reimports, preservation of edited content and publication state.
 
 ## Quality and scope audit
 
-The original importer accidentally treated 15 editorial/software-design documents as world entries. The [content audit](CONTENT_AUDIT.md) documents every excluded file and flags remaining historical placeholders for review. A fresh seeded encyclopedia contains **68 world-content records at the time of the audit**, rather than the previous 83. The subsequent Age of AI history added 10 records, followed by the 2019–2026 multi-domain historical pass adding 29 more records (one source chapter and 28 structured entries), for a clean total of **107** at that stage. The 2018 start and progressively nested regional chapters add 10 source chapters plus eight dated events, yielding **125 records and 159 relations**. Existing local databases receive a backup-first cleanup that preserves edited or published content.
+The original importer accidentally treated 15 editorial/software-design documents as world entries. The [content audit](CONTENT_AUDIT.md) documents every excluded file and flags remaining historical placeholders for review. A fresh seeded encyclopedia contains **68 world-content records at the time of the audit**, rather than the previous 83. The subsequent Age of AI history added 10 records, followed by the 2019–2026 multi-domain historical pass adding 29 more records (one source chapter and 28 structured entries), for a clean total of **107** at that stage. The 2018 start and progressively nested regional chapters add 12 source chapters plus eight dated events, yielding **128 records and 165 relations**. Existing local databases receive a backup-first cleanup that preserves edited or published content.
 
 ## Opening historical era
 
