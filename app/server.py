@@ -165,7 +165,13 @@ class Store:
         self.lock = threading.RLock()
         self.db = sqlite3.connect(self.path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
+        self.db.execute("PRAGMA busy_timeout=5000")
+        self.db.execute("PRAGMA journal_mode=WAL")
+        self.db.execute("PRAGMA synchronous=FULL")
+        version = self.db.execute("PRAGMA user_version").fetchone()[0]
+        require(version <= 1, "Database schema is newer than this application", 409)
         self.db.executescript(SCHEMA)
+        self.db.execute("PRAGMA user_version=1")
         self.db.commit()
 
     def close(self):
@@ -492,6 +498,26 @@ class Store:
         ids = [e.get("id") for e in entities if isinstance(e, dict)]
         require(len(ids) == len(entities) and all(isinstance(x, str) and x for x in ids)
                 and len(set(ids)) == len(ids), "Invalid or duplicate entity IDs")
+        # Validate parentage as a directed acyclic graph before any writes.
+        adjacency = {id_: [] for id_ in ids}
+        indegree = {id_: 0 for id_ in ids}
+        for rel in relations:
+            require(isinstance(rel, dict), "Invalid relationship")
+            src, dst = rel.get("source_id"), rel.get("target_id")
+            require(src in adjacency and dst in adjacency and src != dst, "Invalid relationship endpoints")
+            if rel.get("predicate") in ("biological_parent_of", "adoptive_parent_of", "step_parent_of"):
+                adjacency[src].append(dst)
+                indegree[dst] += 1
+        queue = [id_ for id_, degree in indegree.items() if degree == 0]
+        visited = 0
+        while queue:
+            node = queue.pop()
+            visited += 1
+            for child in adjacency[node]:
+                indegree[child] -= 1
+                if indegree[child] == 0:
+                    queue.append(child)
+        require(visited == len(ids), "Imported parentage contains an ancestry cycle")
         old_new = {id_: str(uuid4()) for id_ in ids}
         world_id = str(uuid4())
         epoch = source_world.get("epoch_year")
@@ -542,13 +568,13 @@ class Store:
         return {"world": self.one_world(world_id), "entries": len(entities), "relations": len(relations)}
 
     def export(self, wid):
-        world = self.one_world(wid)
         with self.lock:
+            world = self.one_world(wid)
             entries = [canonical(r) for r in self.db.execute(
                 "SELECT * FROM entities WHERE world_id=? ORDER BY id", (wid,))]
-        relations = self.relation_list(wid)
-        media = self.media_list(wid)
-        uses = self.rows("SELECT * FROM media_uses WHERE world_id=?", (wid,))
+            relations = self.relation_list(wid)
+            media = self.media_list(wid)
+            uses = self.rows("SELECT * FROM media_uses WHERE world_id=?", (wid,))
         return {"format":"world-bible-export-v1","world":world,"entities":entries,
                 "relations":relations,"media_metadata":media,"media_uses":uses,
                 "notice":"Image binaries are not included. Back up the .worldbible/media folder separately."}
