@@ -371,6 +371,12 @@ class Store:
         return self.rows("""SELECT e.id,e.title,e.type FROM content_links l
           JOIN entities e ON e.id=l.target_id WHERE l.source_id=? AND e.world_id=? ORDER BY e.title""", (eid, wid))
 
+    def media_uses(self, wid):
+        self.check_world(wid)
+        return self.rows("""SELECT u.id,u.entity_id,u.media_id,u.role,u.caption,e.title AS entity_title
+            FROM media_uses u JOIN entities e ON e.id=u.entity_id
+            WHERE u.world_id=? AND e.world_id=? ORDER BY e.title,u.role""", (wid,wid))
+
     def media_list(self, wid, eid=None):
         self.check_world(wid)
         if eid:
@@ -667,6 +673,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(s.outgoing(self.get_arg(q,"world_id"), self.get_arg(q,"entity_id")))
             if route == "/api/media":
                 return self.reply(s.media_list(self.get_arg(q,"world_id"), q.get("entity_id",[None])[0]))
+            if route == "/api/media-uses":
+                return self.reply(s.media_uses(self.get_arg(q,"world_id")))
             if route == "/api/export":
                 return self.reply(s.export(self.get_arg(q,"world_id")))
             if route.startswith("/media/"):
