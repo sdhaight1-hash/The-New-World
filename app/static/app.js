@@ -627,7 +627,15 @@ function renderBoardList(){
  $("boardCount").textContent=String(state.boards.length);
  for(const board of state.boards){
   const b=button("",()=>loadBoard(board.id),"board-entry"+(state.board?.board?.id===board.id?" active":""));
-  b.append(el("strong",board.title),el("small",board.item_count+" items"+(board.entity_title?" · "+board.entity_title:"")));
+  const thumb=el("span",undefined,"board-entry-preview");
+  if(board.preview_media_id){
+   const img=el("img");img.src="/media/"+wid()+"/"+board.preview_media_id+"-preview";
+   img.alt="";img.loading="lazy";thumb.append(img);
+  }else{
+   thumb.style.backgroundColor=board.preview_color||"var(--raised)";
+   thumb.append(el("span",board.preview_color?"COLOR STUDY":"VISUAL STUDY"));
+  }
+  b.append(thumb,el("strong",board.title),el("small",board.item_count+" items"+(board.entity_title?" · "+board.entity_title:"")));
   list.append(b);
  }
 }
