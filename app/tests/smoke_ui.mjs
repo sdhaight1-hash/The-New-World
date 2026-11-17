@@ -40,6 +40,16 @@ try{
  await page.locator("#createType").selectOption("place");
  await page.locator("#createForm button[type=submit]").click();
  await page.locator("#writePanel").waitFor({state:"visible"});
+ await page.locator("#v2NewCategory").fill("Smoke-test collection");
+ await page.locator("#v2AddCategory").click();
+ await page.locator("#v2Categories option").filter({hasText:"Smoke-test collection"}).waitFor();
+ const collectionOption=await page.locator("#v2Categories option").filter({hasText:"Smoke-test collection"}).getAttribute("value");
+ await page.locator("#v2Categories").selectOption(collectionOption);
+ await page.locator("#v2Subtype").selectOption("settlement");
+ await page.locator('#v2PropertyFields [data-property="kind"]').selectOption("settlement");
+ await page.locator("#v2SaveMetadata").click();
+ await page.waitForFunction(()=>document.querySelector("#v2MetaStatus")?.textContent==="Saved");
+
  assert.equal(await page.locator("#breadcrumb").innerText(),"Locations / Navigation Test Settlement");
  assert.match(await page.locator("#eBody").inputValue(),/Geography and setting/);
  await page.locator("#eSummary").fill("A deliberately created sample record.");
@@ -86,6 +96,7 @@ try{
  await reader.locator("#articleContent h1").waitFor({state:"visible"});
  assert.equal(await reader.locator("#articleContent h1").innerText(),"Navigation Test Settlement");
  assert.match(await reader.locator("#articleContent .reader-prose").innerText(),/Initial data entry/);
+ assert.match(await reader.locator("#articleContent .article-taxonomy").innerText(),/Smoke-test collection/);
  assert.equal(await reader.locator("#editForm").count(),0);
  await reader.locator('a[href="#/browse"]').first().click();
  await reader.locator("#browseCards .article-card").first().waitFor({state:"visible"});
