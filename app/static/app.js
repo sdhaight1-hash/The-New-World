@@ -82,7 +82,7 @@ function categoryCounts(){
  for(const e of state.entries)counts.set(e.type,(counts.get(e.type)||0)+1);
  return [...counts].sort((a,b)=>{
   const ia=groupOrder.indexOf(a[0]),ib=groupOrder.indexOf(b[0]);
-  return (ia===-1?999:ia)-(ib===-1?999)||a[0].localeCompare(b[0]);
+  return (ia===-1?999:ia)-(ib===-1?999:ib)||a[0].localeCompare(b[0]);
  });
 }
 function workspaceChrome(){
