@@ -2,17 +2,19 @@
 
 This directory contains the **source-grounded population manifest** for the local World Bible Studio.
 
-- [`entries.json`](entries.json) — 99 identified historical concepts, including two reused authoritative catastrophe articles, and 112 reviewed relations. When combined with the 10 in-world historical and regional source articles, a fresh Studio seed creates **107 world-content records**.
+- [`entries.json`](entries.json) — 117 identified historical concepts, including two reused authoritative catastrophe articles, and 159 reviewed relations. When combined with the 20 in-world historical and regional source articles, a fresh Studio seed creates **125 world-content records**.
 - [`../app/seed.py`](../app/seed.py) — deterministic, repeatable importer. Source article content is preserved verbatim, and editing an existing database record never causes a later seed to overwrite it.
 - [`../app/tests/test_seed.py`](../app/tests/test_seed.py) — tests record totals, related entries and backlinks, source fidelity, world isolation by IDs, stable reimports, preservation of edited content and publication state.
 
 ## Quality and scope audit
 
-The original importer accidentally treated 15 editorial/software-design documents as world entries. The [content audit](CONTENT_AUDIT.md) documents every excluded file and flags remaining historical placeholders for review. A fresh seeded encyclopedia contains **68 world-content records at the time of the audit**, rather than the previous 83. The subsequent Age of AI history added 10 records, followed by the 2019–2026 multi-domain historical pass adding 29 more records (one source chapter and 28 structured entries), for a current clean total of **107**. Existing local databases receive a backup-first cleanup that preserves edited or published content.
+The original importer accidentally treated 15 editorial/software-design documents as world entries. The [content audit](CONTENT_AUDIT.md) documents every excluded file and flags remaining historical placeholders for review. A fresh seeded encyclopedia contains **68 world-content records at the time of the audit**, rather than the previous 83. The subsequent Age of AI history added 10 records, followed by the 2019–2026 multi-domain historical pass adding 29 more records (one source chapter and 28 structured entries), for a clean total of **107** at that stage. The 2018 start and progressively nested regional chapters add 10 source chapters plus eight dated events, yielding **125 records and 159 relations**. Existing local databases receive a backup-first cleanup that preserves edited or published content.
 
 ## Opening historical era
 
-[The Pre-Divergence World (2019–November 2026)](../bible/21-real-world-2019-2026.md) is now the historical opening, documenting major political, economic, military, public-health, climate and technological events. [The Brief Age of AI](../bible/20-brief-age-of-ai.md) is a pivotal subhistory within that period, beginning with ChatGPT’s public introduction on November 30, 2022; December 2026 marks the fictional AGI announcement, with broad displacement of human labor and rapid automation in the speculative years 2027–2029. The calendar labels of new historical entries are approximate projections onto the still-provisional Cascade-relative year system. This is **not** a claim that the real world announced AGI in December 2026.
+[The 2018–November 2026 historical atlas](../history/README.md) is now the historical opening, documenting major political, economic, military, public-health, climate and technological events at progressively closer geographic scales. [The Brief Age of AI](../bible/20-brief-age-of-ai.md) is a pivotal subhistory within that period, beginning with ChatGPT’s public introduction on November 30, 2022; December 2026 marks the fictional AGI announcement, with broad displacement of human labor and rapid automation in the speculative years 2027–2029. The calendar labels of new historical entries are approximate projections onto the still-provisional Cascade-relative year system. This is **not** a claim that the real world announced AGI in December 2026.
+
+A clean import also creates explicit parent/child historical links, using stable IDs and preserving the original Markdown. The hierarchy is a source-grounded navigational structure, not an assertion that a region belongs to a successor government. Historical articles remain unpublished until reviewed.
 
 ## What counts as canon here?
 
