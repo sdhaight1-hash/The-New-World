@@ -228,7 +228,7 @@ class Store:
         row=self.one("SELECT * FROM moodboards WHERE id=? AND world_id=?", (bid,wid))
         require(row,"Moodboard not found in this world",404)
         return {"board":dict(row),"items":self.rows("""SELECT i.*,e.title AS entity_title,
-                 m.title AS media_title FROM moodboard_items i
+                 m.title AS media_title,m.credit AS media_credit,m.alt AS media_alt FROM moodboard_items i
                  LEFT JOIN entities e ON e.id=i.entity_id
                  LEFT JOIN media m ON m.id=i.media_id
                  WHERE i.board_id=? ORDER BY i.z,i.created_at""",(bid,))}
