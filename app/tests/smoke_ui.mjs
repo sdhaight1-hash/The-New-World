@@ -10,7 +10,8 @@ try{
  await page.goto(base,{waitUntil:"domcontentloaded"});
  await page.locator("#homeWorldTitle").waitFor({state:"visible",timeout:15000});
  assert.match(await page.locator("#spaceHeading").innerText(),/World Overview/);
- assert.equal(await page.locator("body").getAttribute("data-space"),"home");
+ assert.equal(await page.locator("body").getAttribute("data-space"),"home",
+  JSON.stringify({errors,notice:await page.locator("#notice").textContent()}));
  const nav=page.locator(".space-rail button[data-panel]");
  assert.equal(await nav.count(),7);
  for(const [space,heading] of [["article","Encyclopedia"],["timeline","Chronology"],["atlas","Historical Atlas"],["network","Connections"],["media","Media Library"],["home","World Overview"]]){
