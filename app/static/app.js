@@ -428,6 +428,7 @@ function renderV2Editor(){
 }
 async function saveV2Metadata(){
  if(!state.entry)return;
+ if(state.dirty||state.designDirty)return notice("Save article or design edits before saving classification.",true);
  const subtype=$("v2Subtype").value||null;
  const props={};
  for(const element of $("v2PropertyFields").querySelectorAll("[data-property]"))
@@ -441,6 +442,7 @@ async function saveV2Metadata(){
  }catch(err){$("v2MetaStatus").textContent=err.message;notice(err.message,true);}
 }
 async function createV2Classification(kind){
+ if(state.dirty||state.designDirty)return notice("Save article edits before creating a collection or tag.",true);
  const field=$(kind==="category"?"v2NewCategory":"v2NewTag");
  const name=field.value.trim();if(!name)return;
  try{
