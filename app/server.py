@@ -219,7 +219,11 @@ class Store:
     def boards(self, wid):
         self.check_world(wid)
         return self.rows("""SELECT b.*,e.title AS entity_title,
-           (SELECT COUNT(*) FROM moodboard_items i WHERE i.board_id=b.id) AS item_count
+           (SELECT COUNT(*) FROM moodboard_items i WHERE i.board_id=b.id) AS item_count,
+           (SELECT i.media_id FROM moodboard_items i
+              WHERE i.board_id=b.id AND i.kind='image' ORDER BY i.z DESC LIMIT 1) AS preview_media_id,
+           (SELECT i.color FROM moodboard_items i
+              WHERE i.board_id=b.id AND i.kind='swatch' ORDER BY i.z DESC LIMIT 1) AS preview_color
            FROM moodboards b LEFT JOIN entities e ON e.id=b.entity_id
            WHERE b.world_id=? ORDER BY b.updated_at DESC,b.title""", (wid,))
 
