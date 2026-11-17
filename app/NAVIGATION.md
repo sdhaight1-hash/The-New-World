@@ -57,3 +57,9 @@ The initial page designer uses an ordered set of live blocks, not unrestricted a
 GitHub Actions tests backend integrity (multi-world isolation, image reuse, stable backlinks, ancestry cycle checks, full backups), compiles Python, validates JavaScript syntax, verifies idempotent Markdown import, and runs a headless Chromium browser smoke test across workspaces and entry modes.
 
 **Current limitations**: no completed polygon editing, fully semantic historical assertions, large-scale full-text indexing, freeform multi-column designer or extensive browser visual regression suite. This document describes the *working navigation model*, not an assertion of complete feature parity with World Anvil or Realm Works.
+
+## Reader experience is a separate product
+
+Visitors enter the editorial encyclopedia at `/read/`, without a creator navigation rail or authoring controls. The Studio remains at `/app/`. Publishing a record is a deliberate action separate from marking its canon status; the reader displays published records and linked published relationships only.
+
+A standalone reader-only website can be generated using `python app/publish_site.py public-site` after publishing at least one entry. It contains only approved public records and their referenced images; no Studio API or draft database. See the [reader-first research](../bible/18-reader-first-ux.md) and [static publishing guide](README.md#reader-first-world-encyclopedia).
