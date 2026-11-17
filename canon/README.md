@@ -2,7 +2,7 @@
 
 This directory contains the **source-grounded population manifest** for the local World Bible Studio.
 
-- [`entries.json`](entries.json) — 62 identified historical concepts, including two reused authoritative catastrophe articles, and 58 reviewed relations. When combined with the 23 existing Markdown source files, a fresh Studio seed creates **83 distinct encyclopedia records**.
+- [`entries.json`](entries.json) — 62 identified historical concepts, including two reused authoritative catastrophe articles, and 58 reviewed relations. When combined with the 8 in-world historical and regional source articles, a fresh Studio seed creates **68 genuine world-content records**.
 - [`../app/seed.py`](../app/seed.py) — deterministic, repeatable importer. Source article content is preserved verbatim, and editing an existing database record never causes a later seed to overwrite it.
 - [`../app/tests/test_seed.py`](../app/tests/test_seed.py) — tests record totals, related entries and backlinks, source fidelity, world isolation by IDs, stable reimports, preservation of edited content and publication state.
 
@@ -16,7 +16,7 @@ This directory contains the **source-grounded population manifest** for the loca
 
 The chronology uses **Cascade-relative Years**, not a fixed Gregorian mapping. Year 0 is the first Cascade, tentatively around 2034–2035; events such as the Great Plague have deliberately approximate ranges. No in-world historian, dynasty or royal capital has been invented simply to make the database look full.
 
-The repository already includes source pages about worldbuilding software and UX. They are retained as *editorial/reference documents* rather than mistaken for new fictional governments or settlements. Where a genuine world entity is described inside a broad source, its structured entry links back to the original source and to related entities by stable identifiers.
+Software architecture, UI/UX specifications, system plans, research task lists, and editorial ledgers remain in the repository for developers but are **excluded from the world's encyclopedia**. The seeder imports only explicitly whitelisted history and geography source articles, never all Markdown under `bible/`. Where a genuine world entity is described inside a broad source, its structured entry links back to the original source and to related entities by stable identifiers.
 
 ## Importing
 
