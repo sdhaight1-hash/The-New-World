@@ -225,6 +225,37 @@ def seed(path=DB_DEFAULT):
 
         repaired_links = update_generated_legacy_source_link(store, manifest, ids)
 
+        # Publish the initial, source-backed reading shelf once. Existing worlds with
+        # editorial publications are left alone, as are subsequent manual unpublishes.
+        # This is local reader visibility, not a deployment or remote upload.
+        with store.lock, store.db:
+            store.db.execute("""CREATE TABLE IF NOT EXISTS seed_migrations (
+                name TEXT PRIMARY KEY
+            )""")
+            migration = "starter_reader_publications_v1"
+            first_run = not store.db.execute(
+                "SELECT 1 FROM seed_migrations WHERE name=?", (migration,)
+            ).fetchone()
+            published_starters = 0
+            if first_run:
+                already_published = store.db.execute("""SELECT 1 FROM publications p
+                    JOIN entities e ON e.id=p.entity_id
+                    WHERE e.world_id=? LIMIT 1""", (WORLD_ID,)).fetchone()
+                if not already_published:
+                    for relative in sorted(WORLD_SOURCE_PATHS):
+                        # The curated source documents carry their own provenance.
+                        # Generated/working canon entries still require review.
+                        eid = source_id(relative)
+                        if store.db.execute(
+                            "SELECT 1 FROM entities WHERE id=? AND world_id=?", (eid, WORLD_ID)
+                        ).fetchone():
+                            store.db.execute(
+                                "INSERT OR IGNORE INTO publications(entity_id,published_at) VALUES (?,?)",
+                                (eid, datetime.now(timezone.utc).isoformat())
+                            )
+                            published_starters += 1
+                store.db.execute("INSERT INTO seed_migrations(name) VALUES (?)", (migration,))
+
         # Deterministic relationship identity. Existing user-edited relationships are untouched.
         for relation in manifest["relations"]:
             src,dst=ids[relation["source"]],ids[relation["target"]]
@@ -247,7 +278,8 @@ def seed(path=DB_DEFAULT):
         print(
             f"Seed complete: {added_docs} world source documents, {added_canon} distinct canon records, "
             f"{related} relationships added; {skipped} existing records preserved; "
-            f"{removed} non-world documents removed; {repaired_links} old source links repaired. "
+            f"{removed} non-world documents removed; {repaired_links} old source links repaired; "
+            f"{published_starters} starter reader articles published. "
             f"World ID: {WORLD_ID}"
         )
         if archive:
