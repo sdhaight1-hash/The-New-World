@@ -1153,6 +1153,102 @@
       "summary": "Historical regional reference layer",
       "body": "See source chapter",
       "status": "established"
+    },
+    {
+      "key": "trade-war-2018",
+      "type": "event",
+      "title": "US–China trade tariffs escalate (2018)",
+      "summary": "The 2018 tariff escalation changes international manufacturing and agricultural trade conditions.",
+      "body": "From 2018 onward the US and China impose successive tariffs and retaliatory trade measures, reshaping exporter conditions, supply sourcing and industrial policy debates. This is a documented historical turning point. It did not by itself disconnect global trade, and later factory locations must be researched rather than assumed.",
+      "start_year": -16,
+      "end_year": -16,
+      "source": "history/00-world-2018-2026.md",
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "ipcc-report-2018",
+      "type": "event",
+      "title": "IPCC Special Report on 1.5°C (October 2018)",
+      "summary": "Climate science assessment highlights risks from warming and paths for reducing emissions.",
+      "body": "The IPCC publishes its special report on Global Warming of 1.5°C in October 2018. It assesses impacts, pathways and uncertainty; it does not forecast the fictional Plague or solar Cascade. Climate constraints need local sources before assigning drought, wildfire and agricultural effects.",
+      "start_year": -16,
+      "end_year": -16,
+      "source": "history/00-world-2018-2026.md",
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "camp-fire-2018",
+      "type": "event",
+      "title": "Camp Fire destroys much of Paradise, California (November 2018)",
+      "summary": "The Camp Fire becomes a defining California wildfire disaster, exposing evacuation, utilities and housing vulnerabilities.",
+      "body": "Beginning November 8, 2018, the Camp Fire devastates Paradise and nearby communities. CAL FIRE documents 85 fatalities and the destruction of more than 18,000 structures. The event exposes the vulnerabilities of fire-prone settlements, access roads, electric infrastructure and recovery systems. This is a historic California disaster, not a direct impact on Big Bear or Victor Valley. Source: https://www.fire.ca.gov/incidents/2018/",
+      "start_year": -16,
+      "end_year": -16,
+      "source": "history/04-california-2018-2026.md",
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "usmca-effective-2020",
+      "type": "event",
+      "title": "USMCA enters into force (July 2020)",
+      "summary": "A new agreement governs much North American trade between the US, Mexico and Canada.",
+      "body": "The United States–Mexico–Canada Agreement takes effect July 1, 2020, following negotiation and ratification. It preserves an integrated North American trade framework with altered rules affecting labor, autos and regional supply chains. Later tariff disputes and individual investment choices remain separate issues. Source: https://ustr.gov/trade-agreements/free-trade-agreements/united-states-mexico-canada-agreement",
+      "start_year": -14,
+      "end_year": -14,
+      "source": "history/01-western-hemisphere-2018-2026.md",
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "oregon-labor-day-fires-2020",
+      "type": "event",
+      "title": "Oregon Labor Day fires (September 2020)",
+      "summary": "Extreme winds spread major Oregon wildfires during the COVID-19 pandemic.",
+      "body": "Over September 7–8, 2020 a severe wind event accelerates multiple major fires across Oregon, including Beachie Creek, Holiday Farm and Riverside. State agencies describe five megafires and more than a million acres burned within days. Precise burn perimeters must be used when studying Clatsop County; the presence of statewide smoke and emergency strain does not mean Astoria or Seaside burned. Source: https://energyinfo.oregon.gov/recent-emergencies",
+      "start_year": -14,
+      "end_year": -14,
+      "source": "history/05-oregon-2018-2026.md",
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "pnw-heat-dome-2021",
+      "type": "event",
+      "title": "Pacific Northwest heat dome (June 2021)",
+      "summary": "Extraordinary heat affects Oregon, Washington and western Canada, exposing cooling and health vulnerabilities.",
+      "body": "A record-breaking heat event peaks June 26–29, 2021. Portland Airport reaches 116°F on June 28. Heat impacts infrastructure and public health, with unequal vulnerability across housing, occupations and locations. This is a Portland measurement; do not transplant the same temperature to coastal Clatsop County. Source: https://www.drought.gov/drought-status-updates/drought-status-update-pacific-northwest-2021-07-08",
+      "start_year": -13,
+      "end_year": -13,
+      "source": "history/05-oregon-2018-2026.md",
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "california-atmospheric-rivers-2023",
+      "type": "event",
+      "title": "California atmospheric rivers and snowpack (2022–2023)",
+      "summary": "Repeated winter storms cause flooding while replenishing mountain snow and water reserves.",
+      "body": "Late 2022 and early 2023 atmospheric rivers deliver prolonged heavy precipitation, flooding and major Sierra snowpack. Impacts differ by watershed and may involve road damage, crop loss, landslides and water-storage recovery. One wet year does not erase long-term groundwater pressures. Source: https://water.ca.gov/",
+      "start_year": -12,
+      "end_year": -11,
+      "source": "history/04-california-2018-2026.md",
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "la-fires-2025",
+      "type": "event",
+      "title": "Palisades and Eaton fires in Los Angeles County (January 2025)",
+      "summary": "Two destructive Los Angeles-area fires cause deaths, displacement and extensive built-environment damage.",
+      "body": "The Palisades and Eaton fires start January 7, 2025. A Los Angeles County retrospective records 23,448 acres and 6,837 structures destroyed in the Palisades Fire, and 14,021 acres and 9,414 structures destroyed in the Eaton Fire, with 12 and 19 fatalities respectively. Effects are concentrated in specific communities, not every part of Southern California. Source: https://file.lacounty.gov/SDSInter/lac/1199046_Eaton_Palisades_Fires_Anniversary_Fact_Sheet.pdf",
+      "start_year": -9,
+      "end_year": -9,
+      "source": "history/04-california-2018-2026.md",
+      "status": "established",
+      "theme_id": "chronicle"
     }
   ],
   "relations": [
@@ -2013,6 +2109,102 @@
       "target": "wyoming-reservation",
       "predicate": "research_scope_for",
       "status": "working"
+    },
+    {
+      "source": "trade-war-2018",
+      "target": "history-world",
+      "predicate": "documented_in",
+      "status": "established"
+    },
+    {
+      "source": "trade-war-2018",
+      "target": "global-supply-dependence",
+      "predicate": "affected",
+      "status": "established"
+    },
+    {
+      "source": "ipcc-report-2018",
+      "target": "global-climate-baseline",
+      "predicate": "informed",
+      "status": "established"
+    },
+    {
+      "source": "ipcc-report-2018",
+      "target": "history-world",
+      "predicate": "documented_in",
+      "status": "established"
+    },
+    {
+      "source": "camp-fire-2018",
+      "target": "history-california",
+      "predicate": "documented_in",
+      "status": "established"
+    },
+    {
+      "source": "camp-fire-2018",
+      "target": "history-west",
+      "predicate": "documented_in",
+      "status": "established"
+    },
+    {
+      "source": "usmca-effective-2020",
+      "target": "history-hemisphere",
+      "predicate": "documented_in",
+      "status": "established"
+    },
+    {
+      "source": "usmca-effective-2020",
+      "target": "global-supply-dependence",
+      "predicate": "relevant_to",
+      "status": "established"
+    },
+    {
+      "source": "oregon-labor-day-fires-2020",
+      "target": "history-oregon",
+      "predicate": "documented_in",
+      "status": "established"
+    },
+    {
+      "source": "oregon-labor-day-fires-2020",
+      "target": "history-clatsop-local",
+      "predicate": "regional_context_for",
+      "status": "established"
+    },
+    {
+      "source": "pnw-heat-dome-2021",
+      "target": "history-oregon",
+      "predicate": "documented_in",
+      "status": "established"
+    },
+    {
+      "source": "pnw-heat-dome-2021",
+      "target": "global-climate-baseline",
+      "predicate": "illustrates",
+      "status": "established"
+    },
+    {
+      "source": "california-atmospheric-rivers-2023",
+      "target": "history-california",
+      "predicate": "documented_in",
+      "status": "established"
+    },
+    {
+      "source": "california-atmospheric-rivers-2023",
+      "target": "water-infrastructure",
+      "predicate": "affected",
+      "status": "established"
+    },
+    {
+      "source": "la-fires-2025",
+      "target": "history-california",
+      "predicate": "documented_in",
+      "status": "established"
+    },
+    {
+      "source": "la-fires-2025",
+      "target": "history-so-cal-local",
+      "predicate": "regional_context_for",
+      "status": "established"
     }
   ]
 }
