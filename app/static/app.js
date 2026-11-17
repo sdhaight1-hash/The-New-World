@@ -302,14 +302,32 @@ async function save(){
   start_year:num($("eStart").value),end_year:num($("eEnd").value),lat:num($("eLat").value),lon:num($("eLon").value)};
  try{state.entry=await api(q("/api/entity",{world_id:wid(),id:e.id}),"PATCH",data);dirty(false);await refresh();await context();render();notice("Saved.");}catch(err){notice(err.message,true);}
 }
+const STARTER_ARTICLES={
+ place:{theme:"atlas",hint:"Geographical regions, settlements, sites and environmental history.",sections:["Geography and setting","Settlement and land use","Water, resources and infrastructure","Historical development","People and institutions","Sources and open questions"]},
+ organization:{theme:"civic",hint:"Governments, factions, guilds, companies, associations and informal groups.",sections:["Founding and purpose","Organization and leadership","Members and branches","Territory, resources and relationships","Historical development","Sources and open questions"]},
+ person:{theme:"kinship",hint:"Biographies, life histories, residences, kinship and participation in events.",sections:["Life and background","Family and relationships","Residences and work","Historical events and activities","Legacy and sources"]},
+ family:{theme:"kinship",hint:"Households, ancestry, kinship groups and their history over time.",sections:["Origins and identity","Members and kinship","Residences and migration","Activities and social ties","Historical development","Sources"]},
+ event:{theme:"chronicle",hint:"Historically situated events with participants, locations and consequences.",sections:["Overview","Background and causes","Participants and locations","Sequence of events","Consequences and later interpretation","Sources and uncertainties"]},
+ source:{theme:"archive",hint:"Historical references, documents, testimony, provenance and disputed evidence.",sections:["Description","Origin and provenance","Contents and testimony","Reliability and limitations","Related records"]},
+ object:{theme:"archive",hint:"Objects, materials, technologies, resources and artifacts.",sections:["Description and characteristics","Origins and manufacture","Uses and owners","Historical context","Sources"]},
+ subject:{theme:"archive",hint:"Culture, customs, ecological topics, general history or other subjects.",sections:["Overview","Background","Regional variation","Historical development","Related records and sources"]}
+};
+function updateCreateHint(){
+ const type=$("createType").value;
+ $("customTypeField").hidden=type!=="custom";
+ const entry=STARTER_ARTICLES[type];
+ $("createTypeHint").textContent=entry?.hint||"Define a custom category for this world. You can write your own structure and relationships.";
+}
 function createEntry(){
- if(!safeExit())return;$("createTitle").value="";$("createType").value="place";$("customType").value="";$("customTypeField").hidden=true;$("createDialog").showModal();$("createTitle").focus();
+ if(!safeExit())return;$("createTitle").value="";$("createType").value="place";$("customType").value="";$("createOutline").checked=true;updateCreateHint();$("createDialog").showModal();$("createTitle").focus();
 }
 async function submitCreate(){
  const title=$("createTitle").value.trim(),type=$("createType").value==="custom"?$("customType").value.trim():$("createType").value;
  if(!title)return;
  try{
-  const e=await api(q("/api/entities",{world_id:wid()}),"POST",{title,type});
+  const starter=STARTER_ARTICLES[type];
+  const body=$("createOutline").checked&&starter?starter.sections.map(section=>"## "+section+"\n\n").join("\n"):"";
+  const e=await api(q("/api/entities",{world_id:wid()}),"POST",{title,type,body,theme_id:starter?.theme||"archive"});
   $("createDialog").close();await refresh();await open(e.id);mode("write");
  }catch(err){notice(err.message,true);}
 }
@@ -724,7 +742,7 @@ function wire(){
  document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>mode(b.dataset.mode));
  $("appearance").value=localStorage.getItem("wb-mode")||"dark";document.body.dataset.appearance=$("appearance").value;
  $("appearance").onchange=()=>{document.body.dataset.appearance=$("appearance").value;localStorage.setItem("wb-mode",$("appearance").value);if(state.mode==="read"&&state.entry)read();if(state.mode==="design"&&state.entry)previewDesign();};
- $("createType").onchange=()=>{$("customTypeField").hidden=$("createType").value!=="custom";};
+ $("createType").onchange=updateCreateHint;
  $("eType").onchange=()=>{$("editCustomTypeField").hidden=$("eType").value!=="custom";};
  $("relType").onchange=()=>{$("relCustom").hidden=$("relType").value!=="custom";};
  $("editForm").onsubmit=e=>{e.preventDefault();save();};$("editForm").oninput=()=>dirty(true);
