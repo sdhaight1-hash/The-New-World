@@ -20,6 +20,7 @@ import shutil
 import tempfile
 
 from server import Store, DB_DEFAULT, LINK_PATTERN
+import v2_store
 
 ROOT=Path(__file__).resolve().parent
 MEDIA_EXTENSION={"image/jpeg":".jpg","image/png":".png","image/webp":".webp"}
@@ -74,6 +75,12 @@ def build_site(store: Store, world_id: str, destination: Path) -> dict:
         "media_by_entity":media_by_entity,
         "links":links,
         "assets":{id:{"extension":item["extension"]} for id,item in assets.items()},
+        "v2":{
+            "categories":v2_store.categories(store,world_id,True),
+            "tags":v2_store.tags(store,world_id,True),
+            "memberships":v2_store.memberships(store,world_id,True),
+            "metadata":{e["id"]:v2_store.public_metadata(store,world_id,e["id"]) for e in records}
+        },
     }
 
     destination.parent.mkdir(parents=True,exist_ok=True)
