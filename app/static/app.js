@@ -67,6 +67,12 @@ async function worlds(){
  $("worldDescription").textContent=state.world.description||"Separate worldbuilding workspace.";
  await refresh();workspaceChrome();
 }
+const ENTRY_MODES={
+ read:{name:"Reading mode",description:"Explore the article and its verified connections. Navigation and backlinks stay close at hand.",icon:"▤",hint:"ARTICLE VIEW"},
+ write:{name:"Writing mode",description:"Focus on the content, names and historical facts. Use Discover References to connect existing entries.",icon:"✎",hint:"CONTENT EDITOR"},
+ design:{name:"Design mode",description:"Reorder visible sections, apply a visual theme, and choose an entry accent without changing the facts.",icon:"▧",hint:"PRESENTATION EDITOR"},
+ explore:{name:"Connection mode",description:"Manage typed relationships, family links and media placements for this record.",icon:"⌘",hint:"RELATIONSHIP EDITOR"}
+};
 const SPACE_META={
  home:{name:"World Overview",label:"OVERVIEW",description:"Your worldbuilding workspace, records, and progress.",icon:"⌂",accent:"#8ebfb5"},
  article:{name:"Encyclopedia",label:"KNOWLEDGE LIBRARY",description:"Read, author, design, and link world records.",icon:"▤",accent:"#89bdac"},
@@ -88,7 +94,17 @@ function categoryCounts(){
 function workspaceChrome(){
  const p=state.panel,meta=SPACE_META[p]||SPACE_META.home;
  document.body.dataset.space=p;
+ document.body.dataset.mode=state.mode;
  document.body.style.setProperty("--space-accent",meta.accent);
+ const banner=$("entryModeBanner");
+ banner.hidden=p!=="article"||!state.entry;
+ if(!banner.hidden){
+  const modeMeta=ENTRY_MODES[state.mode]||ENTRY_MODES.read;
+  $("entryModeIcon").textContent=modeMeta.icon;
+  $("entryModeTitle").textContent=modeMeta.name;
+  $("entryModeDescription").textContent=modeMeta.description;
+  $("entryModeContext").textContent=modeMeta.hint;
+ }
  $("spaceHeading").textContent=meta.name;
  $("spaceEyebrow").textContent=state.world?.name.toUpperCase()+" / "+meta.label;
  $("spaceSubtitle").textContent=meta.description;
@@ -619,7 +635,16 @@ function wire(){
  $("mediaFilter").onchange=renderMediaGrid;
   $("world").onchange=e=>switchWorld(e.target.value);$("worldSettings").onclick=editWorld;$("cancelCreate").onclick=()=>$("createDialog").close();$("createForm").onsubmit=e=>{e.preventDefault();submitCreate();};$("importWorld").onclick=()=>$("importFile").click();$("importFile").onchange=importWorld;$("addWorld").onclick=createWorld;$("newEntry").onclick=createEntry;$("welcomeNew").onclick=createEntry;$("export").onclick=exportWorld;
  $("welcomeTimeline").onclick=()=>panel("timeline");$("welcomeAtlas").onclick=()=>panel("atlas");
- $("search").oninput=renderList;$("typeFilter").onchange=renderList;$("globalYear").onchange=()=>setHistoricalYear($("globalYear").value);
+ document.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){
+   e.preventDefault();$("search").focus();$("search").select();return;
+  }
+  if(e.altKey&&!e.ctrlKey&&!e.metaKey&&/^[1-6]$/.test(e.key)){
+   e.preventDefault();const names=["home","article","atlas","timeline","network","media"];
+   panel(names[Number(e.key)-1]);
+  }
+ });
+  $("search").oninput=renderList;$("typeFilter").onchange=renderList;$("globalYear").onchange=()=>setHistoricalYear($("globalYear").value);
  document.querySelectorAll("[data-panel]").forEach(b=>b.onclick=()=>panel(b.dataset.panel));
  document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>mode(b.dataset.mode));
  $("appearance").value=localStorage.getItem("wb-mode")||"dark";document.body.dataset.appearance=$("appearance").value;
