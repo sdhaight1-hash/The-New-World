@@ -254,7 +254,8 @@ class Store:
         self.check_world(wid)
         if eid:
             require(self.is_published(wid,eid), "Published article not found", 404)
-        sql = """SELECT r.* FROM relations r
+        sql = """SELECT r.id,r.world_id,r.source_id,r.target_id,r.predicate,
+                        r.status,r.start_year,r.end_year FROM relations r
                  JOIN entities a ON a.id=r.source_id
                  JOIN publications pa ON pa.entity_id=a.id
                  JOIN entities b ON b.id=r.target_id
@@ -277,7 +278,9 @@ class Store:
 
     def public_media(self, wid, eid):
         require(self.is_published(wid,eid), "Published article not found", 404)
-        return self.media_list(wid,eid)
+        records=self.media_list(wid,eid)
+        safe_keys={"id","media_id","use_id","role","caption","title","alt","credit","width","height"}
+        return [{k:v for k,v in r.items() if k in safe_keys} for r in records]
 
     def worlds(self):
         return self.rows("SELECT * FROM worlds ORDER BY created_at,name")
