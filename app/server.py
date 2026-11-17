@@ -802,8 +802,8 @@ class Store:
                 self.db.execute("INSERT INTO relations VALUES(?,?,?,?,?,?,?,?,?,?)",
                     (str(uuid4()), world_id, old_new[rel["source_id"]], old_new[rel["target_id"]],
                      rel["predicate"], rel["status"], start, end, note, now()))
-        if payload.get("format")=="world-bible-export-v2":
-            v2_store.import_tables(self,world_id,payload,old_new)
+            if payload.get("format")=="world-bible-export-v2":
+                v2_store.import_tables(self,world_id,payload,old_new)
         return {"world": self.one_world(world_id), "entries": len(entities), "relations": len(relations)}
 
     def export(self, wid):
