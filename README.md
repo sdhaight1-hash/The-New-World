@@ -15,6 +15,7 @@
 - [RFC 001: Unified Historical Knowledge Core](bible/10-rfc-historical-knowledge-core.md)
 - [RFC 002: Location and Faction Systems](bible/11-rfc-location-faction-systems.md)
 - [RFC 003: Historical Timeline and Chronology Engine](bible/12-rfc-timeline-engine.md)
+- [RFC 004: Media Library and Image Handling](bible/13-rfc-media-image-handling.md)
 - [Open the link discovery explorer](tools/discovery/index.html)
 - [Genealogy, family history, and kinship](bible/07-genealogy-dynasties.md)
 - [Genealogy data model and roadmap](genealogy/README.md)
