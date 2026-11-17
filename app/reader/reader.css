@@ -31,3 +31,14 @@ button,input,select{font:inherit}button,input,select{color:var(--ink);border:1px
 @media(max-width:740px){.site-header{height:auto;min-height:70px;flex-wrap:wrap;padding:12px 14px 0}.wordmark{flex:1;min-width:190px}.wordmark b{font-size:18px}.wordmark small{font-size:7px}.reader-tools{gap:3px}.reader-tools .search-trigger span,.studio-link{display:none}.primary-nav{order:3;width:100%;justify-content:space-around;margin:0}.primary-nav a{height:44px;padding:0 8px}.search-panel,.reading-panel{top:65px;right:9px}.cover{min-height:425px}.cover-inner{padding:75px 24px 65px}.cover h1{font-size:60px}.cover-bottom{flex-direction:column;gap:4px}.reader-wrap{padding:35px 19px 65px}.category-grid,.article-grid{grid-template-columns:1fr 1fr}.discovery-split,.article-columns{grid-template-columns:1fr}.article-aside{position:static;display:grid;grid-template-columns:1fr 1fr;gap:12px}.article-page-wrap{padding:28px 18px 60px}.article-heading h1{font-size:48px}.compact-list{grid-template-columns:1fr 1fr}.browse-tools{flex-wrap:wrap}.browse-tools select{max-width:100%}.atlas-map{height:370px}.site-footer{padding:30px 20px}}
 @media(max-width:480px){.category-grid,.article-grid,.article-aside,.compact-list{grid-template-columns:1fr}.cover h1{font-size:52px}.cover-bottom{font-size:9px}.article-heading h1{font-size:43px}.reader-prose{line-height:1.75}.discovery-panel{padding:23px;min-height:240px}.relation-list{grid-template-columns:1fr}.map-toolbar{flex-wrap:wrap}.map-toolbar label{margin-left:0}.browse-tools input{flex-basis:100%}.site-footer{flex-direction:column}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.article-card,.category-card{transform:none!important}}
+
+/* Authored visual storytelling: imagery and thematic identity without changing the shell. */
+.cover{background-image:linear-gradient(90deg,#142127df 0%,#142127b8 57%,#14212790),var(--cover-art,none),radial-gradient(ellipse at 75% 50%,#527d7755,transparent 60%),linear-gradient(120deg,#152127,#223d42 49%,#142329);background-position:center;background-size:cover}
+#readerWorld{width:auto;max-width:180px;font-size:11px;white-space:nowrap}
+.article-page-wrap{--article-accent:var(--accent)}
+.article-heading .eyebrow,.article-page-wrap .aside-panel h2,.article-page-wrap .reader-prose a,.article-page-wrap .relation-item:hover{color:var(--article-accent)}
+.article-page-wrap .aside-panel a:hover{color:var(--article-accent)}
+.toc-jump{display:block;width:100%;text-align:left;padding:6px 0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;color:var(--secondary);font-size:11px;line-height:1.5}
+.toc-jump:hover{color:var(--article-accent);background:transparent;text-decoration:underline}
+.gallery-strip a{display:block}
+.gallery-strip a:hover img{outline:2px solid var(--article-accent);outline-offset:2px}
