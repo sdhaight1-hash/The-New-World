@@ -277,7 +277,7 @@ def import_tables(store,wid,payload,old_new):
     tag_map={x["id"]:str(uuid4()) for x in source_tags}
     if len(cat_map)!=len(source_cats) or len(tag_map)!=len(source_tags):
         raise error("Duplicate category/tag identifiers")
-    with store.lock,store.db:
+    with store.lock:
         for c in source_cats:
             store.db.execute("INSERT INTO categories VALUES(?,?,?,?,?,?,?)",
                 (cat_map[c["id"]],wid,c["name"],c["slug"],c.get("description",""),
