@@ -1,7 +1,7 @@
 "use strict";
 // Reader uses published-only API endpoints. It never requests the Studio's full entity store.
 const $=id=>document.getElementById(id);
-const state={worlds:[],world:null,entries:[],relations:[],current:null,media:[],related:[],incoming:[],outgoing:[],font:17,appearance:"dark",map:{lon:0,lat:25,zoom:2,drag:null}};
+const state={worlds:[],world:null,entries:[],relations:[],current:null,media:[],related:[],incoming:[],outgoing:[],font:17,appearance:"dark",staticBundle:null,map:{lon:0,lat:25,zoom:2,drag:null}};
 const CATEGORY={
  place:{label:"Places & geography",short:"Places",symbol:"◇",description:"Settlements, landscapes and regions"},
  organization:{label:"Factions & societies",short:"Societies",symbol:"⚑",description:"Institutions, governments and communities"},
@@ -20,10 +20,43 @@ const link=(title,href,cls)=>{const a=node("a",title,cls);a.href=href;return a};
 const url=(path,args={})=>path+"?"+new URLSearchParams(args);
 const currentId=()=>state.world?.id;
 const byId=id=>state.entries.find(e=>e.id===id);
-const mediaUrl=(id,preview=true)=>"/media/"+encodeURIComponent(currentId())+"/"+encodeURIComponent(id)+(preview?"-preview":"");
+const mediaUrl=(id,preview=true)=>{
+ if(state.staticBundle){
+  const asset=state.staticBundle.assets[id];
+  if(!asset)return "";
+  return "media/"+encodeURIComponent(id)+(preview?"-preview.webp":asset.extension);
+ }
+ return "/media/"+encodeURIComponent(currentId())+"/"+encodeURIComponent(id)+(preview?"-preview":"");
+};
 const readableDate=e=>e.start_year==null&&e.end_year==null?"Date not recorded":e.start_year===e.end_year?"Year "+e.start_year:"Year "+(e.start_year??"unknown")+" – "+(e.end_year??"ongoing");
 const activeAt=(e,year)=>(e.start_year===null||e.start_year<=year)&&(e.end_year===null||e.end_year>=year);
-async function get(path){const response=await fetch(path);const obj=await response.json();if(!response.ok)throw Error(obj.error||"Reader request failed");return obj;}
+async function get(path){
+ if(state.staticBundle)return staticRequest(path);
+ const response=await fetch(path);
+ const obj=await response.json();
+ if(!response.ok)throw Error(obj.error||"Reader request failed");
+ return obj;
+}
+function staticRequest(path){
+ const req=new URL(path,location.origin),q=req.searchParams,b=state.staticBundle;
+ if(req.pathname==="/api/public/worlds")return Promise.resolve([b.world]);
+ if(q.get("world_id")!==b.world.id)throw Error("Unknown published world");
+ if(req.pathname==="/api/public/entities"){
+  const type=q.get("type"),search=(q.get("search")||"").toLowerCase();
+  return Promise.resolve(b.entities.filter(e=>(!type||e.type===type)&&
+    (!search||[e.title,e.summary,e.body,...e.aliases].some(v=>String(v).toLowerCase().includes(search)))));
+ }
+ if(req.pathname==="/api/public/media")return Promise.resolve(b.media_by_entity[q.get("entity_id")]||[]);
+ if(req.pathname==="/api/public/relations"){
+  const id=q.get("entity_id");
+  return Promise.resolve(b.relations.filter(r=>!id||r.source_id===id||r.target_id===id));
+ }
+ if(req.pathname==="/api/public/backlinks"||req.pathname==="/api/public/outgoing"){
+  const id=q.get("entity_id");
+  return Promise.resolve((b.links[id]?.[req.pathname.endsWith("backlinks")?"incoming":"outgoing"])||[]);
+ }
+ throw Error("Unknown reader publication resource");
+}
 function showRoute(name){for(const id of ["Home","Browse","Article","Atlas","History","Empty"])$("reader"+id).hidden=id.toLowerCase()!==name;document.querySelectorAll("[data-route]").forEach(a=>{const on=(name==="article"&&a.dataset.route==="browse")||a.dataset.route===name;a.classList.toggle("active",on);if(on)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});}
 function setTitle(value){document.title=value+" · "+(state.world?.name||"World Bible");}
 function syncWorld(){
@@ -311,6 +344,11 @@ async function navigate(){
 async function init(){
  setupTools();
  try{
+  if(document.querySelector('meta[name="worldbible-static"]')){
+   const response=await fetch("site-data.json");
+   if(!response.ok)throw Error("Published site data missing");
+   state.staticBundle=await response.json();
+  }
   state.worlds=await get("/api/public/worlds");
   const fromUrl=new URLSearchParams(location.search).get("world");
   const saved=localStorage.getItem("reader-world");
