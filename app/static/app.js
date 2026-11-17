@@ -69,6 +69,10 @@ async function worlds(){
 }
 async function refresh(){
  state.entries=await api(q("/api/entities",{world_id:wid()}));
+ const filter=$("typeFilter"),before=filter.value;
+ for(const type of new Set(state.entries.map(e=>e.type)))
+   if(![...filter.options].some(o=>o.value===type))filter.add(new Option(type,type));
+ filter.value=before;
  renderList();timeline();atlas(false);
  if(state.entry){state.entry=byId(state.entry.id)||null;render();}
 }
@@ -132,20 +136,23 @@ function read(){
 function write(){
  const e=state.entry;
  for(const [id,v] of Object.entries({eTitle:e.title,eType:e.type,eStatus:e.status,eAliases:e.aliases.join(", "),eStart:e.start_year,eEnd:e.end_year,eLat:e.lat,eLon:e.lon,eSummary:e.summary,eBody:e.body}))$(id).value=v??"";
+ const typeSelect=$("eType");
+ if(![...typeSelect.options].some(x=>x.value===e.type))typeSelect.add(new Option("Custom: "+e.type,e.type));
+ typeSelect.value=e.type;$("editCustomTypeField").hidden=true;$("editCustomType").value="";
  $("suggestions").hidden=true;dirty(false);
 }
 async function save(){
  const e=state.entry;
- const data={title:$("eTitle").value.trim(),type:$("eType").value,status:$("eStatus").value,
+ const data={title:$("eTitle").value.trim(),type:$("eType").value==="custom"?$("editCustomType").value.trim():$("eType").value,status:$("eStatus").value,
   aliases:$("eAliases").value.split(",").map(x=>x.trim()).filter(Boolean),summary:$("eSummary").value,body:$("eBody").value,
   start_year:num($("eStart").value),end_year:num($("eEnd").value),lat:num($("eLat").value),lon:num($("eLon").value)};
  try{state.entry=await api(q("/api/entity",{world_id:wid(),id:e.id}),"PATCH",data);dirty(false);await refresh();await context();render();notice("Saved.");}catch(err){notice(err.message,true);}
 }
 function createEntry(){
- if(!safeExit())return;$("createTitle").value="";$("createType").value="place";$("createDialog").showModal();$("createTitle").focus();
+ if(!safeExit())return;$("createTitle").value="";$("createType").value="place";$("customType").value="";$("customTypeField").hidden=true;$("createDialog").showModal();$("createTitle").focus();
 }
 async function submitCreate(){
- const title=$("createTitle").value.trim(),type=$("createType").value;
+ const title=$("createTitle").value.trim(),type=$("createType").value==="custom"?$("customType").value.trim():$("createType").value;
  if(!title)return;
  try{
   const e=await api(q("/api/entities",{world_id:wid()}),"POST",{title,type});
@@ -244,7 +251,7 @@ function explore(){
 }
 async function addRelation(){
  const target_id=$("relTarget").value;if(!target_id)return;
- try{await api(q("/api/relations",{world_id:wid()}),"POST",{source_id:state.entry.id,target_id,predicate:$("relType").value,start_year:num($("relStart").value),end_year:num($("relEnd").value),status:$("relStatus").value,notes:$("relNotes").value});await context();render();notice("Relationship added.");}catch(err){notice(err.message,true);}
+ try{await api(q("/api/relations",{world_id:wid()}),"POST",{source_id:state.entry.id,target_id,predicate:$("relType").value==="custom"?$("relCustom").value.trim():$("relType").value,start_year:num($("relStart").value),end_year:num($("relEnd").value),status:$("relStatus").value,notes:$("relNotes").value});await context();render();notice("Relationship added.");}catch(err){notice(err.message,true);}
 }
 async function uploadImage(){
  const f=$("imageFile").files[0];if(!f)return;
@@ -370,6 +377,9 @@ function wire(){
  document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>mode(b.dataset.mode));
  $("appearance").value=localStorage.getItem("wb-mode")||"dark";document.body.dataset.appearance=$("appearance").value;
  $("appearance").onchange=()=>{document.body.dataset.appearance=$("appearance").value;localStorage.setItem("wb-mode",$("appearance").value);render();};
+ $("createType").onchange=()=>{$("customTypeField").hidden=$("createType").value!=="custom";};
+ $("eType").onchange=()=>{$("editCustomTypeField").hidden=$("eType").value!=="custom";};
+ $("relType").onchange=()=>{$("relCustom").hidden=$("relType").value!=="custom";};
  $("editForm").onsubmit=e=>{e.preventDefault();save();};$("editForm").oninput=()=>dirty(true);
  $("deleteEntry").onclick=remove;$("findLinks").onclick=discover;$("addRelation").onclick=addRelation;
  $("uploadImage").onclick=uploadImage;$("attachImage").onclick=attachImage;
