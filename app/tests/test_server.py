@@ -137,6 +137,47 @@ class StoreTests(unittest.TestCase):
             self.store.import_data(archive)
         self.assertEqual(ctx.exception.status, 409)
 
+    def test_world_settings_persist_and_isolate(self):
+        self.store.update_world(self.a, {"name":"Changed World","description":"New description","epoch_year":2040})
+        a = self.store.one_world(self.a)
+        self.assertEqual(a["epoch_year"], 2040)
+        self.assertEqual(a["name"], "Changed World")
+        self.assertEqual(self.store.one_world(self.b)["epoch_year"], None)
+        with self.assertRaises(Error):
+            self.store.update_world(self.a, {"epoch_year":"tomorrow"})
+
+    def test_media_metadata_caption_updates_and_invalid_bytes(self):
+        try:
+            from PIL import Image
+        except ImportError:
+            self.skipTest("Pillow absent")
+        with self.assertRaises(Error):
+            self.store.upload_image(self.a, b"not an image", "bad.png")
+        raw = io.BytesIO()
+        Image.new("RGB", (8, 8), (18, 24, 32)).save(raw, "PNG")
+        media = self.store.upload_image(self.a, raw.getvalue(), "photo.png")
+        person = self.add(self.a, "Portrait subject")
+        usage = self.store.add_media_use(self.a, {"entity_id": person["id"], "media_id": media["id"]})
+        edited = self.store.update_media(self.a, media["id"], {
+            "title":"Portrait", "alt":"Person in a portrait", "credit":"Creator"})
+        self.assertEqual(edited["alt"], "Person in a portrait")
+        caption = self.store.update_media_use(self.a, usage["id"], {"caption":"Archival reproduction"})
+        self.assertEqual(caption["caption"], "Archival reproduction")
+        with self.assertRaises(Error):
+            self.store.update_media(self.b, media["id"], {"title":"Stolen"})
+
+    def test_bad_ancestry_archive_rejected_atomically(self):
+        parent = self.add(self.a, "A")
+        child = self.add(self.a, "B")
+        exported = self.store.export(self.a)
+        exported["relations"] = [
+            {"source_id":parent["id"],"target_id":child["id"],"predicate":"biological_parent_of","status":"working"},
+            {"source_id":child["id"],"target_id":parent["id"],"predicate":"adoptive_parent_of","status":"working"}]
+        count = len(self.store.worlds())
+        with self.assertRaises(Error):
+            self.store.import_data(exported)
+        self.assertEqual(len(self.store.worlds()), count)
+
     def test_export_content(self):
         a = self.add(self.a, "River", "place")
         data = self.store.export(self.a)
