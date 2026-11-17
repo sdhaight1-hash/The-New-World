@@ -120,7 +120,7 @@ function read(){
   const s=el("section",undefined,"entry-section");
   if(block==="body"){const a=el("article",undefined,"prose");a.innerHTML=prose(e.body||"This article has not been written yet.");bindLinks(a);s.append(a);}
   if(block==="facts"){s.append(el("h2","Details"));const grid=el("div",undefined,"facts");for(const [k,v] of [["Type",e.type],["Status",e.status],["Period",when(e)],["Aliases",e.aliases.join(", ")||"None"],["Coordinates",e.lat===null?"Not recorded":e.lat+", "+e.lon]])grid.append(el("p",k+": "+v));s.append(grid);}
-  if(block==="relationships"){s.append(el("h2","Relationships"));for(const r of state.relations){const other=byId(r.source_id===e.id?r.target_id:r.source_id);if(other){s.append(el("span",r.predicate.replaceAll("_"," ")+(r.source_id===e.id?" → ":" ← ")));s.append(linkTo(other));}}}
+  if(block==="relationships"){s.append(el("h2","Relationships"));for(const r of state.relations.filter(relationActive)){const other=byId(r.source_id===e.id?r.target_id:r.source_id);if(other){s.append(el("span",r.predicate.replaceAll("_"," ")+(r.source_id===e.id?" → ":" ← ")));s.append(linkTo(other));}}}
   if(block==="backlinks"){s.append(el("h2","Cross-references"));for(const r of state.incoming){s.append(el("span","Linked from: "));const other=byId(r.id);if(other)s.append(linkTo(other));}for(const r of state.outgoing){const other=byId(r.id);if(other)s.append(linkTo(other));}}
   if(block==="timeline"){s.append(el("h2","Linked historical events"));for(const ev of state.entries.filter(x=>x.type==="event"&&(x.id===e.id||state.relations.some(r=>[r.source_id,r.target_id].includes(e.id)&&[r.source_id,r.target_id].includes(x.id))))){s.append(el("span",when(ev)+" "));s.append(linkTo(ev));}}
   if(block==="map"){s.append(el("h2","Geography"));s.append(el("p",e.lat===null?"No documented coordinates":e.lat+", "+e.lon));if(e.lat!==null)s.append(button("View on atlas",()=>{panel("atlas");center(e.lon,e.lat,7);}));}
@@ -181,13 +181,45 @@ function inspector(){
  root.append(el("h3",e.title),el("p",e.type+" · "+e.status,"muted"),el("h3","Backlinks"));
  for(const x of state.incoming){const target=byId(x.id);if(target)root.append(linkTo(target));}
  root.append(el("h3","References"));for(const x of state.outgoing){const target=byId(x.id);if(target)root.append(linkTo(target));}
- root.append(el("h3","Related"));for(const r of state.relations){const target=byId(r.source_id===e.id?r.target_id:r.source_id);if(target)root.append(linkTo(target));}
+ root.append(el("h3","Related"));for(const r of state.relations.filter(relationActive)){const target=byId(r.source_id===e.id?r.target_id:r.source_id);if(target)root.append(linkTo(target));}
+}
+const historicalYear=()=>num($("globalYear").value)??50;
+const relationActive=r=>(r.start_year===null||r.start_year<=historicalYear())&&(r.end_year===null||r.end_year>=historicalYear());
+function graph(){
+ const root=$("relationshipGraph");root.replaceChildren();const e=state.entry;if(!e)return;
+ const relationships=state.relations.filter(relationActive).slice(0,18);
+ if(!relationships.length){root.append(el("p","No dated relationships active in the selected year.","muted"));return;}
+ const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+ svg.setAttribute("viewBox","0 0 660 330");svg.setAttribute("role","img");
+ svg.setAttribute("aria-label","Relationship map for "+e.title);
+ const ns="http://www.w3.org/2000/svg";
+ const shape=(name,attrs)=>{const x=document.createElementNS(ns,name);for(const [k,v] of Object.entries(attrs))x.setAttribute(k,v);svg.append(x);return x;};
+ const center=[330,165],count=relationships.length;
+ const positions=relationships.map((r,i)=>{const t=2*Math.PI*i/count-Math.PI/2;return [330+240*Math.cos(t),165+119*Math.sin(t)];});
+ relationships.forEach((r,i)=>{const pos=positions[i];shape("line",{x1:center[0],y1:center[1],x2:pos[0],y2:pos[1],stroke:"currentColor","stroke-opacity":".34","stroke-width":"2"});
+ const other=byId(r.source_id===e.id?r.target_id:r.source_id);if(!other)return;
+ const circle=shape("circle",{cx:pos[0],cy:pos[1],r:21,fill:"#3c6174",stroke:"#b7dce1","stroke-width":"2"});
+ const title=document.createElementNS(ns,"title");title.textContent=other.title+" · "+r.predicate;circle.append(title);
+ circle.style.cursor="pointer";circle.addEventListener("click",()=>open(other.id));
+ const text=shape("text",{x:pos[0],y:pos[1]+36,"text-anchor":"middle",fill:"currentColor","font-size":"11"});text.textContent=other.title.length>23?other.title.slice(0,20)+"…":other.title;
+ });
+ shape("circle",{cx:center[0],cy:center[1],r:31,fill:"#a57b48",stroke:"#ecd19a","stroke-width":"3"});
+ const title=shape("text",{x:330,y:212,"text-anchor":"middle",fill:"currentColor","font-size":"12","font-weight":"bold"});title.textContent=e.title.length>32?e.title.slice(0,29)+"…":e.title;
+ root.append(svg);
+ if(state.relations.filter(relationActive).length>18)root.append(el("p","Showing the first 18 connections. Use the complete relationship list above for the rest.","muted"));
+}
+function setHistoricalYear(raw){
+ const year=num(raw);if(year===null||!Number.isInteger(year))return;
+ for(const id of ["globalYear","timelineYear","atlasYear"])$(id).value=year;
+ if(state.entry){if(state.mode==="read")read();if(state.mode==="explore")graph();inspector();}
+ if(state.panel==="timeline")timeline();
+ if(state.panel==="atlas")atlas(true);
 }
 function explore(){
  const e=state.entry;optionList($("relTarget"),state.entries.filter(x=>x.id!==e.id));
- const rows=$("relationCards");rows.replaceChildren();
+ const rows=$("relationCards");rows.replaceChildren();graph();
  for(const r of state.relations){const other=byId(r.source_id===e.id?r.target_id:r.source_id);if(!other)continue;
-  const row=el("div",undefined,"record-card");row.append(el("span",r.predicate+" · "),linkTo(other),button("Remove",async()=>{
+  const row=el("div",undefined,"record-card");row.append(el("span",r.predicate+" · "+r.status+" · "+when(r)+" · "+(r.notes||"")+" "),linkTo(other),button("Remove",async()=>{
    if(!confirm("Remove relationship?"))return;try{await api(q("/api/relation",{world_id:wid(),id:r.id}),"DELETE");await context();render();}catch(err){notice(err.message,true);}
   }));rows.append(row);}
  const family=$("familyView");family.replaceChildren();
@@ -202,7 +234,7 @@ function explore(){
 }
 async function addRelation(){
  const target_id=$("relTarget").value;if(!target_id)return;
- try{await api(q("/api/relations",{world_id:wid()}),"POST",{source_id:state.entry.id,target_id,predicate:$("relType").value});await context();render();notice("Relationship added.");}catch(err){notice(err.message,true);}
+ try{await api(q("/api/relations",{world_id:wid()}),"POST",{source_id:state.entry.id,target_id,predicate:$("relType").value,start_year:num($("relStart").value),end_year:num($("relEnd").value),status:$("relStatus").value,notes:$("relNotes").value});await context();render();notice("Relationship added.");}catch(err){notice(err.message,true);}
 }
 async function uploadImage(){
  const f=$("imageFile").files[0];if(!f)return;
@@ -273,8 +305,8 @@ function setupMap(){
  $("mapZoomIn").onclick=()=>{map.zoom=Math.min(15,map.zoom+1);atlas(true);};
  $("mapZoomOut").onclick=()=>{map.zoom=Math.max(1,map.zoom-1);atlas(true);};
  $("mapReset").onclick=()=>center(0,25,2);$("mapLabels").onchange=()=>atlas(true);
- $("atlasYear").onchange=()=>{$("timelineYear").value=$("atlasYear").value;atlas(true);};
- $("timelineYear").onchange=()=>{$("atlasYear").value=$("timelineYear").value;timeline();};
+ $("atlasYear").onchange=()=>setHistoricalYear($("atlasYear").value);
+ $("timelineYear").onchange=()=>setHistoricalYear($("timelineYear").value);
  window.addEventListener("resize",()=>{if(state.panel==="atlas")atlas(true);});
 }
 async function switchWorld(id){
@@ -323,7 +355,7 @@ async function importWorld(){
 function wire(){
  $("world").onchange=e=>switchWorld(e.target.value);$("worldSettings").onclick=editWorld;$("cancelCreate").onclick=()=>$("createDialog").close();$("createForm").onsubmit=e=>{e.preventDefault();submitCreate();};$("importWorld").onclick=()=>$("importFile").click();$("importFile").onchange=importWorld;$("addWorld").onclick=createWorld;$("newEntry").onclick=createEntry;$("welcomeNew").onclick=createEntry;$("export").onclick=exportWorld;
  $("welcomeTimeline").onclick=()=>panel("timeline");$("welcomeAtlas").onclick=()=>panel("atlas");
- $("search").oninput=renderList;$("typeFilter").onchange=renderList;
+ $("search").oninput=renderList;$("typeFilter").onchange=renderList;$("globalYear").onchange=()=>setHistoricalYear($("globalYear").value);
  document.querySelectorAll("[data-panel]").forEach(b=>b.onclick=()=>panel(b.dataset.panel));
  document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>mode(b.dataset.mode));
  $("appearance").value=localStorage.getItem("wb-mode")||"dark";document.body.dataset.appearance=$("appearance").value;
