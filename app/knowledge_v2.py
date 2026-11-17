@@ -123,7 +123,7 @@ def suggestions(body, source_id, entries, ignored=(), limit=150):
     ignored = set(ignored)
     matches = []
     for term, candidates in names.items():
-        for match in re.finditer(re.escape(term), eligible.casefold()):
+        for match in re.finditer(re.escape(term), eligible, flags=re.IGNORECASE):
             start, end = match.span()
             if (start > 0 and (eligible[start-1].isalnum() or eligible[start-1] == "_")) or (
                 end < len(eligible) and (eligible[end].isalnum() or eligible[end] == "_")):
