@@ -51,7 +51,7 @@ The repository includes [the structured initial canon inventory](../canon/entrie
 
 A fresh import currently yields **128 world-content records** (22 source articles and 106 distinct structured entries) and **165 typed relationships**. The original plague and Cascade articles are authoritative and are not duplicated. The starting timeline now includes **January 1, 2018–November 17, 2026 documented world history**, across public health, economy, international trade, politics, war, climate and AI, followed by the fictional December 2026 AGI announcement and the 2027–2029 automation and labor crisis. Structured records are searchable and linked through the Encyclopedia, Chronology and Connections workspaces; geographic entries intentionally do not invent coordinates where no source establishes them.
 
-Importing preserves all prior local edits, publication settings and manually authored pages. A one-time migration safely removes untouched *non-world* software-document entries after writing a complete backup. It reports edited or published copies for manual review. No content is published to the reader automatically. You can inspect records individually and publish approved entries through the Studio.
+Importing preserves all prior local edits, publication settings and manually authored pages. A one-time migration safely removes untouched *non-world* software-document entries after writing a complete backup. It reports edited or published copies for manual review. On first launch, if this world has no published entries, the importer makes the 22 original source-backed documents available in the local reader. Generated/working canon articles remain drafts until reviewed and published in the Studio. This one-time starter shelf does not republish articles you later unpublish and does not deploy anything online.
 
 ## Available now
 
@@ -72,7 +72,7 @@ Importing preserves all prior local edits, publication settings and manually aut
 
 The reader has an editorial world homepage, subject browsing, published-only encyclopedia articles with headings and related reading, media galleries, a 2D atlas, historical chronology, search, and reading preferences. It has **no authoring navigation or editing controls**.
 
-**Publishing is explicit:** selecting an entry in the Studio exposes **Publish/Unpublish**, independent of its editorial canon status. The reader sees only published entries and links between published entries. A published article updates immediately when edited. Drafts remain in the Studio; review prose and image rights before publishing.
+**Publishing is editorial:** the initial 22 source-backed articles populate the local reader once; selecting an entry in the Studio exposes **Publish/Unpublish**, independent of its editorial canon status. The reader sees only published entries and links between published entries. A published article updates immediately when edited. Drafts remain in the Studio; review prose and image rights before publishing.
 
 ### Publish a reader-only static website
 
