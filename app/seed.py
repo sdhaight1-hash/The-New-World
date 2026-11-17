@@ -29,6 +29,16 @@ WORLD_SOURCE_PATHS = {
     "bible/05-successor-societies.md",
     "bible/20-brief-age-of-ai.md",
     "bible/21-real-world-2019-2026.md",
+    "history/00-world-2018-2026.md",
+    "history/01-western-hemisphere-2018-2026.md",
+    "history/02-united-states-2018-2026.md",
+    "history/03-western-united-states-2018-2026.md",
+    "history/04-california-2018-2026.md",
+    "history/05-oregon-2018-2026.md",
+    "history/06-wyoming-2018-2026.md",
+    "history/07-southern-california-local-2018-2026.md",
+    "history/08-clatsop-local-2018-2026.md",
+    "history/09-wyoming-local-2018-2026.md",
     "regions/southern-california.md",
     "regions/clatsop-county.md",
     "regions/wyoming.md",
@@ -174,6 +184,7 @@ def seed(path=DB_DEFAULT):
                 properties = {
                     "title": title, "type": typ, "body": body,
                     "status": "working", "aliases": aliases,
+                    **({"status": "established", "theme_id": "chronicle"} if relative.startswith("history/") else {}),
                     **SOURCE_EVENT_DETAILS.get(relative, {}),
                 }
                 store.create_entry(WORLD_ID, properties, specified_id=eid)
