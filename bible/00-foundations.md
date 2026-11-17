@@ -12,13 +12,13 @@
 
 ## The opening era — established setting direction
 
-- **Historical beginning:** 2019. The world’s real-world timeline covers late-2019 COVID-19 emergence and the subsequent pandemic, economic and political changes, regional wars, global trade, climate, energy, technology and other influential developments. ChatGPT’s public release on November 30, 2022 is a major technological milestone, not the beginning of the timeline.
+- **Historical beginning:** January 1, 2018. The timeline begins with the pre-pandemic world, US–China trade tensions and major 2018 political, technological and disaster developments, followed by late-2019 COVID-19 emergence and the subsequent pandemic, economic and political changes, regional wars, global trade, climate, energy, technology and other influential developments. ChatGPT’s public release on November 30, 2022 is a major technological milestone, not the beginning of the timeline.
 - **Documented cutoff:** real history through November 17, 2026, including increasing AI capabilities and adoption, but without asserting real economy-wide labor displacement.
 - **First major alternate-history divergence:** a convincing worldwide AGI announcement in **December 2026**. Exact day, announcing party and implementation remain open.
 - **Brief AI and automation age:** 2027–2029 sees intense, globally uneven deployment and large-scale loss or transformation of human jobs. Economic productivity and private capital concentrations can rise alongside weakened wages, careers and local fiscal capacity.
 - **Causal role:** the later Great Plague begins amid existing employment upheaval and social strain; AI is not the pathogen's cause, and the separate Cascade physically disrupts infrastructure sustaining many automated systems. Some offline/local AI technology can survive.
 
-See [The Pre-Divergence World (2019–2026)](21-real-world-2019-2026.md) and [The Brief Age of AI](20-brief-age-of-ai.md).
+See [the 2018–2026 geographic historical atlas](../history/README.md), [the 2019–2026 background chapter](21-real-world-2019-2026.md) and [The Brief Age of AI](20-brief-age-of-ai.md).
 
 ## Provisional (not locked)
 
