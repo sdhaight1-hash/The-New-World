@@ -1,6 +1,6 @@
-# Genealogy and Dynastic Records
+# Genealogy, Families and Kinship
 
-Genealogy is a **first-class world-bible system**. It must be usable for ordinary families, migration histories, communities and political dynasties, not only nobles.
+Genealogy is a **general-purpose relationship, historical and information-organizing system** inside the world bible. It exists for **all people and communities**, including ordinary households, migration histories, biological and adoptive kinship, professions, community ties, and—when relevant—political dynasties. The family tree is a view of shared person records, not a separate collection of duplicate biographies. See the [connected encyclopedia architecture](../bible/08-world-bible-architecture.md).
 
 ## Start
 
@@ -10,7 +10,7 @@ The initial [dataset](data.json) is intentionally empty; **no people or noble ho
 
 ## Architecture
 
-The canonical interoperable archive is a versioned JSON graph of entities, with stable IDs:
+The current prototype keeps a versioned JSON graph with stable IDs. **Long term, these records should join a shared encyclopedia data model rather than remain a separate genealogy database:**
 - `people`: name and name-history, vital dates (with precision), notes, reference to places, narrative status.
 - `parentage`: parent → child directed relationship, tagged biological/adoptive/step/claimed/unknown, with evidence/status.
 - `unions`: partnerships/marriages that are independent from parentage and may have starts/ends.
@@ -38,7 +38,7 @@ The canonical interoperable archive is a versioned JSON graph of entities, with 
 1. **Delivered:** browser workbench, create/edit people, typed parentage, partner links, relationship overview, JSON import/export, basic integrity validation.
 2. Typed event chronology, places linked into atlas, per-fact source/evidence assertions, full uncertainty handling and conflict flagging.
 3. Ancestor/descendant/pedigree graphical views, search and filters, cousinship/common ancestor computation, household/union charts.
-4. Political houses, marriages as alliances, heraldry, dated memberships, estates, tenures, elected/hereditary offices, lawful succession rules and competing claims.
+4. Ordinary household history and community migrations integrated into Person/Place/Event articles; optional political houses, alliances, estates, tenures, succession and competing claims.
 5. Consistency audit (age gaps, overlapping tenures, impossible date sequences), historical “as of Year N” views, GEDCOM 7 import/export and bulk editing.
 6. World-bible integration: biographies, genealogy indexes, location links, dynasty timelines and auto-generated pages from structured data.
 
