@@ -1,6 +1,6 @@
 # RFC 008 — Reader-first World Encyclopedia and Authoring Studio
 
-**Status (November 2026):** reader-facing website and publication-gated API implemented locally; static publication/export remains a distinct deployment capability. The shared worldbuilding Studio retains its full authoring workflow. No public internet hosting or authentication is claimed by this RFC.
+**Status (November 2026):** independent reader website, publication-gated local API, and a reader-only static site exporter are implemented. The Studio retains full authoring workflows. The static exporter builds deployable files but does not itself publish them to a hosting provider. No public internet hosting or Studio authentication is claimed.
 
 ## Why this change is essential
 
@@ -88,7 +88,7 @@ Also test keyboard search, responsive navigation, deep URL entry, browser back, 
 - Authored editorial journeys/exhibitions, curated covers, and featured article ordering.
 - Dedicated public thematic maps and historic polygon/route layers, without leaking modern boundary assumptions.
 - Full historical source apparatus, citations and versioned assertions, with readable public editorial notes.
-- Public-safe static site generation/deployment and site bundle verification.
+- Static publication export and verification **implemented**; automated hosting, search-engine-friendly article URLs and deployment workflows remain to be built.
 - Reader site design controls beyond current article accents and ordered sections.
 - Usability tests with real first-time readers, not only scripted interaction; quantitative success criteria should use observed task completion and navigation mistakes.
 
