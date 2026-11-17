@@ -29,6 +29,7 @@ jobs:
         with:
           node-version: '22'
       - run: node --check app/static/app.js
+      - run: node --check app/reader/reader.js
       - name: Install browser test harness
         run: |
           npm install --no-save --no-package-lock playwright
