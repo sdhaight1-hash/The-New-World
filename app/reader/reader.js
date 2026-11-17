@@ -183,7 +183,12 @@ async function renderArticle(id){
  const wrap=node("div",undefined,"article-page-wrap");
  setArticleTheme(wrap,entry);
  const crumbs=node("nav",undefined,"crumbs");crumbs.setAttribute("aria-label","Breadcrumb");
- crumbs.append(link("World","#/"),link("Encyclopedia","#/browse"),link(category(entry).short,"#/browse/"+entry.type),node("span",entry.title));
+ const historicalParent=relations.find(r=>r.predicate==="narrows_to"&&r.target_id===id);
+ const broader=historicalParent&&byId(historicalParent.source_id);
+ crumbs.append(link("World","#/"),link("Encyclopedia","#/browse"));
+ if(broader){crumbs.append(link("Historical atlas","#/browse"),link(broader.title,"#/article/"+broader.id));}
+ else crumbs.append(link(category(entry).short,"#/browse/"+entry.type));
+ crumbs.append(node("span",entry.title));
  wrap.append(crumbs);
  const heroHeading=node("header",undefined,"article-heading");
  heroHeading.append(node("p",category(entry).label.toUpperCase(),"eyebrow"),node("h1",entry.title));
@@ -218,6 +223,24 @@ async function renderArticle(id){
   return other?[other.id,{entry:other,relation:humanize(r.predicate)}]:null;
  }).filter(Boolean),...outgoing.map(e=>[e.id,{entry:byId(e.id),relation:"Read more"}])]).values()]
  .filter(x=>x.entry&&x.entry.id!==id);
+ const narrower=relations.filter(r=>r.predicate==="narrows_to"&&r.source_id===id)
+   .map(r=>byId(r.target_id)).filter(Boolean);
+ if(broader||narrower.length){
+  const atlas=node("section",undefined,"historical-zoom");
+  atlas.append(node("p","EXPLORE BY GEOGRAPHIC SCALE","eyebrow"));
+  if(broader)atlas.append(link("↑ Wider perspective: "+broader.title,"#/article/"+broader.id,"zoom-parent"));
+  if(narrower.length){
+   atlas.append(node("h2","Go deeper"));
+   const choices=node("div",undefined,"zoom-choices");
+   for(const place of narrower){
+    const a=link("","#/article/"+place.id,"zoom-child");
+    a.append(node("strong",place.title),node("span","Explore this regional history →"));
+    choices.append(a);
+   }
+   atlas.append(choices);
+  }
+  main.append(atlas);
+ }
  const gallery=media.filter(m=>m.id!==hero?.id);
  const contentSection=(title)=>{const section=node("section",undefined,"reader-data-section");section.append(node("h2",title));return section;};
  for(const name of layout){
