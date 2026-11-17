@@ -15,7 +15,7 @@ From the project directory with Python 3.11+:
 3. Launch the application: \`python app/server.py\`
 4. Open **http://127.0.0.1:8765/app/**
 
-**[Studio setup and features](app/README.md)** · **[Automated tests](https://github.com/sdhaight1-hash/The-New-World/actions/workflows/test-studio.yml)**
+**[Studio setup and features](app/README.md)** · **[Navigation and UI/UX Guide](app/NAVIGATION.md)** · **[Automated tests](https://github.com/sdhaight1-hash/The-New-World/actions/workflows/test-studio.yml)**
 
 The application supports independent worlds, encyclopedia editing, identity-preserving hyperlinks and backlinks, reference suggestions, typed/dated relationships, family connections, a chronological event list, a 2D map of documented locations, reusable images with captions, and entry-specific themes and section arrangements. Data lives locally in \`.worldbible/\`, which must be backed up. The Export button saves world metadata and text records as JSON; **media binaries require separate backup**.
 
