@@ -24,11 +24,11 @@ CANON = ROOT / "canon" / "entries.json"
 SOURCE_EVENT_DETAILS = {
     "bible/02-great-plague.md": {
         "summary": "Globally devastating epidemic before the Cascade; uneven regional mortality and migration.",
-        "start_year": -5, "end_year": -2, "theme_id": "chronicle",
+        "start_year": -5, "end_year": -2, "theme_id": "chronicle", "status": "established",
     },
     "bible/03-cascade.md": {
         "summary": "Exceptional solar disturbances begin around provisional Year 0; prolonged infrastructure crisis follows.",
-        "start_year": 0, "end_year": 0, "theme_id": "chronicle",
+        "start_year": 0, "end_year": 0, "theme_id": "chronicle", "status": "established",
     },
 }
 # Regional source pages describe areas, not named characters or future factions.
