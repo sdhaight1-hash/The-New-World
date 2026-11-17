@@ -99,6 +99,44 @@ class StoreTests(unittest.TestCase):
             self.store.add_media_use(self.b, {"entity_id":self.add(self.b, "B")["id"],
                                                "media_id":media["id"]})
 
+    def test_archive_roundtrip_isolated_and_stable(self):
+        author = self.add(self.a, "Author")
+        town = self.add(self.a, "Harbor", "place")
+        self.store.update_entry(self.a, author["id"], {"body":"Lived at [[" + town["id"] + "|Harbor]]."})
+        self.store.create_relation(self.a, {"source_id":author["id"],
+                     "target_id":town["id"],"predicate":"resided_in"})
+        export = self.store.export(self.a)
+        result = self.store.import_data(export)
+        new_world = result["world"]["id"]
+        self.assertNotEqual(new_world, self.a)
+        imported = self.store.entries(new_world)
+        self.assertEqual(len(imported), 2)
+        i_author = next(e for e in imported if e["title"] == "Author")
+        i_town = next(e for e in imported if e["title"] == "Harbor")
+        self.assertNotEqual(i_town["id"], town["id"])
+        self.assertIn("[[" + i_town["id"] + "|Harbor]]", i_author["body"])
+        self.assertEqual(self.store.backlinks(new_world, i_town["id"])[0]["id"], i_author["id"])
+        self.assertEqual(len(self.store.relation_list(new_world)), 1)
+        self.assertEqual(self.store.check_entity(self.a, town["id"])["title"], "Harbor")
+
+    def test_no_truncated_world_export(self):
+        with self.store.lock, self.store.db:
+            for idx in range(505):
+                self.store.db.execute(
+                    "INSERT INTO entities VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (f"test-{idx}",self.a,"subject",f"Topic {idx}","[]","","","working",
+                     None,None,None,None,"archive",None,"[]","now","now"))
+        self.assertEqual(len(self.store.entries(self.a)), 500)
+        self.assertEqual(len(self.store.export(self.a)["entities"]), 505)
+
+    def test_import_rejects_media_manifest_without_binaries(self):
+        e = self.add(self.a, "A")
+        archive = self.store.export(self.a)
+        archive["media_metadata"] = [{"id":"image-without-binary"}]
+        with self.assertRaises(Error) as ctx:
+            self.store.import_data(archive)
+        self.assertEqual(ctx.exception.status, 409)
+
     def test_export_content(self):
         a = self.add(self.a, "River", "place")
         data = self.store.export(self.a)
