@@ -59,8 +59,11 @@ def initialize(store, previous_version):
 
 def error(message, status=400):
     # Reuse the application's standard HTTP error with correct status.
-    from server import Error
-    return Error(message,status)
+    import sys
+    module = sys.modules.get("server")
+    if module is None or not hasattr(module,"Error"):
+        module = sys.modules["__main__"]
+    return module.Error(message,status)
 
 def types():
     return type_catalog()
@@ -205,8 +208,11 @@ def search(store,wid,needle="",typ=None,category=None,tag=None,public=False,offs
         params.extend(["%"+needle+"%"]*4)
     sql+=" ORDER BY e.title COLLATE NOCASE LIMIT ? OFFSET ?"
     params.extend([limit,offset])
-    from server import canonical
-    return [canonical(r) for r in store.rows(sql,params)]
+    import sys
+    module = sys.modules.get("server")
+    if module is None or not hasattr(module,"canonical"):
+        module = sys.modules["__main__"]
+    return [module.canonical(r) for r in store.rows(sql,params)]
 
 def enrich_public(store,wid,entries):
     # Batch enrich only published entries. No draft references are exposed.
