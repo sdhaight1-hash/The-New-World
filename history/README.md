@@ -12,7 +12,7 @@ A **geographic zoom** through documented pre-divergence history of The New World
 → [04 — Western United States](03-western-united-states-2018-2026.md)  
 → Three state histories:
 
-- [California, 2018–2026](04-california-2018-2026.md) → [Southern California: Big Bear, Cajon Pass, Victor Valley](07-southern-california-local-2018-2026.md)
+- [California, 2018–2026](04-california-2018-2026.md) → [Southern California: Big Bear, Cajon Pass, Victor Valley](07-southern-california-local-2018-2026.md) → [Big Bear Valley](10-big-bear-valley-2018-2026.md) / [Victor Valley](11-victor-valley-2018-2026.md)
 - [Oregon, 2018–2026](05-oregon-2018-2026.md) → [Clatsop County: Astoria, Warrenton, Seaside, Cannon Beach](08-clatsop-local-2018-2026.md)
 - [Wyoming, 2018–2026](06-wyoming-2018-2026.md) → [Ranchlands and an unresolved reservation-area focus](09-wyoming-local-2018-2026.md)
 
