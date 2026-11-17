@@ -1,6 +1,6 @@
 # RFC 006 — UI/UX, Theme System and Visual Entry Designer
 
-**Status:** adopted interface/design specification; interactive application not yet implemented.
+**Status:** partial implementation: responsive studio shell, light/dark theme presets, accent choice, ordered/visible live article blocks and media placement are implemented. Full drag/drop graphical layout designer, reusable custom theme editing and visual regression testing remain planned.
 **Primary architecture:** [Unified platform ADR](15-unified-architecture.md).
 
 ## Design goals
