@@ -2,6 +2,19 @@
 
 **A realistic, globally scoped, post-industrial alternate future Earth.** The primary reference era is approximately fifty years after the Cascade. This is an open-ended **worldbuilding project**, not a novel outline; no protagonists, book sequence, or fixed geographical limits are assumed.
 
+## Explore the world and build its encyclopedia
+
+The project now has two deliberately separate experiences sharing one knowledge base: a **reader-facing illustrated encyclopedia** and a **creator-focused Studio**.
+
+- **Reader:** `http://127.0.0.1:8765/read/` — editorial presentation, maps, history, article discovery and published-only content.
+- **Studio:** `http://127.0.0.1:8765/app/` — worldbuilding, editorial drafting, relationships, images, design and publication controls.
+
+Run `python app/launch.py` to start locally. The repository also includes a published-only **static website exporter**: `python app/publish_site.py public-site` after selecting which entries to publish.
+
+**[Reader experience research](bible/18-reader-first-ux.md)** · **[Reader publishing and site-export guide](app/README.md#reader-first-world-encyclopedia)**
+
+---
+
 ## Run World Bible Studio
 
 The New World now includes a **working, local-first worldbuilding application** that can host multiple independent worlds. The repository's historical Bible is the initial dataset; the engine itself uses generic person, place, organization, family, event, subject, and media records.
