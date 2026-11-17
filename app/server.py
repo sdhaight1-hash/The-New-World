@@ -427,6 +427,75 @@ class Store:
         with self.lock, self.db:
             self.db.execute("DELETE FROM media_uses WHERE id=? AND world_id=?", (uid,wid))
 
+    def import_data(self, payload):
+        """Restore a data-only export into a NEW isolated world, atomically.
+
+        Image metadata without original blobs cannot be faithfully restored.
+        """
+        require(isinstance(payload, dict) and payload.get("format") == "world-bible-export-v1",
+                "Unsupported export format")
+        source_world = payload.get("world")
+        entities = payload.get("entities")
+        relations = payload.get("relations")
+        require(isinstance(source_world, dict) and isinstance(entities, list) and isinstance(relations, list),
+                "Malformed export")
+        require(not payload.get("media_metadata") and not payload.get("media_uses"),
+                "Export references images. Restore the original .worldbible directory instead.", 409)
+        require(len(entities) <= 20000 and len(relations) <= 100000, "Import exceeds limit")
+        name = source_world.get("name")
+        require(isinstance(name, str) and 0 < len(name.strip()) <= 150, "Invalid imported world name")
+        ids = [e.get("id") for e in entities if isinstance(e, dict)]
+        require(len(ids) == len(entities) and all(isinstance(x, str) and x for x in ids)
+                and len(set(ids)) == len(ids), "Invalid or duplicate entity IDs")
+        old_new = {id_: str(uuid4()) for id_ in ids}
+        world_id = str(uuid4())
+        epoch = source_world.get("epoch_year")
+        require(epoch is None or type(epoch) is int and -100000 <= epoch <= 100000, "Invalid imported epoch")
+        with self.lock, self.db:
+            self.db.execute("INSERT INTO worlds VALUES(?,?,?,?,?)",
+                            (world_id, name + " (Imported)", str(source_world.get("description", ""))[:3000],
+                             epoch, now()))
+            for e in entities:
+                payload_entity = {k:e[k] for k in ("type", "title", "aliases", "summary",
+                  "body", "status", "start_year", "end_year", "lat", "lon", "theme_id", "accent", "layout") if k in e}
+                require(set(payload_entity) == {"type", "title", "aliases", "summary", "body", "status",
+                   "start_year", "end_year", "lat", "lon", "theme_id", "accent", "layout"},
+                   "Missing fields in exported entity")
+                payload_entity = validate_entity(payload_entity)
+                old_id = e["id"]
+                def relink(match):
+                    target = match.group(1)
+                    require(target in old_new, "Export contains an unknown cross-world link")
+                    display = match.group(0).split("|", 1)
+                    return "[[" + old_new[target] + ("|" + display[1] if len(display) == 2 else "]]")
+                payload_entity["body"] = LINK_PATTERN.sub(relink, payload_entity["body"])
+                row = dict(id=old_new[old_id], world_id=world_id, **payload_entity,
+                           created_at=now(), updated_at=now())
+                for key in ("aliases", "layout"):
+                    row[key] = json.dumps(row[key], ensure_ascii=False)
+                self.db.execute("INSERT INTO entities(" + ",".join(ENTITY_COLUMNS) + ") VALUES("
+                                + ",".join("?" for _ in ENTITY_COLUMNS) + ")",
+                                [row[k] for k in ENTITY_COLUMNS])
+            for e in entities:
+                self._sync_links(world_id, old_new[e["id"]], LINK_PATTERN.sub(
+                    lambda m: "[[" + old_new[m.group(1)] + ("|" + m.group(0).split("|",1)[1] if "|" in m.group(0) else "]]"),
+                    e["body"]))
+            for rel in relations:
+                require(isinstance(rel, dict) and rel.get("source_id") in old_new
+                        and rel.get("target_id") in old_new, "Invalid imported relationship target")
+                require(rel.get("predicate") in PREDICATES and rel.get("status") in STATUSES,
+                        "Invalid imported relationship type/status")
+                start, end = rel.get("start_year"), rel.get("end_year")
+                require(start is None or type(start) is int, "Invalid relation start")
+                require(end is None or type(end) is int, "Invalid relation end")
+                require(start is None or end is None or start <= end, "Invalid relation period")
+                note = rel.get("notes","")
+                require(isinstance(note,str) and len(note)<=5000, "Invalid relation notes")
+                self.db.execute("INSERT INTO relations VALUES(?,?,?,?,?,?,?,?,?,?)",
+                    (str(uuid4()), world_id, old_new[rel["source_id"]], old_new[rel["target_id"]],
+                     rel["predicate"], rel["status"], start, end, note, now()))
+        return {"world": self.one_world(world_id), "entries": len(entities), "relations": len(relations)}
+
     def export(self, wid):
         world = self.one_world(wid)
         with self.lock:
@@ -560,7 +629,7 @@ class Handler(BaseHTTPRequestHandler):
             route=p.path
             q=parse_qs(p.query)
             s=self.server.store
-            wid=self.get_arg(q,"world_id") if route != "/api/worlds" else None
+            wid=self.get_arg(q,"world_id") if route not in ("/api/worlds","/api/import") else None
             if route=="/api/upload" and verb=="POST":
                 count=self.headers.get("Content-Length","0")
                 require(count.isdigit() and 0<int(count)<=MAX_IMAGE,"Image body too large")
@@ -568,6 +637,8 @@ class Handler(BaseHTTPRequestHandler):
                 filename=unquote(self.headers.get("X-File-Name","image"))[:180]
                 return self.reply(s.upload_image(wid,raw,filename),201)
             data=self.json_body() if verb in ("POST","PATCH") else {}
+            if route=="/api/import" and verb=="POST":
+                return self.reply(s.import_data(data),201)
             if route=="/api/worlds" and verb=="POST":
                 return self.reply(s.create_world(data),201)
             if route=="/api/entities" and verb=="POST":
