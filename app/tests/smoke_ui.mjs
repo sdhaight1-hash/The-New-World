@@ -26,6 +26,7 @@ try{
  await page.locator("#createForm button[type=submit]").click();
  await page.locator("#writePanel").waitFor({state:"visible"});
  assert.equal(await page.locator("#breadcrumb").innerText(),"Locations / Navigation Test Settlement");
+ assert.match(await page.locator("#eBody").inputValue(),/Geography and setting/);
  await page.locator("#eSummary").fill("A deliberately created sample record.");
  await page.locator("#eBody").fill("## Survey notes\nInitial data entry.");
  await page.locator('#editForm button[type=submit]').click();
