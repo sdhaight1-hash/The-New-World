@@ -248,3 +248,21 @@ dialog .outline-option input{flex:0 0 auto;margin:0}
 .mood-hint{font-size:11px!important;line-height:1.6;margin:11px 2px}
 @media(max-width:1000px){.mood-layout{grid-template-columns:180px minmax(0,1fr)}}
 @media(max-width:710px){.mood-layout{grid-template-columns:1fr}.mood-sidebar{padding:12px}.mood-sidebar #boardList{display:flex;overflow-x:auto;gap:8px}.board-entry{min-width:150px}.mood-heading{flex-direction:column}.mood-zoom-label{margin-left:0}.mood-stage-viewport{height:490px}}
+
+/* Visual asset browser: searchable, keyboard-accessible, reusable without copying. */
+dialog.mood-picker{width:min(860px,calc(100vw - 32px));max-height:82vh;overflow:auto}
+dialog.mood-create-dialog{width:min(545px,calc(100vw - 32px))}
+.mood-picker-head{display:flex;align-items:start;justify-content:space-between;gap:12px}
+.mood-picker-head h2,.mood-create-dialog h2{margin:5px 0 19px;font-family:Georgia,serif;font-size:27px;font-weight:400}
+.mood-picker-head button{border:0;background:transparent}
+.mood-picker>label{font-size:12px;display:block;color:var(--muted);margin-bottom:7px}
+.mood-picker-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;max-height:55vh;overflow:auto;margin-top:16px;padding:2px}
+.mood-picker-tile{display:flex;flex-direction:column;align-items:start;gap:7px;padding:9px;text-align:left;min-height:150px;background:var(--raised);border:1px solid var(--line)}
+.mood-picker-tile:hover{border-color:var(--space-accent)}
+.mood-picker-tile img{width:100%;height:123px;object-fit:cover;border-radius:5px;background:var(--surface)}
+.mood-picker-tile strong{font-size:12px}.mood-picker-tile small{font-size:10px;color:var(--muted);line-height:1.4}
+.mood-picker-category{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--space-accent)}
+.mood-create-dialog label{display:block;margin:12px 0;color:var(--muted);font-size:12px}
+.mood-create-dialog label input,.mood-create-dialog label select,.mood-create-dialog label textarea{display:block;width:100%;margin-top:5px}
+.mood-create-dialog textarea{resize:vertical;min-height:84px;padding:8px;background:var(--surface);border:1px solid var(--line);border-radius:6px;color:var(--text)}
+@media(max-width:540px){.mood-picker-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
