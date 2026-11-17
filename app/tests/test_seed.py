@@ -10,7 +10,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0,str(Path(__file__).resolve().parent.parent))
-from seed import ROOT, WORLD_ID, canon_id, source_id, load_canon, seed
+from seed import ROOT, WORLD_ID, WORLD_SOURCE_PATHS, canon_id, source_id, load_canon, linked_body, seed
 from server import Store
 
 
@@ -38,10 +38,14 @@ class CanonSeedTests(unittest.TestCase):
         manifest=load_canon()
         seed(self.path)
         with closing(Store(self.path)) as store:
-            docs=sum(1 for folder in ("bible","regions") for _ in (ROOT/folder).glob("*.md"))
+            docs=len(WORLD_SOURCE_PATHS)
             distinct=sum(not x.get("reuse_source") for x in manifest["entries"])
             self.assertEqual(len(store.entries(WORLD_ID)),docs+distinct)
             self.assertEqual(len(store.relation_list(WORLD_ID)),len(manifest["relations"]))
+            self.assertNotIn(source_id("bible/10-rfc-historical-knowledge-core.md"),
+                             {e["id"] for e in store.entries(WORLD_ID)})
+            self.assertNotIn(source_id("bible/00-foundations.md"),
+                             {e["id"] for e in store.entries(WORLD_ID)})
             self.assertEqual(store.public_entries(WORLD_ID),[])
             self.assertEqual(len(store.entries(WORLD_ID,typ="person")),0)
             for path in ("bible/00-foundations.md","bible/02-great-plague.md","regions/clatsop-county.md"):
