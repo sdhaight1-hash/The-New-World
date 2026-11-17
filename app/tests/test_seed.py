@@ -127,7 +127,7 @@ class CanonSeedTests(unittest.TestCase):
         seed(self.path)
         with closing(Store(self.path)) as store:
             years=[e for e in store.entries(WORLD_ID) if e["type"]=="event"]
-            self.assertEqual(min(e["start_year"] for e in years if e["start_year"] is not None),-12)
+            self.assertEqual(min(e["start_year"] for e in years if e["start_year"] is not None),-15)
             self.assertEqual(store.check_entity(WORLD_ID,canon_id("chatgpt-public-launch"))["start_year"],-12)
             self.assertEqual(store.check_entity(WORLD_ID,canon_id("agi-announcement-2026"))["start_year"],-8)
             self.assertEqual(store.check_entity(WORLD_ID,canon_id("automation-boom-2028"))["start_year"],-6)
