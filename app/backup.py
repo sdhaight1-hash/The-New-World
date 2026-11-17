@@ -6,6 +6,7 @@ Stop the local server before RESTORING. Backup uses SQLite's online backup API.
 from __future__ import annotations
 
 import argparse
+from contextlib import closing
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -36,8 +37,11 @@ def make_backup(db_path: Path, output: Path) -> dict:
         raise ValueError("Backup archive must not be stored inside the media library")
     with tempfile.TemporaryDirectory() as d:
         snapshot = Path(d) / "database.sqlite3"
-        with sqlite3.connect(f"file:{db_path}?mode=ro", uri=True) as source:
-            with sqlite3.connect(snapshot) as target:
+        # sqlite3.Connection.__exit__ commits/rolls back but does not close.
+        # Close both handles before TemporaryDirectory removes the snapshot;
+        # Windows refuses to delete files held open by SQLite connections.
+        with closing(sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)) as source:
+            with closing(sqlite3.connect(snapshot)) as target:
                 source.backup(target)
                 check = target.execute("PRAGMA integrity_check").fetchone()[0]
                 if check != "ok":
@@ -128,7 +132,7 @@ def restore_backup(archive_path: Path, db_path: Path, force=False) -> dict:
                         count += len(chunk)
                 if count != expected[name]["size"] or checksum.hexdigest() != expected[name]["sha256"]:
                     raise ValueError("SHA-256 verification failed: " + name)
-            with sqlite3.connect(staging/"worlds.sqlite3") as test:
+            with closing(sqlite3.connect(staging/"worlds.sqlite3")) as test:
                 if test.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                     raise ValueError("Restored SQLite database is corrupt")
             prior = None
