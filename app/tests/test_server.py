@@ -1,0 +1,164 @@
+import io
+import json
+import tempfile
+import threading
+import unittest
+from pathlib import Path
+from http.server import ThreadingHTTPServer
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from server import Store, Handler, Error
+
+
+class StoreTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.store = Store(Path(self.tmp.name) / "test.sqlite3")
+        self.a = self.store.create_world({"name": "World A", "epoch_year": 2035})["id"]
+        self.b = self.store.create_world({"name": "World B"})["id"]
+
+    def tearDown(self):
+        self.store.close()
+        self.tmp.cleanup()
+
+    def add(self, world, title, typ="person", **kwargs):
+        return self.store.create_entry(world, {"title": title, "type": typ, **kwargs})
+
+    def test_world_isolation_and_search(self):
+        a = self.add(self.a, "Northwind", "place", summary="A distant settlement")
+        b = self.add(self.b, "Northwind", "place")
+        self.assertNotEqual(a["id"], b["id"])
+        self.assertEqual(len(self.store.entries(self.a, "distant")), 1)
+        self.assertEqual(len(self.store.entries(self.b, "distant")), 0)
+        with self.assertRaises(Error):
+            self.store.check_entity(self.a, b["id"])
+        with self.assertRaises(Error):
+            self.store.create_relation(self.a, {"source_id": a["id"], "target_id": b["id"]})
+
+    def test_stable_links_backlinks_rename_and_delete(self):
+        source = self.add(self.a, "Archive")
+        target = self.add(self.a, "Oldname")
+        text = "See [[" + target["id"] + "|Oldname]] for details."
+        self.store.update_entry(self.a, source["id"], {"body": text})
+        self.assertEqual(self.store.backlinks(self.a, target["id"])[0]["id"], source["id"])
+        self.store.update_entry(self.a, target["id"], {"title": "Newname"})
+        self.assertEqual(self.store.outgoing(self.a, source["id"])[0]["title"], "Newname")
+        with self.assertRaises(Error) as cm:
+            self.store.delete_entry(self.a, target["id"])
+        self.assertEqual(cm.exception.status, 409)
+        self.store.update_entry(self.a, source["id"], {"body": "No external link."})
+        self.store.delete_entry(self.a, target["id"])
+        self.assertEqual(self.store.backlinks(self.a, source["id"]), [])
+
+    def test_unknown_and_cross_world_links_rejected_without_changing_existing_body(self):
+        source = self.add(self.a, "Archive", body="Original")
+        other = self.add(self.b, "Other")
+        for target in ("not-real-id", other["id"]):
+            with self.assertRaises(Error):
+                self.store.update_entry(self.a, source["id"], {"body": "[[" + target + "|Other]]"})
+        self.assertEqual(self.store.check_entity(self.a, source["id"])["body"], "Original")
+
+    def test_parentage_cycle(self):
+        p = self.add(self.a, "Parent")
+        c = self.add(self.a, "Child")
+        self.store.create_relation(self.a, {"source_id": p["id"], "target_id": c["id"], "predicate": "biological_parent_of"})
+        with self.assertRaises(Error):
+            self.store.create_relation(self.a, {"source_id": c["id"], "target_id": p["id"], "predicate": "adoptive_parent_of"})
+        self.assertEqual(len(self.store.relation_list(self.a)), 1)
+
+    def test_years_coordinates_and_design_validated(self):
+        a = self.add(self.a, "Valley", "place", start_year=1, end_year=50, lat=34.25, lon=-116.9,
+                     theme_id="atlas", layout=["body", "map"])
+        self.assertEqual(a["layout"], ["body", "map"])
+        for payload in ({"lat": 999}, {"start_year": 51, "end_year": 2},
+                        {"accent": "expression(alert(1))"}, {"layout": ["body", "body"]},
+                        {"theme_id": "not-a-preset"}, {"body": 55}):
+            with self.assertRaises(Error):
+                self.store.update_entry(self.a, a["id"], payload)
+        self.assertEqual(self.store.check_entity(self.a, a["id"])["title"], "Valley")
+
+    def test_media_reuse(self):
+        try:
+            from PIL import Image
+        except ImportError:
+            self.skipTest("Pillow absent")
+        f = io.BytesIO()
+        Image.new("RGB", (10, 12), (100, 140, 170)).save(f, "PNG")
+        media = self.store.upload_image(self.a, f.getvalue(), "test.png")
+        x = self.add(self.a, "Person")
+        y = self.add(self.a, "Location", "place")
+        self.store.add_media_use(self.a, {"entity_id":x["id"], "media_id":media["id"], "role":"portrait"})
+        self.store.add_media_use(self.a, {"entity_id":y["id"], "media_id":media["id"], "role":"gallery"})
+        self.assertEqual(len(self.store.media_list(self.a, x["id"])), 1)
+        self.assertEqual(len(self.store.media_list(self.a, y["id"])), 1)
+        self.assertTrue(self.store.media_file(self.a, media["id"], True)[0].is_file())
+        with self.assertRaises(Error):
+            self.store.add_media_use(self.b, {"entity_id":self.add(self.b, "B")["id"],
+                                               "media_id":media["id"]})
+
+    def test_export_content(self):
+        a = self.add(self.a, "River", "place")
+        data = self.store.export(self.a)
+        self.assertEqual(data["format"], "world-bible-export-v1")
+        self.assertEqual(data["entities"][0]["id"], a["id"])
+        self.assertEqual(len(self.store.export(self.b)["entities"]), 0)
+
+
+class ServerTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.store = Store(Path(self.tmp.name) / "api.sqlite3")
+        self.http = ThreadingHTTPServer(("127.0.0.1",0), Handler)
+        self.http.store = self.store
+        self.url = "http://127.0.0.1:" + str(self.http.server_port)
+        self.thread = threading.Thread(target=self.http.serve_forever, daemon=True)
+        self.thread.start()
+
+    def tearDown(self):
+        self.http.shutdown()
+        self.http.server_close()
+        self.thread.join(2)
+        self.store.close()
+        self.tmp.cleanup()
+
+    def request(self, path, method="GET", body=None, headers=None):
+        opts = {"X-World-Bible":"1"}
+        if headers:
+            opts.update(headers)
+        blob = json.dumps(body).encode() if body is not None else None
+        if blob is not None:
+            opts["Content-Type"]="application/json"
+        try:
+            with urlopen(Request(self.url+path, data=blob, method=method, headers=opts),timeout=5) as resp:
+                return resp.status, resp.read(), resp.headers
+        except HTTPError as e:
+            return e.code, e.read(), e.headers
+
+    def test_http_creation_linking_and_static(self):
+        code, page, headers = self.request("/app/")
+        self.assertEqual(code,200)
+        self.assertIn(b"World Bible Studio", page)
+        self.assertIn("Content-Security-Policy", headers)
+        code, raw, _ = self.request("/api/worlds","POST",{"name":"Another World"})
+        self.assertEqual(code,201)
+        wid=json.loads(raw)["id"]
+        code, raw, _ = self.request("/api/entities?world_id="+wid,"POST",{"title":"Village","type":"place"})
+        self.assertEqual(code,201)
+        entity=json.loads(raw)
+        self.assertEqual(self.request("/api/entity?world_id="+wid+"&id="+entity["id"])[0],200)
+        self.assertEqual(self.request("/api/export?world_id="+wid)[0],200)
+
+    def test_missing_header_and_cross_origin_refused(self):
+        code, _, _ = self.request("/api/worlds","POST",{"name":"X"},headers={"Origin":"http://attacker.invalid"})
+        self.assertEqual(code,403)
+        req=Request(self.url+"/api/worlds",data=b'{"name":"X"}',method="POST",headers={"Content-Type":"application/json"})
+        with self.assertRaises(HTTPError) as cm:
+            urlopen(req,timeout=5)
+        self.assertEqual(cm.exception.code,403)
+
+
+if __name__ == "__main__":
+    unittest.main()
