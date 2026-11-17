@@ -778,6 +778,34 @@ function renderBoardItems(){
    body.append(el("span",(item.color||"")+" "+item.content,"mood-caption"));
   }else body.append(el("p",item.content||"A visual research note"));
   card.append(body);
+  const resize=el("button","↘","mood-resize");
+  resize.title="Resize card";
+  resize.setAttribute("aria-label","Drag to resize card");
+  resize.onpointerdown=e=>{
+   e.preventDefault();e.stopPropagation();
+   const startX=e.clientX,startY=e.clientY,w=item.w,h=item.h;
+   resize.setPointerCapture(e.pointerId);
+   const move=event=>{
+    const width=Math.max(120,Math.min(1200,Math.round(w+(event.clientX-startX)/state.boardZoom)));
+    const height=Math.max(95,Math.min(1200,Math.round(h+(event.clientY-startY)/state.boardZoom)));
+    card.style.width=width+"px";card.style.height=height+"px";
+   };
+   const end=async event=>{
+    resize.removeEventListener("pointermove",move);
+    resize.removeEventListener("pointerup",end);
+    resize.removeEventListener("pointercancel",end);
+    if(event.type==="pointercancel"){
+     card.style.width=w+"px";card.style.height=h+"px";return;
+    }
+    const width=Math.max(120,Math.min(1200,Math.round(w+(event.clientX-startX)/state.boardZoom)));
+    const height=Math.max(95,Math.min(1200,Math.round(h+(event.clientY-startY)/state.boardZoom)));
+    if(width!==w||height!==h)await updateBoardCard(item.id,{w:width,h:height});
+   };
+   resize.addEventListener("pointermove",move);
+   resize.addEventListener("pointerup",end);
+   resize.addEventListener("pointercancel",end);
+  };
+  card.append(resize);
   header.addEventListener("pointerdown",e=>{
    if(e.target.closest("button"))return;
    e.preventDefault();
@@ -814,15 +842,33 @@ async function updateBoardCard(id,data){
   renderBoardItems();
  }catch(error){notice("Card not saved: "+error.message,true);await loadBoard(state.board.board.id);}
 }
-async function editBoardCard(id){
+let editingBoardCard=null;
+function editBoardCard(id){
  const item=state.board?.items.find(x=>x.id===id);if(!item)return;
- const content=prompt(item.kind==="note"?"Edit note":"Edit caption or label",item.content);
- if(content===null)return;
- let color=item.color;
- if(item.kind==="swatch"){
-  color=prompt("Swatch color",item.color);if(color===null)return;
- }
- await updateBoardCard(id,{content,...(item.kind==="swatch"?{color}:{})});
+ editingBoardCard=item.id;
+ $("boardCardHeading").textContent="Edit "+item.kind+" card";
+ $("boardCardText").value=item.content||"";
+ $("boardCardColorField").hidden=item.kind!=="swatch";
+ $("boardCardColor").value=item.color||"#9cb6a0";
+ $("boardCardWidth").value=item.w;
+ $("boardCardHeight").value=item.h;
+ $("boardCardDialog").showModal();
+ $("boardCardText").focus();
+}
+async function saveBoardCard(event){
+ event.preventDefault();
+ if(!editingBoardCard)return;
+ const item=state.board?.items.find(x=>x.id===editingBoardCard);
+ if(!item)return $("boardCardDialog").close();
+ const data={
+  content:$("boardCardText").value,
+  w:Number($("boardCardWidth").value),
+  h:Number($("boardCardHeight").value)
+ };
+ if(item.kind==="swatch")data.color=$("boardCardColor").value;
+ await updateBoardCard(item.id,data);
+ $("boardCardDialog").close();
+ editingBoardCard=null;
 }
 async function removeBoardCard(id){
  if(!state.board||!confirm("Remove this placement from the board? Source records and media remain unchanged."))return;
@@ -994,6 +1040,8 @@ function wire(){
  $("boardImageFile").onchange=uploadBoardImage;
  $("boardPickerSearch").oninput=renderBoardPicker;
  $("boardPickerClose").onclick=()=>$("boardPickerDialog").close();
+ $("boardCardForm").onsubmit=saveBoardCard;
+ $("boardCardCancel").onclick=()=>$("boardCardDialog").close();
  $("boardCreateForm").onsubmit=submitBoard;
  $("boardCreateCancel").onclick=()=>$("boardCreateDialog").close();
  $("boardAddEntry").onclick=()=>boardAdd("entry");
