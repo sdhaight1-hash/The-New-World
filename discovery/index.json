@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "id": "foundation",
+      "title": "Foundations and Canon Ledger",
+      "type": "reference",
+      "aliases": [
+        "Foundational Canon"
+      ],
+      "path": "bible/00-foundations.md",
+      "related": [
+        "chronology",
+        "plague",
+        "cascade",
+        "technology",
+        "successors"
+      ]
+    },
+    {
+      "id": "chronology",
+      "title": "Master Historical Chronology",
+      "type": "history",
+      "aliases": [
+        "Master Timeline",
+        "Timeline"
+      ],
+      "path": "bible/01-chronology.md",
+      "related": [
+        "plague",
+        "cascade",
+        "southern-california",
+        "clatsop",
+        "wyoming"
+      ]
+    },
+    {
+      "id": "plague",
+      "title": "The Great Plague",
+      "type": "event",
+      "aliases": [
+        "Great Plague",
+        "Plague"
+      ],
+      "path": "bible/02-great-plague.md",
+      "related": [
+        "chronology",
+        "southern-california",
+        "clatsop",
+        "wyoming"
+      ]
+    },
+    {
+      "id": "cascade",
+      "title": "The Cascade",
+      "type": "event",
+      "aliases": [
+        "Cascade",
+        "Long Storms"
+      ],
+      "path": "bible/03-cascade.md",
+      "related": [
+        "chronology",
+        "technology",
+        "southern-california",
+        "clatsop",
+        "wyoming"
+      ]
+    },
+    {
+      "id": "technology",
+      "title": "Post-Cascade Technology",
+      "type": "reference",
+      "aliases": [
+        "Technology",
+        "Material Culture"
+      ],
+      "path": "bible/04-technology.md",
+      "related": [
+        "cascade",
+        "successors"
+      ]
+    },
+    {
+      "id": "successors",
+      "title": "Successor Societies",
+      "type": "subject",
+      "aliases": [
+        "Successor Societies",
+        "Feudal America"
+      ],
+      "path": "bible/05-successor-societies.md",
+      "related": [
+        "technology",
+        "genealogy"
+      ]
+    },
+    {
+      "id": "research",
+      "title": "Research Register",
+      "type": "reference",
+      "aliases": [
+        "Open Questions"
+      ],
+      "path": "bible/06-research-register.md",
+      "related": [
+        "foundation"
+      ]
+    },
+    {
+      "id": "genealogy",
+      "title": "Genealogy and Kinship",
+      "type": "subject",
+      "aliases": [
+        "Genealogy",
+        "Family History"
+      ],
+      "path": "bible/07-genealogy-dynasties.md",
+      "related": [
+        "successors",
+        "architecture"
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "World Bible Architecture",
+      "type": "reference",
+      "aliases": [
+        "Information Architecture"
+      ],
+      "path": "bible/08-world-bible-architecture.md",
+      "related": [
+        "genealogy",
+        "discovery"
+      ]
+    },
+    {
+      "id": "discovery",
+      "title": "Relationship Mapping and Link Discovery",
+      "type": "reference",
+      "aliases": [
+        "Link Discovery",
+        "Relationship Mapping"
+      ],
+      "path": "bible/09-linking-and-discovery.md",
+      "related": [
+        "architecture",
+        "genealogy"
+      ]
+    },
+    {
+      "id": "southern-california",
+      "title": "Southern California",
+      "type": "region",
+      "aliases": [
+        "Big Bear",
+        "Victor Valley",
+        "Southern California"
+      ],
+      "path": "regions/southern-california.md",
+      "related": [
+        "plague",
+        "cascade",
+        "chronology"
+      ]
+    },
+    {
+      "id": "clatsop",
+      "title": "Clatsop County",
+      "type": "region",
+      "aliases": [
+        "Astoria",
+        "Seaside",
+        "Cannon Beach",
+        "Clatsop Coast"
+      ],
+      "path": "regions/clatsop-county.md",
+      "related": [
+        "plague",
+        "cascade",
+        "chronology"
+      ]
+    },
+    {
+      "id": "wyoming",
+      "title": "Wyoming Ranchlands",
+      "type": "region",
+      "aliases": [
+        "Wyoming",
+        "Diamond Ranch"
+      ],
+      "path": "regions/wyoming.md",
+      "related": [
+        "plague",
+        "cascade",
+        "chronology"
+      ]
+    }
+  ]
+}
