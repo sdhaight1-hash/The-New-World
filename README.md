@@ -46,33 +46,46 @@ This is an inventory of what the prior source documents actually establish—not
 
 ---
 
-## Begin here
+## The world itself — source material
 
-- [Canon, assumptions, and open questions](bible/00-foundations.md)
+These documents establish the setting and are the only Markdown sources imported as world content. The [structured canon inventory](canon/entries.json) adds individual places, events, and linked subjects from them.
+
 - [Master historical chronology](bible/01-chronology.md)
 - [The Great Plague and demographic inversion](bible/02-great-plague.md)
 - [The Cascade and the Long Storms](bible/03-cascade.md)
 - [Technology and material culture](bible/04-technology.md)
 - [Political and social development](bible/05-successor-societies.md)
-- [Connected world encyclopedia architecture](bible/08-world-bible-architecture.md)
-- [Relationship mapping and link discovery](bible/09-linking-and-discovery.md)
-- [RFC 001: Unified Historical Knowledge Core](bible/10-rfc-historical-knowledge-core.md)
-- [RFC 002: Location and Faction Systems](bible/11-rfc-location-faction-systems.md)
-- [RFC 003: Historical Timeline and Chronology Engine](bible/12-rfc-timeline-engine.md)
-- [RFC 004: Media Library and Image Handling](bible/13-rfc-media-image-handling.md)
-- [Unified architecture & migration plan](bible/15-unified-architecture.md)
-- [Visual design, themes & entry builder](bible/16-ux-and-entry-designer.md)
-- [2D Historical Atlas](bible/17-rfc-2d-historical-atlas.md)
-- [Versioned design presets and layout](design/README.md)
-- [RFC 005: Earlier 3D atlas proposal (superseded)](bible/14-rfc-gods-eye-atlas.md)
-- [Open the link discovery explorer](tools/discovery/index.html)
-- [Genealogy, family history, and kinship](bible/07-genealogy-dynasties.md)
-- [Genealogy data model and roadmap](genealogy/README.md)
-- [Open genealogy workbench](tools/genealogy/index.html)
 - [Southern California: Big Bear and Victor Valley](regions/southern-california.md)
 - [Northern Oregon: Clatsop County](regions/clatsop-county.md)
 - [Wyoming: ranchlands and reservation region](regions/wyoming.md)
-- [Questions and research priorities](bible/06-research-register.md)
+
+## Editorial notes and research — not encyclopedia entries
+
+These guide decisions about what becomes canon, but are **not places, events, people, or other entries in the world**.
+
+- [Foundations and canon ledger](bible/00-foundations.md)
+- [Research register and unresolved questions](bible/06-research-register.md)
+- [Genealogy and kinship system planning](bible/07-genealogy-dynasties.md)
+
+## Studio software documentation — not world lore
+
+These are engineering and interface design references for building the program. They stay in GitHub and **must never be imported into the world's encyclopedia**.
+
+- [World Bible information architecture](bible/08-world-bible-architecture.md)
+- [Relationship mapping and discovery design](bible/09-linking-and-discovery.md)
+- [Historical knowledge core RFC](bible/10-rfc-historical-knowledge-core.md)
+- [Locations and factions RFC](bible/11-rfc-location-faction-systems.md)
+- [Timeline engine RFC](bible/12-rfc-timeline-engine.md)
+- [Media handling RFC](bible/13-rfc-media-image-handling.md)
+- [Superseded 3D atlas proposal](bible/14-rfc-gods-eye-atlas.md)
+- [Unified technical architecture](bible/15-unified-architecture.md)
+- [Studio interface and page design](bible/16-ux-and-entry-designer.md)
+- [2D atlas design](bible/17-rfc-2d-historical-atlas.md)
+- [Reader-first experience design](bible/18-reader-first-ux.md)
+- [Visual worldbuilding and moodboards](bible/19-visual-worldbuilding-and-moodboards.md)
+- [Theme and layout implementation](design/README.md)
+- [Legacy discovery prototype](tools/discovery/index.html)
+- [Legacy genealogy prototype](tools/genealogy/index.html)
 
 ## Timekeeping
 
