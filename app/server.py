@@ -228,7 +228,12 @@ class Store:
         require(isinstance(search,str) and len(search)<=200, "Invalid search")
         if typ:
             require(isinstance(typ,str) and TYPE_PATTERN.fullmatch(typ), "Invalid type")
-        sql = """SELECT e.* FROM entities e JOIN publications p ON p.entity_id=e.id
+        sql = """SELECT e.*,
+                   (SELECT u.media_id FROM media_uses u
+                    WHERE u.entity_id=e.id AND u.role IN ('hero','portrait')
+                    ORDER BY CASE u.role WHEN 'hero' THEN 0 ELSE 1 END LIMIT 1)
+                   AS hero_media_id
+                 FROM entities e JOIN publications p ON p.entity_id=e.id
                  WHERE e.world_id=?"""
         args=[wid]
         if typ:
