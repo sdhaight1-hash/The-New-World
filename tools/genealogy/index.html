@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The New World | Genealogy Workbench</title>
+<style>
+:root{color-scheme:dark;--bg:#10151b;--panel:#1a232c;--line:#364453;--text:#eaf0f5;--muted:#afbcc9;--accent:#d6ad73}
+*{box-sizing:border-box}body{margin:0;font:15px system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}header{padding:20px 28px;background:#16212b;border-bottom:1px solid var(--line)}header h1{margin:0 0 5px;font-size:25px}p{line-height:1.5}header p{margin:0;color:var(--muted)}main{display:grid;grid-template-columns:minmax(220px,300px) minmax(320px,1fr);gap:16px;padding:18px;max-width:1400px;margin:auto}section,aside{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:16px 0 8px}button,input,select,textarea{font:inherit}button{background:#304455;color:var(--text);border:1px solid #547086;border-radius:7px;padding:9px 12px;cursor:pointer}button:hover{background:#405a70}button.primary{background:#795936;border-color:#bc9361}button:disabled{opacity:.5;cursor:default}label{display:block;color:var(--muted);font-size:13px;margin:9px 0 4px}input,select,textarea{display:block;width:100%;border:1px solid var(--line);border-radius:6px;background:#101921;color:var(--text);padding:9px}textarea{min-height:72px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0}.toolbar button{flex:0 0 auto}.hint{color:var(--muted);font-size:13px}.people{max-height:64vh;overflow:auto;margin:8px -4px}.person{width:100%;display:block;text-align:left;margin:5px 0;background:#192630}.person.active{border-color:var(--accent);background:#39402f}.person small{display:block;color:var(--muted);margin-top:3px}.hidden{display:none}.relationships{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pill{display:inline-block;border:1px solid var(--line);padding:7px;margin:3px;border-radius:7px;cursor:pointer}.tree{overflow:auto;min-height:150px;padding:12px;background:#111b23;border:1px solid var(--line);border-radius:7px}.generation{display:flex;gap:12px;justify-content:center;margin:12px 0}.node{min-width:125px;max-width:210px;padding:10px;border:1px solid #688192;border-radius:8px;background:#263540;text-align:center;cursor:pointer}.node.focus{border:2px solid var(--accent)}.node small{display:block;color:var(--muted)}.separator{text-align:center;color:var(--accent)}#status{min-height:20px;color:var(--accent)}.wide{grid-column:1/-1}@media(max-width:750px){main{display:block;padding:10px}main>*{margin:10px 0}.relationships{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>The New World · Genealogy</h1><p>People, kinship and family history · local-first workbench · experimental v0.1</p></header>
+<main>
+<aside><h2>People <span id="count"></span></h2><input id="search" placeholder="Search names…" aria-label="Search people"><div class="toolbar"><button id="new" class="primary">New person</button><button id="export">Export JSON</button><button id="import">Import JSON</button><input id="file" class="hidden" type="file" accept=".json,application/json"></div><div class="people" id="people"></div><p class="hint">Edits stay in this browser until exported. Export and commit the JSON to the repository to preserve your world bible.</p></aside>
+<section id="editor"><h2>Person record</h2><p id="empty" class="hint">Choose a person or create one. No historical people have been invented for you.</p>
+<div id="fields" class="hidden">
+<label for="name">Display name</label><input id="name" maxlength="180">
+<div class="row"><div><label for="birth">Birth date / approximate year</label><input id="birth" placeholder="e.g. c. 2041"></div><div><label for="death">Death date / approximate year</label><input id="death" placeholder="Unknown"></div></div>
+<label for="place">Place or world-bible location ID</label><input id="place" placeholder="e.g. Big Bear Valley">
+<label for="statusfield">Canon status</label><select id="statusfield"><option>working</option><option>established</option><option>disputed</option></select>
+<label for="notes">Biographical notes</label><textarea id="notes" placeholder="Migration, household, occupation, affiliations…"></textarea>
+<div class="toolbar"><button id="save" class="primary">Save changes</button><button id="remove">Delete record</button></div>
+<h3>Add parent relationship</h3><div class="row"><select id="parent"></select><select id="ptype"><option value="biological">Biological</option><option value="adoptive">Adoptive</option><option value="step">Step</option><option value="claimed">Claimed / disputed</option></select><button id="addparent">Add</button></div>
+<h3>Add partnership or marriage</h3><div class="row"><select id="partner"></select><select id="utype"><option value="marriage">Marriage</option><option value="partnership">Partnership</option><option value="betrothal">Betrothal</option></select><button id="addpartner">Add</button></div>
+<div id="relationships" class="relationships"></div>
+</div></section>
+<section class="wide"><h2>Family view</h2><p class="hint">Direct parents, the selected individual, and direct children. Full multi-generation charts and dynastic succession views are planned next.</p><div class="tree" id="tree">Select a person to view family links.</div><p id="status" role="status"></p></section>
+</main>
+<script>
+"use strict";
+const KEY="the-new-world-genealogy-v1";
+const EMPTY=()=>({schema_version:1,people:[],parentage:[],unions:[],houses:[],house_memberships:[],events:[],claims:[],institutions:[],offices:[],tenures:[],places:[],sources:[]});
+const $=id=>document.getElementById(id);
+let data=EMPTY(),selected=null;
+const uid=()=>("p-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9));
+const person=id=>data.people.find(p=>p.id===id);
+const label=id=>person(id)?.name||"(unnamed)";
+const msg=text=>$("status").textContent=text;
+function check(d){
+ if(!d||d.schema_version!==1||!Array.isArray(d.people)||!Array.isArray(d.parentage)||!Array.isArray(d.unions))throw Error("Unsupported genealogy format");
+ for(const p of d.people)if(!p.id||typeof p.id!=="string")throw Error("Every person needs a stable ID");
+ const ids=new Set(d.people.map(p=>p.id));if(ids.size!==d.people.length)throw Error("Duplicate person IDs");
+ const graph=new Map([...ids].map(x=>[x,[]]));
+ const seen=new Set();
+ for(const r of d.parentage){
+  if(!ids.has(r.parent_id)||!ids.has(r.child_id))throw Error("Parent relationship refers to missing person");
+  if(r.parent_id===r.child_id)throw Error("A person cannot be their own parent");
+  const k=r.parent_id+"|"+r.child_id;if(seen.has(k))throw Error("Duplicate parent/child link");seen.add(k);
+  graph.get(r.parent_id).push(r.child_id);
+ }
+ const visiting=new Set(),visited=new Set();
+ function visit(id){if(visiting.has(id))throw Error("Ancestry cycle detected");if(visited.has(id))return;visiting.add(id);for(const child of graph.get(id))visit(child);visiting.delete(id);visited.add(id)}
+ for(const id of ids)visit(id);
+ for(const u of d.unions){if(!ids.has(u.person1_id)||!ids.has(u.person2_id)||u.person1_id===u.person2_id)throw Error("Invalid partnership");}
+ return true;
+}
+function persist(){check(data);localStorage.setItem(KEY,JSON.stringify(data));}
+function el(tag,txt,cls){const e=document.createElement(tag);if(txt!=null)e.textContent=txt;if(cls)e.className=cls;return e}
+function renderPeople(){
+ const q=$("search").value.trim().toLowerCase(),list=$("people");list.replaceChildren();
+ $("count").textContent="("+data.people.length+")";
+ for(const p of [...data.people].sort((a,b)=>(a.name||"").localeCompare(b.name||"")).filter(p=>(p.name||"").toLowerCase().includes(q))){
+  const b=el("button",null,"person"+(p.id===selected?" active":""));b.append(el("strong",p.name||"(unnamed)"));b.append(el("small",[p.birth,p.death].filter(Boolean).join(" – ")||"Dates unknown"));b.onclick=()=>selectPerson(p.id);list.append(b);
+ }
+}
+function fillSelect(id){const s=$(id);s.replaceChildren(new Option("Choose person…",""));for(const p of [...data.people].sort((a,b)=>(a.name||"").localeCompare(b.name||"")))if(p.id!==selected)s.add(new Option(p.name||"(unnamed)",p.id))}
+function linkedBox(title,links,fn){
+ const div=el("div"),h=el("h3",title+" ("+links.length+")");div.append(h);
+ if(!links.length)div.append(el("p","None recorded","hint"));
+ for(const r of links){const b=el("button",fn(r).text,"pill");b.onclick=()=>selectPerson(fn(r).id);div.append(b)}
+ return div;
+}
+function view(){
+ const p=person(selected);$("fields").classList.toggle("hidden",!p);$("empty").classList.toggle("hidden",!!p);
+ if(!p){$("tree").textContent="Select a person to view family links.";renderPeople();return}
+ for(const f of ["name","birth","death","place","notes"])$(f).value=p[f]||"";
+ $("statusfield").value=p.status||"working";
+ fillSelect("parent");fillSelect("partner");
+ const parents=data.parentage.filter(r=>r.child_id===p.id);
+ const children=data.parentage.filter(r=>r.parent_id===p.id);
+ const partners=data.unions.filter(u=>u.person1_id===p.id||u.person2_id===p.id);
+ $("relationships").replaceChildren(
+ linkedBox("Parents",parents,r=>({id:r.parent_id,text:label(r.parent_id)+" · "+r.type})),
+ linkedBox("Children",children,r=>({id:r.child_id,text:label(r.child_id)+" · "+r.type})),
+ linkedBox("Partners",partners,u=>({id:u.person1_id===p.id?u.person2_id:u.person1_id,text:label(u.person1_id===p.id?u.person2_id:u.person1_id)+" · "+u.type}))
+ );
+ const tree=$("tree");tree.replaceChildren();
+ for(const [group,records,toId] of [["Parents",parents,r=>r.parent_id],["Selected",[p],r=>r.id],["Children",children,r=>r.child_id]]){
+  tree.append(el("div",group,"separator"));const row=el("div",null,"generation");
+  if(!records.length)row.append(el("span","Not recorded","hint"));
+  for(const r of records){const id=toId(r),pp=person(id);const node=el("div",null,"node"+(id===p.id?" focus":""));node.append(el("strong",pp.name||"(unnamed)"));node.append(el("small",[pp.birth,pp.death].filter(Boolean).join(" – ")));node.onclick=()=>selectPerson(id);row.append(node)}tree.append(row);
+ }
+ renderPeople();
+}
+function selectPerson(id){selected=id;view()}
+$("new").onclick=()=>{const p={id:uid(),name:"New person",birth:"",death:"",place:"",status:"working",notes:""};data.people.push(p);persist();selectPerson(p.id);msg("Created a new person record.")};
+$("save").onclick=()=>{const p=person(selected);if(!p)return;for(const k of ["name","birth","death","place","notes"])p[k]=$(k).value.trim();p.status=$("statusfield").value;if(!p.name){msg("A name is required.");return}persist();view();msg("Saved person record.")};
+$("addparent").onclick=()=>{
+ const id=$("parent").value;if(!id||!selected)return;
+ if(data.parentage.some(r=>r.parent_id===id&&r.child_id===selected)){msg("That parent link already exists.");return}
+ const r={id:uid(),parent_id:id,child_id:selected,type:$("ptype").value,status:"working"};
+ data.parentage.push(r);
+ try{persist();view();msg("Parent relationship added.")}catch(e){data.parentage.pop();msg(e.message)}
+};
+$("addpartner").onclick=()=>{
+ const id=$("partner").value;if(!id||!selected)return;
+ if(data.unions.some(u=>[u.person1_id,u.person2_id].includes(id)&&[u.person1_id,u.person2_id].includes(selected))){msg("A union for this pair already exists.");return}
+ data.unions.push({id:uid(),person1_id:selected,person2_id:id,type:$("utype").value,status:"working"});
+ persist();view();msg("Partnership added.")
+};
+$("remove").onclick=()=>{
+ const id=selected;if(!id)return;
+ if(data.parentage.some(r=>r.parent_id===id||r.child_id===id)||data.unions.some(u=>u.person1_id===id||u.person2_id===id)){msg("Cannot delete: unlink relationships first. Relationship editing is a later milestone.");return}
+ if(!confirm("Permanently remove this person from the local dataset?"))return;
+ data.people=data.people.filter(p=>p.id!==id);selected=null;persist();view();msg("Deleted unlinked person.")
+};
+$("search").oninput=renderPeople;
+$("export").onclick=()=>{persist();const blob=new Blob([JSON.stringify(data,null,2)+"\n"],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="genealogy.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);msg("JSON exported. Commit it to the repository for durable storage.")};
+$("import").onclick=()=>$("file").click();
+$("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());check(d);if(!confirm("Replace this browser's genealogy data with imported JSON? Export a backup first."))return;data={...EMPTY(),...d};selected=null;persist();view();msg("Imported "+data.people.length+" people.")}catch(err){msg("Import failed: "+err.message)}finally{e.target.value=""}};
+try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);check(d);data={...EMPTY(),...d}}}catch(e){msg("Stored genealogy could not be loaded: "+e.message)}
+view();
+</script></body></html>
