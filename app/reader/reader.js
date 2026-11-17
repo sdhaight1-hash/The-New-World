@@ -202,8 +202,9 @@ async function renderArticle(id){
  if(connections.length||incoming.length){
   const section=node("section",undefined,"article-related");section.append(node("p","FURTHER READING","eyebrow"),node("h2","Continue exploring"));
   const list=node("div",undefined,"relation-list");
-  const suggested=[...new Map([...connections,...incoming.map(e=>({entry:byId(e.id),relation:"Referenced by"}))]
-   .filter(x=>x.entry).map(x=>[x.entry.id,x])]).values()].slice(0,12);
+  const relatedItems=[...connections,...incoming.map(e=>({entry:byId(e.id),relation:"Referenced by"}))]
+    .filter(item=>item.entry);
+  const suggested=[...new Map(relatedItems.map(item=>[item.entry.id,item])).values()].slice(0,12);
   for(const rel of suggested){const a=link("","#/article/"+rel.entry.id,"relation-item");
    a.append(node("small",rel.relation),node("strong",rel.entry.title));list.append(a);}
   section.append(list);wrap.append(section);
