@@ -1,12 +1,13 @@
 # Master chronology — working history
 
-The New World's master history begins in **2019** and follows documented events through **November 17, 2026**. The first fictional divergence is a convincing public AGI announcement in **December 2026**. The period 2027–2029 establishes rapid automation and labor displacement; the separate fictional Great Plague begins around 2030 and the Cascade follows around 2034–2035. Those later calendar anchors remain provisional.
+The New World's master history begins on **January 1, 2018** and follows documented events through **November 17, 2026**. The first fictional divergence is a convincing public AGI announcement in **December 2026**. The period 2027–2029 establishes rapid automation and labor displacement; the separate fictional Great Plague begins around 2030 and the Cascade follows around 2034–2035. Those later calendar anchors remain provisional.
 
-The historical baseline is deliberately broad: public health, geopolitics, armed conflict, economics, trade and supply chains, climate, energy and technology each affect the societies entering the speculative era. Begin with [**The Pre-Divergence World (2019–November 2026)**](21-real-world-2019-2026.md), then read [**The Brief Age of AI (2022–2030)**](20-brief-age-of-ai.md) as a focused technological and economic subhistory. The 2030 men's World Cup remains only a candidate fictional epidemic-amplification episode, not a proven cause.
+The historical baseline is deliberately broad: public health, geopolitics, armed conflict, economics, trade and supply chains, climate, energy and technology each affect the societies entering the speculative era. Begin with the [**2018–2026 historical atlas**](../history/README.md), moving from global history into the Western Hemisphere, United States, Western states and our three focus regions. The earlier [**2019–2026 global overview**](21-real-world-2019-2026.md) remains as supporting context; the [**Brief Age of AI (2022–2030)**](20-brief-age-of-ai.md) as a focused technological and economic subhistory. The 2030 men's World Cup remains only a candidate fictional epidemic-amplification episode, not a proven cause.
 
 | Era | Tentative date | Working development | Confidence |
 |---|---|---|---|
-| **Historical opening** | **2019** | Global trade integration, US–China economic friction, Hong Kong protests; unexplained pneumonia cluster reported in Wuhan in December | Documented real events and baseline |
+| **Global pre-pandemic baseline** | **2018** | US–China tariff escalation, IPCC 1.5°C report, California Camp Fire; existing international trade, information networks and institutions | Documented real events; global historical starting point |
+| **Historical opening, continued** | **2019** | Global trade integration, US–China economic friction, Hong Kong protests; unexplained pneumonia cluster reported in Wuhan in December | Documented real events and baseline |
 | **COVID-19 pandemic and economic shock** | **2020** | WHO declares a pandemic March 11; health-system strain, travel restrictions, remote work, emergency fiscal policy and global recession | Documented, varied by region |
 | Uneven recovery and Afghanistan transition | 2021 | Vaccination and economic reopening, supply constraints and inflation pressures; Taliban takeover of Kabul in August | Documented |
 | War, inflation and international reordering | 2022 | Russia's full-scale invasion of Ukraine, commodity and energy shocks, military realignment, rising borrowing costs | Documented |
@@ -34,9 +35,9 @@ The historical baseline is deliberately broad: public health, geopolitics, armed
 
 ## Historical causality to preserve
 
-**2019 international integration and geopolitical friction → COVID-19 pandemic and unequal recovery → trade, inflation and supply-chain adjustments → sustained conflicts and heightened military expenditure → expanding computing/energy/AI investment → December 2026 fictional AGI announcement → 2027–2029 mass labor displacement and political-economic strain → fictional Great Plague and asymmetric migration → partial recovery → independent Cascade and long-term solar disruptions → divergent successor societies.**
+**2018–2019 international integration, geopolitical friction and climate/disaster pressures → COVID-19 pandemic and unequal recovery → trade, inflation and supply-chain adjustments → sustained conflicts and heightened military expenditure → expanding computing/energy/AI investment → December 2026 fictional AGI announcement → 2027–2029 mass labor displacement and political-economic strain → fictional Great Plague and asymmetric migration → partial recovery → independent Cascade and long-term solar disruptions → divergent successor societies.**
 
-The 2019–2026 timeline records **real history**, but identifying potential causal connections with later fictional events is an **interpretive modeling exercise**, not evidence that the real events were destined to produce the fictional catastrophes.
+The 2018–2026 timeline records **real history**, but identifying potential causal connections with later fictional events is an **interpretive modeling exercise**, not evidence that the real events were destined to produce the fictional catastrophes.
 
 The large-scale AI labor crisis belongs specifically to the **fictional 2027–2029 period**; it is not asserted as an established fact of the real world as of November 17, 2026. Software and robotics have different infrastructure requirements; some AI systems can survive on local hardware after later network failures.
 
@@ -50,4 +51,4 @@ Not every survivor moved, and a region losing most of its *population* need not 
 
 ## Dating convention
 
-Write events as “Year +N” or “Year −N” relative to Cascade until the date is locked; retain real calendar dates when independent real-world history requires them. Cross-reference [the 2019–2026 world baseline](21-real-world-2019-2026.md), [the Brief Age of AI](20-brief-age-of-ai.md), [plague](02-great-plague.md), [Cascade](03-cascade.md) and [research questions](06-research-register.md).
+Write events as “Year +N” or “Year −N” relative to Cascade until the date is locked; retain real calendar dates when independent real-world history requires them. Cross-reference [the nested 2018–2026 historical atlas](../history/README.md), [the 2019–2026 world baseline](21-real-world-2019-2026.md), [the Brief Age of AI](20-brief-age-of-ai.md), [plague](02-great-plague.md), [Cascade](03-cascade.md) and [research questions](06-research-register.md).
