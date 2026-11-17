@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The New World — Discovery</title>
+<style>:root{color-scheme:dark;--bg:#11171d;--panel:#1d2933;--line:#3e5362;--text:#eaf0f3;--muted:#a5bac8;--accent:#e2b87a}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,sans-serif}header{padding:19px 24px;border-bottom:1px solid var(--line);background:#19252f}h1{font-size:25px;margin:0}header p{margin:5px 0;color:var(--muted)}main{max-width:1300px;margin:auto;padding:16px;display:grid;grid-template-columns:270px minmax(380px,1fr);gap:16px}section,aside{background:var(--panel);border:1px solid var(--line);padding:18px;border-radius:9px}h2{font-size:19px;margin:0 0 10px}h3{font-size:15px;margin:16px 0 7px}input,textarea{font:inherit;width:100%;border:1px solid var(--line);background:#111d26;color:var(--text);border-radius:6px;padding:9px}textarea{min-height:120px;resize:vertical}button{font:inherit;color:var(--text);background:#304451;border:1px solid #506878;border-radius:6px;padding:8px 11px;cursor:pointer}button:hover{background:#415c6d}.item{display:block;width:100%;margin:4px 0;text-align:left}.item.selected{border-color:var(--accent)}small,.muted{color:var(--muted)}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.row>*{flex:0 0 auto}.group{padding:10px 0;border-bottom:1px solid var(--line)}.pill{display:inline-block;margin:4px 5px 4px 0}.type{text-transform:uppercase;font-size:11px;letter-spacing:.06em;color:var(--accent)}.panel{padding:12px;background:#14212a;border-radius:7px;margin:12px 0}.suggestion{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:9px 0}.suggestion span{flex:1;min-width:200px}.alert{color:var(--accent)}a{color:#dfb784}#items{max-height:65vh;overflow:auto}.wide{grid-column:1/-1}@media(max-width:730px){main{display:block}main>*{margin-bottom:12px}}</style></head>
+<body><header><h1>The New World · Link Discovery</h1><p>Explore connected world-bible entries, review name matches and inspect backlinks.</p></header>
+<main><aside><h2>Entries</h2><input id="search" aria-label="Filter entries" placeholder="Search titles, aliases, categories"><p class="muted" id="counter"></p><div id="items"></div></aside>
+<section><h2 id="title">Select an entry</h2><div class="type" id="category"></div><p id="aliases" class="muted"></p><p><a id="entryLink" href="#" target="_blank" rel="noopener">View source in GitHub</a></p><div class="group"><h3>Related reference entries</h3><div id="links"></div></div><div class="group"><h3>Incoming references</h3><div id="backlinks"></div></div><p class="muted">Reference navigation is editorially indexed. It does not assert historical relationships such as ownership, descent, or political allegiance.</p></section>
+<section class="wide"><h2>Find potential hyperlinks</h2><p class="muted">Paste a paragraph from your world bible. Exact whole-name matches suggest existing entries. No links or historical facts are created automatically.</p><textarea id="prose" placeholder="Example: After the Great Plague, Victor Valley and Big Bear became important regional centers."></textarea><div class="row" style="margin-top:10px"><button id="scan">Scan names and aliases</button><button id="clear">Clear</button></div><div id="suggestions" class="panel muted">Paste text to discover connections.</div><p class="muted">This first prototype uses a curated index of existing entries, not a semantic AI model or a finished Markdown editor. Identical aliases will require explicit disambiguation.</p></section></main>
+<script>
+"use strict";
+const base="https://github.com/sdhaight1-hash/The-New-World/blob/main/";
+const entries=[
+["foundation","Foundations and Canon Ledger","reference",["Foundational Canon"],"bible/00-foundations.md",["chronology","plague","cascade","technology","successors"]],
+["chronology","Master Historical Chronology","history",["Master Timeline","Timeline"],"bible/01-chronology.md",["plague","cascade","southern-california","clatsop","wyoming"]],
+["plague","The Great Plague","event",["Great Plague","Plague"],"bible/02-great-plague.md",["chronology","southern-california","clatsop","wyoming"]],
+["cascade","The Cascade","event",["Cascade","Long Storms"],"bible/03-cascade.md",["chronology","technology","southern-california","clatsop","wyoming"]],
+["technology","Post-Cascade Technology","reference",["Technology","Material Culture"],"bible/04-technology.md",["cascade","successors"]],
+["successors","Successor Societies","subject",["Successor Societies","Feudal America"],"bible/05-successor-societies.md",["technology","genealogy"]],
+["research","Research Register","reference",["Open Questions"],"bible/06-research-register.md",["foundation"]],
+["genealogy","Genealogy and Kinship","subject",["Genealogy","Family History"],"bible/07-genealogy-dynasties.md",["successors","architecture"]],
+["architecture","World Bible Architecture","reference",["Information Architecture"],"bible/08-world-bible-architecture.md",["genealogy","discovery"]],
+["discovery","Relationship Mapping and Link Discovery","reference",["Link Discovery","Relationship Mapping"],"bible/09-linking-and-discovery.md",["architecture","genealogy"]],
+["southern-california","Southern California","region",["Big Bear","Victor Valley","Southern California"],"regions/southern-california.md",["plague","cascade","chronology"]],
+["clatsop","Clatsop County","region",["Astoria","Seaside","Cannon Beach","Clatsop Coast"],"regions/clatsop-county.md",["plague","cascade","chronology"]],
+["wyoming","Wyoming Ranchlands","region",["Wyoming","Diamond Ranch"],"regions/wyoming.md",["plague","cascade","chronology"]]
+].map(([id,title,type,aliases,path,related])=>({id,title,type,aliases,path,related}));
+const byId=new Map(entries.map(e=>[e.id,e]));const $=id=>document.getElementById(id);let current="southern-california";
+function buttonFor(e){const b=document.createElement("button");b.textContent=e.title;b.className="pill";b.onclick=()=>select(e.id);return b}
+function list(){
+ const q=$("search").value.toLocaleLowerCase(), filtered=entries.filter(e=>[e.title,e.type,...e.aliases].some(t=>t.toLowerCase().includes(q)));
+ $("counter").textContent=filtered.length+" entries";const out=$("items");out.replaceChildren();
+ for(const e of filtered){const b=document.createElement("button");b.className="item"+(e.id===current?" selected":"");b.textContent=e.title+" · "+e.type;b.onclick=()=>select(e.id);out.append(b)}
+}
+function select(id){
+ const e=byId.get(id);if(!e)return;current=id;$("title").textContent=e.title;$("category").textContent=e.type;$("aliases").textContent="Aliases: "+(e.aliases.join(", ")||"none");$("entryLink").href=base+e.path;
+ const out=$("links"),incoming=$("backlinks");out.replaceChildren();incoming.replaceChildren();
+ for(const x of e.related){const target=byId.get(x);if(target)out.append(buttonFor(target))}
+ for(const source of entries.filter(x=>x.related.includes(e.id)))incoming.append(buttonFor(source));
+ if(!out.childNodes.length)out.textContent="None indexed";
+ if(!incoming.childNodes.length)incoming.textContent="None indexed";
+ list();
+}
+function boundary(c){return !c||!/[\p{L}\p{N}_]/u.test(c)}
+function scan(){
+ const content=$("prose").value, matches=[];
+ const patterns=new Map();
+ for(const e of entries)for(const name of new Set([e.title,...e.aliases])){const key=name.toLowerCase();if(name.trim().length<4)continue;if(!patterns.has(key))patterns.set(key,{name,targets:[]});if(!patterns.get(key).targets.includes(e.id))patterns.get(key).targets.push(e.id)}
+ const tokens=[...patterns.values()].sort((a,b)=>b.name.length-a.name.length);
+ for(let start=0;start<content.length;start++){
+  for(const token of tokens){
+   const end=start+token.name.length;
+   if(content.slice(start,end).toLowerCase()===token.name.toLowerCase()&&boundary(content[start-1])&&boundary(content[end])){
+    matches.push({text:content.slice(start,end),targets:token.targets,at:start});start=end-1;break;
+   }
+  }
+ }
+ const out=$("suggestions");out.replaceChildren();
+ if(!matches.length){out.textContent="No indexed names found. Try “Victor Valley”, “the Great Plague”, or “Astoria”.";return}
+ const heading=document.createElement("p");heading.textContent=matches.length+" potential mention(s) found. Review each target:";out.append(heading);
+ for(const m of matches){
+  const row=document.createElement("div");row.className="suggestion";
+  const label=document.createElement("span");label.textContent="\""+m.text+"\" at character "+(m.at+1);row.append(label);
+  for(const id of m.targets){const e=byId.get(id),b=buttonFor(e);row.append(b)}
+  if(m.targets.length>1){const c=document.createElement("strong");c.textContent="Ambiguous";c.className="alert";row.append(c)}
+  out.append(row);
+ }
+}
+$("search").oninput=list;$("scan").onclick=scan;$("clear").onclick=()=>{$("prose").value="";$("suggestions").textContent="Paste text to discover connections."};select(current);
+</script></body></html>
