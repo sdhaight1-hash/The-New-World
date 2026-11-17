@@ -8,6 +8,10 @@ Requires Python 3.11 or newer. Pillow is needed for safe image uploads; all othe
 
 From the repository root:
 
+**Quick start:** `python app/launch.py`. On Windows, you can double-click `Launch-World-Bible.cmd` in the repository root. The launcher imports only missing Markdown articles, then opens the local site.
+
+For individual steps:
+
 1. Install image dependency: \`python -m pip install -r app/requirements.txt\`
 2. Import existing Bible pages once: \`python app/seed.py\`
 3. Run the local application: \`python app/server.py\`
