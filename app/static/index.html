@@ -8,7 +8,7 @@
 <div class="spacer"></div><div class="top-actions">
 <label for="appearance" class="sr">Appearance</label><select id="appearance" title="Appearance"><option value="dark">Dark</option><option value="light">Light</option><option value="high-contrast">High contrast</option></select>
 <button id="export" title="Export all records in this world">Export</button><button id="importWorld" title="Import a data-only archive as a separate world">Import</button><input id="importFile" type="file" accept=".json,application/json" hidden>
-<a href="/app/" class="small-link" title="Open start page">Studio</a></div></header>
+<a href="/read/" class="reader-preview-link" title="Open the published reader experience">Explore World ↗</a></div></header>
 <nav class="space-rail" aria-label="Main workspaces">
   <div class="rail-heading">WORKSPACES</div>
   <button class="space-item active" data-panel="home" aria-current="page"><span class="space-glyph" aria-hidden="true">⌂</span><span>Overview</span></button>
@@ -42,6 +42,7 @@
 </div>
 <div class="page-head" id="entryToolbar" hidden>
   <div class="entry-location"><span class="entry-location-label">CURRENT RECORD</span><div class="breadcrumb" id="breadcrumb">Select an entry</div></div>
+  <div class="publication-tools"><span id="publishStatus" class="publish-status">Unpublished</span><button id="publishToggle" type="button" title="Publish or unpublish this article for readers">Publish</button><a id="viewPublished" href="/read/" target="_blank" rel="noopener noreferrer" hidden>View as reader ↗</a></div>
   <div class="mode-nav" id="modeNav">
     <button data-mode="read" class="active">Read</button>
     <button data-mode="write">Write</button>
