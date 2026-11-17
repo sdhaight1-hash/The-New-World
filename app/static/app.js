@@ -420,7 +420,24 @@ function setHistoricalYear(raw){
  if(state.panel==="timeline")timeline();
  if(state.panel==="atlas")atlas(true);
 }
+async function showEntryBoards(){
+ const entry=state.entry;if(!entry)return;
+ const root=$("entryBoards");root.replaceChildren(el("p","Loading associated boards…","muted"));
+ try{
+  const world=wid(),all=await api(q("/api/boards",{world_id:world}));
+  if(wid()!==world||state.entry?.id!==entry.id)return;
+  root.replaceChildren();
+  const boards=all.filter(board=>board.entity_id===entry.id);
+  for(const board of boards){
+   const card=button("",async()=>{panel("boards");await loadBoard(board.id);},"entry-board-link");
+   card.append(el("strong",board.title),el("small",board.item_count+" visual references"));
+   root.append(card);
+  }
+  if(!boards.length)root.append(el("p","No visual research boards attached yet.","muted"));
+ }catch(error){root.replaceChildren(el("p",error.message,"error"));}
+}
 function explore(){
+ showEntryBoards();
  const e=state.entry;optionList($("relTarget"),state.entries.filter(x=>x.id!==e.id));
  const rows=$("relationCards");rows.replaceChildren();graph();
  for(const r of state.relations){const other=byId(r.source_id===e.id?r.target_id:r.source_id);if(!other)continue;
@@ -1042,6 +1059,7 @@ function wire(){
  $("boardPickerClose").onclick=()=>$("boardPickerDialog").close();
  $("boardCardForm").onsubmit=saveBoardCard;
  $("boardCardCancel").onclick=()=>$("boardCardDialog").close();
+ $("createEntryBoard").onclick=()=>{panel("boards");newBoard();};
  $("boardCreateForm").onsubmit=submitBoard;
  $("boardCreateCancel").onclick=()=>$("boardCreateDialog").close();
  $("boardAddEntry").onclick=()=>boardAdd("entry");
