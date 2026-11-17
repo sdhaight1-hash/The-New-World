@@ -65,6 +65,22 @@ def error(message, status=400):
         module = sys.modules["__main__"]
     return module.Error(message,status)
 
+def assert_type_change(store,wid,eid,new_type):
+    detail=classifications(store,wid,eid)
+    try:
+        validate_properties(new_type,detail["subtype"],detail["properties"],
+            lambda target: bool(store.one("SELECT 1 FROM entities WHERE world_id=? AND id=?",(wid,target))))
+    except ValueError as exc:
+        raise error("Clear incompatible subtype or properties before changing entry type: "+str(exc),409) from exc
+
+def assert_not_property_target(store,wid,eid):
+    from knowledge_v2 import TYPE_FIELDS
+    for r in store.rows("""SELECT d.entity_id,d.properties,e.type FROM entry_details d
+        JOIN entities e ON e.id=d.entity_id WHERE e.world_id=? AND e.id<>?""",(wid,eid)):
+        props=json.loads(r["properties"])
+        if any(props.get(key)==eid for key,kind in TYPE_FIELDS.get(r["type"],{}).items() if kind=="entry"):
+            raise error("Entry is referenced by a structured property. Redirect or clear the reference first.",409)
+
 def types():
     return type_catalog()
 
