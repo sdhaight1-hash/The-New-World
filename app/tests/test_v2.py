@@ -48,6 +48,17 @@ class KnowledgeV2Tests(unittest.TestCase):
             v2_store.update_metadata(self.store,self.w,entry["id"],{**metadata,"properties":{"parent_place":outside["id"]}})
         self.assertEqual(v2_store.classifications(self.store,self.w,entry["id"])["properties"]["terrain"],"desert")
 
+    def test_structured_references_block_unsafe_deletion_and_type_change(self):
+        parent=self.add("Parent region","place")
+        child=self.add("Child region","place")
+        v2_store.update_metadata(self.store,self.w,child["id"],
+             {"subtype":"region","properties":{"parent_place":parent["id"]},"categories":[],"tags":[]})
+        with self.assertRaises(Error):
+            self.store.delete_entry(self.w,parent["id"])
+        with self.assertRaises(Error):
+            self.store.update_entry(self.w,child["id"],{"type":"person"})
+        self.assertEqual(self.store.check_entity(self.w,child["id"])["type"],"place")
+
     def test_category_tag_membership_and_public_visibility(self):
         public=self.add("Public","place")
         private=self.add("Private","place")
