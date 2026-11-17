@@ -2,7 +2,6 @@ import io
 import json
 import sqlite3
 from unittest.mock import patch
-import backup
 import tempfile
 import threading
 import unittest
@@ -13,6 +12,7 @@ from urllib.error import HTTPError
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import backup
 from server import Store, Handler, Error
 from backup import make_backup, restore_backup
 from publish_site import build_site
