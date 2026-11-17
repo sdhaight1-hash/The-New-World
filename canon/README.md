@@ -2,13 +2,13 @@
 
 This directory contains the **source-grounded population manifest** for the local World Bible Studio.
 
-- [`entries.json`](entries.json) — 97 identified historical concepts, including two reused authoritative catastrophe articles, and 107 reviewed relations. When combined with the 10 in-world historical and regional source articles, a fresh Studio seed creates **105 world-content records**.
+- [`entries.json`](entries.json) — 99 identified historical concepts, including two reused authoritative catastrophe articles, and 112 reviewed relations. When combined with the 10 in-world historical and regional source articles, a fresh Studio seed creates **107 world-content records**.
 - [`../app/seed.py`](../app/seed.py) — deterministic, repeatable importer. Source article content is preserved verbatim, and editing an existing database record never causes a later seed to overwrite it.
 - [`../app/tests/test_seed.py`](../app/tests/test_seed.py) — tests record totals, related entries and backlinks, source fidelity, world isolation by IDs, stable reimports, preservation of edited content and publication state.
 
 ## Quality and scope audit
 
-The original importer accidentally treated 15 editorial/software-design documents as world entries. The [content audit](CONTENT_AUDIT.md) documents every excluded file and flags remaining historical placeholders for review. A fresh seeded encyclopedia contains **68 world-content records at the time of the audit**, rather than the previous 83. The subsequent Age of AI history added 10 records, followed by the 2019–2026 multi-domain historical pass adding 27 more records (one source chapter and 26 structured entries), for a current clean total of **105**. Existing local databases receive a backup-first cleanup that preserves edited or published content.
+The original importer accidentally treated 15 editorial/software-design documents as world entries. The [content audit](CONTENT_AUDIT.md) documents every excluded file and flags remaining historical placeholders for review. A fresh seeded encyclopedia contains **68 world-content records at the time of the audit**, rather than the previous 83. The subsequent Age of AI history added 10 records, followed by the 2019–2026 multi-domain historical pass adding 29 more records (one source chapter and 28 structured entries), for a current clean total of **107**. Existing local databases receive a backup-first cleanup that preserves edited or published content.
 
 ## Opening historical era
 
