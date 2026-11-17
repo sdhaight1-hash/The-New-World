@@ -1,0 +1,978 @@
+{
+  "format": "world-bible-canon-seed-v1",
+  "scope": "The New World / post-Plague and post-Cascade Earth",
+  "policy": "Grounded in existing bible and region Markdown; no guessed names, population, borders, calendar anchors or precise coordinates. Status established means established broad directional premise; timing remains provisional.",
+  "entries": [
+    {
+      "key": "plague-era",
+      "type": "event",
+      "title": "Great Plague",
+      "summary": "A globally devastating epidemic predating the Cascade; regional impacts were highly uneven.",
+      "body": "The Great Plague began years before the Cascade and had largely receded when the first extraordinary solar disturbances occurred. Early international travel and metropolitan contact networks amplified exposure. Its precise pathogen, mortality rates and dated chronology are unresolved. Population decline must distinguish infection deaths, other deaths, births and migration.",
+      "source": "bible/02-great-plague.md",
+      "aliases": [
+        "The Plague",
+        "Global Plague"
+      ],
+      "status": "established",
+      "start_year": -5,
+      "end_year": -2,
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "plague-amplifier",
+      "type": "event",
+      "title": "Proposed 2030 World Cup amplification",
+      "summary": "A candidate—not proven—international mixing event for the fictional epidemic.",
+      "body": "The 2030 men's football World Cup is a potential amplification episode for international disease transmission, not an established origin. It is a provisional worldbuilding hypothesis and should not be represented as a confirmed event in the setting. Dates relative to the Cascade remain uncertain.",
+      "source": "bible/02-great-plague.md",
+      "status": "working",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "partial-recovery",
+      "type": "event",
+      "title": "Partial pre-Cascade recovery",
+      "summary": "Surviving societies attempt to recover from epidemic waves before the solar catastrophe.",
+      "body": "Following the principal plague waves, governments, communities, businesses and essential services attempt uneven restoration. Movements of population and weakening of institutions precede the first Cascade. Approximate relative chronology is provisional.",
+      "source": "bible/01-chronology.md",
+      "start_year": -2,
+      "end_year": 0,
+      "status": "working",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "cascade-event",
+      "type": "event",
+      "title": "The Cascade",
+      "summary": "A sequence of exceptional solar disturbances disrupts vulnerable infrastructure after the plague.",
+      "body": "Successive extraordinary space-weather events cause damage to vulnerable power networks and related disruptions in satellite, navigation and radio systems. Losses in water pumping, fuel supply, refrigeration, medicine, transport, finance and industry compound one another. Year 0 is provisionally the first Cascade; its calendar anchor is not locked.",
+      "source": "bible/03-cascade.md",
+      "aliases": [
+        "Cascade",
+        "Year Zero"
+      ],
+      "status": "established",
+      "start_year": 0,
+      "end_year": 0,
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "long-storms",
+      "type": "event",
+      "title": "The Long Storms",
+      "summary": "Intermittent extraordinary solar activity continues to obstruct industrial recovery for decades.",
+      "body": "Exceptional geomagnetic disturbances recur over following decades and make large interconnected grid architectures difficult to restore reliably. This extraordinary recurrence is part of the setting, not a prediction of ordinary solar climatology. Isolated systems and technical expertise may endure.",
+      "source": "bible/03-cascade.md",
+      "status": "established",
+      "start_year": 0,
+      "end_year": 50,
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "emergency-years",
+      "type": "event",
+      "title": "Emergency years (Years 0–5)",
+      "summary": "The initial period of supply-chain fragmentation and urgent local survival.",
+      "body": "Following the first Cascade, food distribution, transport, medical services, utilities and trade become irregular. Communities respond differently depending on geography, prior plague mortality, local institutions and surviving resources. The year bounds describe a working era, not one globally synchronized event.",
+      "source": "bible/01-chronology.md",
+      "start_year": 0,
+      "end_year": 5,
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "adaptation-era",
+      "type": "event",
+      "title": "Adaptation (Years 5–15)",
+      "summary": "Localized agriculture, salvage and transport systems expand unevenly.",
+      "body": "With long-distance supply chains unreliable, surviving communities adapt through local food production, preserved machinery, mechanical power, animal transport and selective repair of infrastructure. Specific regional outcomes require local evidence rather than automatic worldwide assumptions.",
+      "source": "bible/01-chronology.md",
+      "start_year": 5,
+      "end_year": 15,
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "consolidation-era",
+      "type": "event",
+      "title": "Consolidation (Years 15–30)",
+      "summary": "Regional authority, trade networks and property relationships develop diverse forms.",
+      "body": "Institutions evolve around land, water, market access, surviving technical capacity, roads and mutual defense. Some arrangements become hereditary while elected, tribal, municipal and federation structures can persist. Dates are approximate.",
+      "source": "bible/01-chronology.md",
+      "start_year": 15,
+      "end_year": 30,
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "generational-era",
+      "type": "event",
+      "title": "Generational settlement (Years 30–50)",
+      "summary": "New generations inherit distinctive successor societies and political traditions.",
+      "body": "Historical memory and daily expectations change with generational turnover. Successor institutions acquire deeper traditions, while repeated solar disruption continues to threaten restoration efforts. This is a broad interpretive period rather than a named government or war.",
+      "source": "bible/01-chronology.md",
+      "start_year": 30,
+      "end_year": 50,
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "reference-present",
+      "type": "event",
+      "title": "Atlas reference present (approximately Year 50)",
+      "summary": "Principal reference era for evaluating successor societies and conditions.",
+      "body": "The project primarily examines Earth roughly fifty years after the Cascade, provisionally corresponding to around 2084–2085 if the unconfirmed 2034–2035 calendar anchor holds. The date is a worldbuilding reference frame, not a single universal political epoch.",
+      "source": "bible/00-foundations.md",
+      "start_year": 50,
+      "end_year": 50,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "cajon-quarantine",
+      "type": "event",
+      "title": "Proposed Cajon quarantine",
+      "summary": "A possible movement-control episode at the Cajon Pass corridor during the epidemic.",
+      "body": "An early quarantine or restricted-access effort at Cajon Pass is a promising explanatory hypothesis for different plague outcomes between the interconnected Los Angeles–Inland Empire metro region and high-desert communities. Dates, actors, legal authority, alternate routes and success remain undetermined. This is not yet a locked historical event.",
+      "source": "regions/southern-california.md",
+      "status": "working",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "southern-plague-outcome",
+      "type": "event",
+      "title": "Southern California plague divergence",
+      "summary": "Working hypothesis of markedly different epidemic impacts across metropolitan and inland communities.",
+      "body": "Connected metropolitan areas experience especially devastating early waves, whereas some mountain and high-desert communities may be comparatively less affected because of later introductions, feasible restrictions and chance. Magnitudes are not quantified and exceptions remain important.",
+      "source": "regions/southern-california.md",
+      "status": "working",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "southern-migrations",
+      "type": "event",
+      "title": "Southern California displacement and migration",
+      "summary": "Movement of survivors from the wider southern metropolis toward mountains, high desert and agricultural California.",
+      "body": "Population shifts begin before the Cascade and continue after it, with people moving toward Big Bear, Victor Valley and routes north into agricultural California. Some move onward toward the Sacramento Valley, while some residents stay in the desert. Actual routes, timing and numbers remain unmodeled.",
+      "source": "regions/southern-california.md",
+      "status": "working",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "southern-california-region",
+      "type": "place",
+      "title": "Southern California",
+      "summary": "Regional historical study spanning the Los Angeles Basin, Inland Empire, San Bernardino Mountains and high desert.",
+      "body": "An initial focus region with open boundaries; links between Los Angeles, western Inland Empire, Big Bear, Victor Valley, Cajon Pass, Lucerne Valley and northward migration routes are central to its historical interpretation. Geographic baseline and projected future outcomes must be kept separate.",
+      "source": "regions/southern-california.md",
+      "aliases": [
+        "Southern California study region"
+      ],
+      "status": "established",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "la-basin",
+      "type": "place",
+      "title": "Los Angeles Basin",
+      "summary": "Highly connected metropolitan geography central to the early plague scenario.",
+      "body": "The Los Angeles Basin forms part of an interconnected metropolitan and international travel system. It is hypothesized to experience exceptionally severe epidemic waves and diminished dominance by the Year 50 reference era. No official casualty, population or territorial estimate is yet approved.",
+      "source": "regions/southern-california.md",
+      "aliases": [
+        "LA Basin"
+      ],
+      "theme_id": "atlas"
+    },
+    {
+      "key": "los-angeles",
+      "type": "place",
+      "title": "Los Angeles",
+      "summary": "Major metropolitan center and international travel hub in the southern epidemic study.",
+      "body": "Los Angeles and its travel connections contribute to the early exposure hypothesis. Its eventual decline is a working alternate-history direction; precise municipal outcomes, surviving districts and political control remain unspecified.",
+      "source": "bible/02-great-plague.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "inland-empire",
+      "type": "place",
+      "title": "Inland Empire",
+      "summary": "A connected Southern California metropolitan and inland corridor with uneven projected plague outcomes.",
+      "body": "Western Inland Empire commuting and road networks connect closely with Los Angeles. Pandemic impact here may contrast with later-exposed mountain and high-desert settlements. Treat the western metropolitan continuum and eastern districts separately when modeling.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "san-bernardino-mountains",
+      "type": "place",
+      "title": "San Bernardino Mountains",
+      "summary": "Mountain barriers and transport corridors influencing disease containment and later mobility.",
+      "body": "The mountain range creates fewer cross-mountain routes than the broad urban metro continuum, but does not form a completely sealed barrier. Roads through Cajon Pass and other approaches all require geographic and historical treatment.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "cajon-pass",
+      "type": "place",
+      "title": "Cajon Pass",
+      "summary": "Strategic transport corridor between inland Southern California and the high desert.",
+      "body": "Cajon Pass is a major transport route and a proposed site of movement restrictions during the plague. It was not the only possible approach to the mountain and desert communities; assigning its exact quarantine boundaries or responsible authorities would be premature.",
+      "source": "regions/southern-california.md",
+      "status": "established",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "big-bear-valley",
+      "type": "place",
+      "title": "Big Bear Valley",
+      "summary": "Mountain settlement area with lake, forest, seasonal snow and constrained agricultural capacity.",
+      "body": "The Big Bear area has cooler summers, snowy winters, forests and a short growing season. Tourist traffic poses early epidemic risks; later food capacity, water sources, routes and winter needs constrain successor society. Do not treat Big Bear Lake itself as the municipal drinking-water source without evidence.",
+      "source": "regions/southern-california.md",
+      "aliases": [
+        "Big Bear"
+      ],
+      "theme_id": "atlas"
+    },
+    {
+      "key": "big-bear-lake",
+      "type": "place",
+      "title": "Big Bear Lake",
+      "summary": "Mountain lake and surrounding settlement center in the regional focus.",
+      "body": "The lake is a major geographical feature, but lake storage must not be casually equated with local household water supply. As a settlement, Big Bear Lake is a candidate for detailed epidemic and Year 50 study, without preassigned government or population.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "big-bear-city",
+      "type": "place",
+      "title": "Big Bear City",
+      "summary": "Mountain community identified for detailed settlement-level study.",
+      "body": "Big Bear City belongs to the Big Bear regional focus. Its specific outbreak sequence, surviving businesses, governance, demographics and role after the Cascade are not established. Seasonal access and resource constraints apply.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "fawnskin",
+      "type": "place",
+      "title": "Fawnskin",
+      "summary": "Big Bear Valley settlement candidate with unresolved alternate-history outcome.",
+      "body": "Fawnskin is among the documented localities proposed for settlement-level study. Preserve its real mountain context; do not invent political succession, epidemic figures or survival outcomes.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "baldwin-lake",
+      "type": "place",
+      "title": "Baldwin Lake",
+      "summary": "Big Bear area locality included in the southern mountain study.",
+      "body": "Baldwin Lake is an explicitly listed community/place for investigation. Climate, access, water and surviving infrastructure need study before assigning an alternate-history community or estate.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "victor-valley",
+      "type": "place",
+      "title": "Victor Valley",
+      "summary": "High Desert settlements and groundwater systems forming a significant proposed southern successor hub.",
+      "body": "Victor Valley includes Victorville, Hesperia, Apple Valley, Adelanto and smaller places. It may retain comparatively more skilled labor and population than the western metropolitan system before the Cascade, but remains vulnerable to groundwater pumping, heat, food and transport constraints. The Year 50 concept includes holdout communities, not a completely abandoned desert.",
+      "source": "regions/southern-california.md",
+      "aliases": [
+        "High Desert study region"
+      ],
+      "status": "established",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "victorville",
+      "type": "place",
+      "title": "Victorville",
+      "summary": "High Desert settlement and transport center in Victor Valley.",
+      "body": "Victorville is part of the proposed surviving Victor Valley network. It contains potential salvage, roadway and groundwater dependencies. Its later population and political structure are not yet specified.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "hesperia",
+      "type": "place",
+      "title": "Hesperia",
+      "summary": "High Desert community in the Victor Valley historical focus.",
+      "body": "Hesperia is included in the candidate post-plague and post-Cascade regional studies. Its wells, food access, transport, people and future institutions need baseline research rather than invented dates or rulers.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "apple-valley",
+      "type": "place",
+      "title": "Apple Valley",
+      "summary": "Victor Valley settlement to analyze for groundwater and historical continuity.",
+      "body": "Apple Valley is explicitly part of the initial high-desert focus. Regional plague divergence and later local survival are working hypotheses, not fixed population histories.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "adelanto",
+      "type": "place",
+      "title": "Adelanto",
+      "summary": "Victor Valley municipality included in the high-desert settlement study.",
+      "body": "Adelanto's relationship to nearby settlements, transport infrastructure, groundwater and regional resource use remains to be established in detail for the post-Cascade period.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "mojave-river",
+      "type": "place",
+      "title": "Mojave River",
+      "summary": "Intermittent High Desert river corridor relevant to wells and settlement geography.",
+      "body": "The Mojave River often lacks continuous surface flow. Mapping water access means distinguishing riverbed or aquifer processes from dependable open surface water. This river corridor matters to settlements and trade across Victor Valley.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "oro-grande",
+      "type": "place",
+      "title": "Oro Grande",
+      "summary": "High Desert locality proposed for detailed regional study.",
+      "body": "Oro Grande is explicitly named as a candidate community. No unique post-Cascade political regime, mortality estimate or trade role has yet been established.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "helendale",
+      "type": "place",
+      "title": "Helendale",
+      "summary": "Victor Valley corridor community proposed for settlement-level history.",
+      "body": "Helendale is part of the broader regional study. Water, movement, trade and institutional continuity require analysis before any future history is locked.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "lucerne-valley",
+      "type": "place",
+      "title": "Lucerne Valley",
+      "summary": "High Desert approach and rural locality in the San Bernardino regional study.",
+      "body": "Lucerne Valley matters both as a community and as part of routes that undermine simplistic models of Cajon Pass as the sole mountain crossing. Epidemic and later settlement history remain open.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "phelan",
+      "type": "place",
+      "title": "Phelan",
+      "summary": "High Desert settlement and mountain-access locality proposed for study.",
+      "body": "Phelan is an explicitly mentioned candidate community. Its future social, demographic and political fate must emerge from verified resources and transport networks.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "wrightwood",
+      "type": "place",
+      "title": "Wrightwood",
+      "summary": "Mountain community and regional access study location.",
+      "body": "Wrightwood belongs to the candidate community list; winter access, local food capacity and routes are important to any credible post-Cascade history.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "sacramento-valley",
+      "type": "place",
+      "title": "Sacramento Valley",
+      "summary": "Northern agricultural destination invoked in provisional displacement histories.",
+      "body": "Some Southern California migrants are hypothesized to travel northward into agricultural California and the northern Sacramento Valley. No definite migration numbers, surviving destinations or political affiliations are yet established.",
+      "source": "regions/southern-california.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "clatsop-county",
+      "type": "place",
+      "title": "Clatsop County",
+      "summary": "Northern Oregon coastal region with estuary, timber, fisheries and constrained agricultural lowlands.",
+      "body": "Clatsop County is a primary focus region, including Astoria, Warrenton, Gearhart, Seaside, Cannon Beach, inland valleys and Columbia/Pacific trade connections. Its tourist and maritime exposure may differ between towns. No uniform epidemic outcome or successor government is assigned.",
+      "source": "regions/clatsop-county.md",
+      "aliases": [
+        "Northern Oregon coast study"
+      ],
+      "status": "established",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "astoria",
+      "type": "place",
+      "title": "Astoria",
+      "summary": "Columbia estuary port community in the northern Oregon coastal study.",
+      "body": "Astoria's maritime access, port infrastructure and road connections affect exposure, fisheries, river trade and potential future repair industries. The plague history, later institutions and population remain unresolved.",
+      "source": "regions/clatsop-county.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "warrenton",
+      "type": "place",
+      "title": "Warrenton",
+      "summary": "Clatsop coastal and estuarine community linked to maritime and road networks.",
+      "body": "Warrenton is a named focal settlement. Investigate port access, local water, flood exposure, farms and transport before assigning post-Cascade institutions.",
+      "source": "regions/clatsop-county.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "gearhart",
+      "type": "place",
+      "title": "Gearhart",
+      "summary": "Northern Oregon coastal settlement within the Clatsop study.",
+      "body": "Gearhart is included among the known localities. Its exposure via regional roads, surrounding tourism and subsequent local continuity have not been independently modeled.",
+      "source": "regions/clatsop-county.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "seaside",
+      "type": "place",
+      "title": "Seaside",
+      "summary": "Tourism-oriented Oregon coastal town in the Clatsop historical focus.",
+      "body": "Seaside's tourism connections may increase early outbreak exposure, while fisheries, regional roads, freshwater and inland links affect later sustainability. No invented outbreak count or political house has been assigned.",
+      "source": "regions/clatsop-county.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "cannon-beach",
+      "type": "place",
+      "title": "Cannon Beach",
+      "summary": "Tourism-exposed coastal community and distinct settlement study.",
+      "body": "Cannon Beach has potential visitor-mediated epidemic exposure and coastal resource constraints. Its future cannot be inferred to match Astoria or inland settlements automatically.",
+      "source": "regions/clatsop-county.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "columbia-estuary",
+      "type": "place",
+      "title": "Columbia River estuary",
+      "summary": "Tidal and river corridor connecting Clatsop communities with maritime and inland exchange.",
+      "body": "The Columbia estuary offers access to fisheries, sailing and potential commerce, but currents, crossings, maintenance, weather and navigational hazards create constraints. Coastal communities connect to southwest Washington and inland Oregon through this system.",
+      "source": "regions/clatsop-county.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "pacific-coast",
+      "type": "place",
+      "title": "Pacific coast of northern Oregon",
+      "summary": "Coastal ecological and transport setting for the Clatsop focus.",
+      "body": "Sea routes may become significant where crews, hulls, repairs, preserved food and safe routes survive. The coastline also creates exposure to storms and limited lowland farming. Exact successor trade institutions remain open.",
+      "source": "regions/clatsop-county.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "willamette-valley",
+      "type": "place",
+      "title": "Willamette Valley",
+      "summary": "Agricultural and inland connection to the Clatsop study.",
+      "body": "The Willamette Valley is identified as a possible connected trade and migration region for northern Oregon coastal settlements. Specific Year 50 trade routes, settlement outcomes and government arrangements remain unestablished.",
+      "source": "regions/clatsop-county.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "southwest-washington",
+      "type": "place",
+      "title": "Southwest Washington",
+      "summary": "Neighboring region connected to Clatsop by the lower Columbia corridor.",
+      "body": "Southwest Washington and lower Columbia crossings figure in possible future river, maritime and overland links. No particular border or successor state is established.",
+      "source": "regions/clatsop-county.md",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "wyoming-ranchlands",
+      "type": "place",
+      "title": "Wyoming ranchlands and reservation study",
+      "summary": "An intentionally unresolved Wyoming ranch and tribal-government regional study.",
+      "body": "The focus is described as land between a place called Diamond Ranch and an unspecified reservation. Exact real-world location, tribe, river, jurisdiction and boundaries remain unidentified. Do not resolve these by guesswork or merge tribal continuity into generic ranch authority.",
+      "source": "regions/wyoming.md",
+      "status": "working",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "diamond-ranch",
+      "type": "place",
+      "title": "Diamond Ranch (identity unresolved)",
+      "summary": "Named Wyoming ranch reference that has not yet been disambiguated.",
+      "body": "The worldbuilding discussion identifies a location called Diamond Ranch but does not confirm which real property it refers to. Multiple places may share the name. Its coordinates, ownership, county and relationship to a reservation are deliberately left unknown.",
+      "source": "regions/wyoming.md",
+      "aliases": [
+        "Diamond Ranch"
+      ],
+      "status": "working",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "wyoming-reservation",
+      "type": "place",
+      "title": "Wyoming reservation (identity unresolved)",
+      "summary": "Reservation mentioned in the regional focus; its identity is not yet determined.",
+      "body": "The intended Wyoming study describes an unnamed reservation near the ranchlands. Neither a particular tribal nation nor administrative jurisdiction can be assigned without explicit identification and research. Existing tribal sovereignty and institutions should be treated distinctly.",
+      "source": "regions/wyoming.md",
+      "status": "working",
+      "theme_id": "atlas"
+    },
+    {
+      "key": "wyoming-ranching",
+      "type": "subject",
+      "title": "Wyoming ranching and water economy",
+      "summary": "Material and institutional dependencies of ranch country after the catastrophes.",
+      "body": "Ranching depends on cattle, horses, hay, seasonal feed, irrigation, grazing, water rights, veterinary resources, workshops and transport. Some practical capacity may endure, but sparse healthcare and emergency travel distances can deepen outbreak losses. No particular family's dominance is established.",
+      "source": "regions/wyoming.md",
+      "theme_id": "archive"
+    },
+    {
+      "key": "tribal-continuity",
+      "type": "subject",
+      "title": "Tribal sovereignty and political continuity",
+      "summary": "Existing tribal nations have distinct historical institutions and legal rights.",
+      "body": "Tribal nations, reservation governments and community institutions must not be automatically replaced with landowner or ranch-centered political structures. The Wyoming region's specific tribal identity remains unresolved. Treat claims, jurisdiction and succession individually.",
+      "source": "regions/wyoming.md",
+      "status": "established",
+      "theme_id": "civic"
+    },
+    {
+      "key": "demographic-inversion",
+      "type": "subject",
+      "title": "The demographic inversion",
+      "summary": "Uneven plague exposure reverses some metropolitan and rural demographic advantages.",
+      "body": "International and metropolitan contact networks can seed repeated severe outbreaks, while isolated settlements may have warning time and fewer corridors to close. Outcomes vary: some rural areas suffer heavily; cities can contain disease. Migration and other deaths must not be conflated with direct epidemic mortality.",
+      "source": "bible/02-great-plague.md",
+      "status": "established"
+    },
+    {
+      "key": "salvage-culture",
+      "type": "subject",
+      "title": "Salvage culture",
+      "summary": "Repurposing existing industrial artifacts becomes central to uneven regional recovery.",
+      "body": "Warehouses, bridges, fuel tanks, workshops, books, vehicles, bearings, steel, wheels and machinery remain valuable. Some car components can serve wagon construction, but heavy bodies, braking and tires constrain animal-drawn conversions. Salvage is not effortless industrial substitution.",
+      "source": "bible/04-technology.md",
+      "status": "established"
+    },
+    {
+      "key": "steam-power",
+      "type": "subject",
+      "title": "Steam power after the Cascade",
+      "summary": "Steam remains viable with significant industrial, water, fuel and safety constraints.",
+      "body": "Stationary mills and workshops may be more supportable than locomotives or steamboats. Boilers require trained crews, maintenance, sound metalwork, water and fuel. Steam is a selective industrial resource, not an unlimited replacement for electrical grids.",
+      "source": "bible/04-technology.md",
+      "status": "established"
+    },
+    {
+      "key": "firearms-continuity",
+      "type": "subject",
+      "title": "Firearms and ammunition continuity",
+      "summary": "Existing firearms remain mechanically possible after the Cascade.",
+      "body": "No supernatural suppression of combustion or gunpowder exists. Firearms work where maintained and supplied, and ammunition may persist or be reloaded under suitable conditions. Access varies by stockpiles, materials, weaponsmiths and trade routes.",
+      "source": "bible/04-technology.md",
+      "status": "established"
+    },
+    {
+      "key": "internal-combustion",
+      "type": "subject",
+      "title": "Internal-combustion technology",
+      "summary": "Fuel engines remain physically workable, although fuel, repairs and supply collapse disrupt practical use.",
+      "body": "A geomagnetic event does not ordinarily destroy most isolated vehicle electronics. Lasting vehicle decline should primarily be explained by lack of fuel, replacement parts, batteries, tires and service infrastructure unless a separate extraordinary fictional mechanism is explicitly chosen.",
+      "source": "bible/03-cascade.md",
+      "status": "established"
+    },
+    {
+      "key": "water-infrastructure",
+      "type": "subject",
+      "title": "Water pumping and local water security",
+      "summary": "Reliable water infrastructure is central to post-Cascade settlement sustainability.",
+      "body": "Large-scale electricity loss imperils pumping, treatment and distribution. Groundwater, springs, rivers, reservoirs, human labor, mechanical power, surviving generators and local institutions affect settlement carrying capacity. The region-specific water balance must be modeled rather than assumed.",
+      "source": "bible/03-cascade.md",
+      "status": "established"
+    },
+    {
+      "key": "local-power",
+      "type": "subject",
+      "title": "Localized electrical and mechanical power",
+      "summary": "Partial electricity can endure alongside water, wind, animal and hand power.",
+      "body": "Disconnection, shielding, rebuilding and local resource availability create sharply different technical outcomes. Repeated severe solar events especially threaten vulnerable long-distance networks, not all electronics equally. Waterwheels, windmills and manual machinery remain viable with suitable skills and maintenance.",
+      "source": "bible/04-technology.md",
+      "status": "established"
+    },
+    {
+      "key": "successor-governance",
+      "type": "subject",
+      "title": "Successor governance",
+      "summary": "A diverse range of local political institutions emerges from uneven disruptions.",
+      "body": "Some communities retain elected councils, sheriffs, federations and city republics; others develop protection obligations, hereditary estates or military authority. Existing tribal institutions have distinct continuity. Do not posit universal feudalism or invent political borders before documenting food, water, law and legitimacy.",
+      "source": "bible/05-successor-societies.md",
+      "status": "established",
+      "theme_id": "civic"
+    },
+    {
+      "key": "hereditary-tenure",
+      "type": "subject",
+      "title": "Hereditary tenure and local landholding",
+      "summary": "Land, protective obligations and authority may become inheritable over generations.",
+      "body": "Control of water, grain, markets, mills, defended routes and land can support concentrated authority. Inheritance of a title, estate, office or family name are distinct claims; no particular dynasty or household has been approved. Hereditary structures take time and require enforceable institutions.",
+      "source": "bible/05-successor-societies.md",
+      "status": "working",
+      "theme_id": "civic"
+    },
+    {
+      "key": "historical-memory",
+      "type": "subject",
+      "title": "Generational historical memory",
+      "summary": "Generational turnover changes how the pre-Plague world and collapse are remembered.",
+      "body": "At Year 50, some elders may remember the pre-Plague era, middle generations may remember recovery, and younger adults may know successor institutions as normal. Archives, schools, trades and surviving media affect continuity. No particular chronicler or institution is yet canonized.",
+      "source": "bible/05-successor-societies.md",
+      "status": "working"
+    },
+    {
+      "key": "coastal-livelihood",
+      "type": "subject",
+      "title": "Coastal fisheries, timber and preservation",
+      "summary": "Material basis for possible northern Oregon coastal recovery.",
+      "body": "Fishing, timber, wetlands, river navigation and limited coastal lowland farming all matter to Clatsop County. Food preservation, salt, vessels, trained labor and safe estuary crossings are constraints rather than guaranteed Year 50 solutions.",
+      "source": "regions/clatsop-county.md",
+      "status": "working"
+    }
+  ],
+  "relations": [
+    {
+      "source": "plague-amplifier",
+      "target": "plague-era",
+      "predicate": "potentially_amplified",
+      "status": "working"
+    },
+    {
+      "source": "plague-era",
+      "target": "partial-recovery",
+      "predicate": "preceded",
+      "status": "working"
+    },
+    {
+      "source": "partial-recovery",
+      "target": "cascade-event",
+      "predicate": "preceded",
+      "status": "working"
+    },
+    {
+      "source": "cascade-event",
+      "target": "long-storms",
+      "predicate": "initiated",
+      "status": "established"
+    },
+    {
+      "source": "cascade-event",
+      "target": "emergency-years",
+      "predicate": "initiated",
+      "status": "working"
+    },
+    {
+      "source": "emergency-years",
+      "target": "adaptation-era",
+      "predicate": "preceded",
+      "status": "working"
+    },
+    {
+      "source": "adaptation-era",
+      "target": "consolidation-era",
+      "predicate": "preceded",
+      "status": "working"
+    },
+    {
+      "source": "consolidation-era",
+      "target": "generational-era",
+      "predicate": "preceded",
+      "status": "working"
+    },
+    {
+      "source": "generational-era",
+      "target": "reference-present",
+      "predicate": "preceded",
+      "status": "working"
+    },
+    {
+      "source": "cajon-quarantine",
+      "target": "cajon-pass",
+      "predicate": "located_in",
+      "status": "working"
+    },
+    {
+      "source": "southern-plague-outcome",
+      "target": "southern-california-region",
+      "predicate": "affected",
+      "status": "working"
+    },
+    {
+      "source": "southern-migrations",
+      "target": "southern-california-region",
+      "predicate": "originated_in",
+      "status": "working"
+    },
+    {
+      "source": "southern-migrations",
+      "target": "sacramento-valley",
+      "predicate": "traveled_toward",
+      "status": "working"
+    },
+    {
+      "source": "big-bear-valley",
+      "target": "southern-california-region",
+      "predicate": "part_of",
+      "status": "established"
+    },
+    {
+      "source": "victor-valley",
+      "target": "southern-california-region",
+      "predicate": "part_of",
+      "status": "established"
+    },
+    {
+      "source": "la-basin",
+      "target": "southern-california-region",
+      "predicate": "part_of",
+      "status": "established"
+    },
+    {
+      "source": "inland-empire",
+      "target": "southern-california-region",
+      "predicate": "part_of",
+      "status": "established"
+    },
+    {
+      "source": "san-bernardino-mountains",
+      "target": "southern-california-region",
+      "predicate": "part_of",
+      "status": "established"
+    },
+    {
+      "source": "cajon-pass",
+      "target": "san-bernardino-mountains",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "big-bear-lake",
+      "target": "big-bear-valley",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "big-bear-city",
+      "target": "big-bear-valley",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "fawnskin",
+      "target": "big-bear-valley",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "baldwin-lake",
+      "target": "big-bear-valley",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "victorville",
+      "target": "victor-valley",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "hesperia",
+      "target": "victor-valley",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "apple-valley",
+      "target": "victor-valley",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "adelanto",
+      "target": "victor-valley",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "mojave-river",
+      "target": "victor-valley",
+      "predicate": "passes_through",
+      "status": "established"
+    },
+    {
+      "source": "oro-grande",
+      "target": "victor-valley",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "helendale",
+      "target": "victor-valley",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "lucerne-valley",
+      "target": "southern-california-region",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "phelan",
+      "target": "southern-california-region",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "wrightwood",
+      "target": "san-bernardino-mountains",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "astoria",
+      "target": "clatsop-county",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "warrenton",
+      "target": "clatsop-county",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "gearhart",
+      "target": "clatsop-county",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "seaside",
+      "target": "clatsop-county",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "cannon-beach",
+      "target": "clatsop-county",
+      "predicate": "located_in",
+      "status": "established"
+    },
+    {
+      "source": "columbia-estuary",
+      "target": "clatsop-county",
+      "predicate": "connected_to",
+      "status": "established"
+    },
+    {
+      "source": "clatsop-county",
+      "target": "pacific-coast",
+      "predicate": "located_on",
+      "status": "established"
+    },
+    {
+      "source": "clatsop-county",
+      "target": "southwest-washington",
+      "predicate": "potential_trade_link",
+      "status": "working"
+    },
+    {
+      "source": "clatsop-county",
+      "target": "willamette-valley",
+      "predicate": "potential_trade_link",
+      "status": "working"
+    },
+    {
+      "source": "diamond-ranch",
+      "target": "wyoming-ranchlands",
+      "predicate": "research_focus_of",
+      "status": "working"
+    },
+    {
+      "source": "wyoming-reservation",
+      "target": "wyoming-ranchlands",
+      "predicate": "research_focus_of",
+      "status": "working"
+    },
+    {
+      "source": "wyoming-ranching",
+      "target": "wyoming-ranchlands",
+      "predicate": "describes",
+      "status": "working"
+    },
+    {
+      "source": "tribal-continuity",
+      "target": "wyoming-reservation",
+      "predicate": "relevant_to",
+      "status": "working"
+    },
+    {
+      "source": "plague-era",
+      "target": "demographic-inversion",
+      "predicate": "contributed_to",
+      "status": "established"
+    },
+    {
+      "source": "cascade-event",
+      "target": "water-infrastructure",
+      "predicate": "disrupted",
+      "status": "established"
+    },
+    {
+      "source": "cascade-event",
+      "target": "local-power",
+      "predicate": "constrained",
+      "status": "established"
+    },
+    {
+      "source": "long-storms",
+      "target": "local-power",
+      "predicate": "constrained",
+      "status": "established"
+    },
+    {
+      "source": "salvage-culture",
+      "target": "adaptation-era",
+      "predicate": "characterizes",
+      "status": "working"
+    },
+    {
+      "source": "steam-power",
+      "target": "adaptation-era",
+      "predicate": "potential_resource_during",
+      "status": "working"
+    },
+    {
+      "source": "internal-combustion",
+      "target": "cascade-event",
+      "predicate": "remained_physically_possible_after",
+      "status": "established"
+    },
+    {
+      "source": "firearms-continuity",
+      "target": "cascade-event",
+      "predicate": "remained_physically_possible_after",
+      "status": "established"
+    },
+    {
+      "source": "successor-governance",
+      "target": "consolidation-era",
+      "predicate": "developed_during",
+      "status": "working"
+    },
+    {
+      "source": "hereditary-tenure",
+      "target": "successor-governance",
+      "predicate": "possible_form_of",
+      "status": "working"
+    },
+    {
+      "source": "historical-memory",
+      "target": "generational-era",
+      "predicate": "relevant_to",
+      "status": "working"
+    },
+    {
+      "source": "coastal-livelihood",
+      "target": "clatsop-county",
+      "predicate": "relevant_to",
+      "status": "working"
+    }
+  ]
+}
