@@ -151,11 +151,21 @@ async function refresh(){
  if(state.entry){state.entry=byId(state.entry.id)||null;if(state.panel==="article")render();}
  workspaceChrome();
 }
+function v2CategoryLabel(category){
+ const segments=[category.name],visited=new Set([category.id]);
+ let parent=category.parent_id;
+ while(parent&&!visited.has(parent)){
+  visited.add(parent);
+  const found=state.v2.categories.find(x=>x.id===parent);if(!found)break;
+  segments.unshift(found.name);parent=found.parent_id;
+ }
+ return segments.join(" / ");
+}
 function populateV2Filters(){
  const category=$("v2CategoryFilter"),tag=$("v2TagFilter");
  const priorCategory=category.value,priorTag=tag.value;
  category.replaceChildren(new Option("All collections",""),
-  ...state.v2.categories.map(c=>new Option(c.name,c.id)));
+  ...state.v2.categories.map(c=>new Option(v2CategoryLabel(c),c.id)));
  tag.replaceChildren(new Option("All tags",""),
   ...state.v2.tags.map(t=>new Option(t.name,t.id)));
  category.value=[...category.options].some(o=>o.value===priorCategory)?priorCategory:"";
