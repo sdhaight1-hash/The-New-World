@@ -1,5 +1,8 @@
 import io
 import json
+import sqlite3
+from unittest.mock import patch
+import backup
 import tempfile
 import threading
 import unittest
@@ -192,6 +195,39 @@ class StoreTests(unittest.TestCase):
         with self.assertRaises(Error):
             self.store.create_relation(self.a, {
                 "source_id":a["id"],"target_id":b["id"],"predicate":"evil predicate;"})
+
+    def test_backup_closes_all_sqlite_connections_before_temp_cleanup(self):
+        # SQLite's context manager doesn't close connections, even after exit.
+        # Windows cannot delete a snapshot database while SQLite holds it open.
+        opened=[]
+        native_connect=sqlite3.connect
+
+        class TrackedConnection(sqlite3.Connection):
+            def close(self):
+                self.was_closed=True
+                super().close()
+
+        def track_connect(*args,**kwargs):
+            connection=native_connect(*args, factory=TrackedConnection, **kwargs)
+            connection.was_closed=False
+            opened.append(connection)
+            return connection
+
+        archive=Path(self.tmp.name)/"tracked-backup.zip"
+        with patch.object(backup.sqlite3,"connect",side_effect=track_connect):
+            result=make_backup(self.store.path,archive)
+        self.assertTrue(archive.is_file())
+        self.assertGreaterEqual(result["files"],1)
+        self.assertEqual(len(opened),2)
+        self.assertTrue(all(connection.was_closed for connection in opened))
+
+        restored_path=Path(self.tmp.name)/"tracked-restored"/"worlds.sqlite3"
+        opened.clear()
+        with patch.object(backup.sqlite3,"connect",side_effect=track_connect):
+            restore_backup(archive,restored_path)
+        self.assertTrue(restored_path.is_file())
+        self.assertEqual(len(opened),1)
+        self.assertTrue(opened[0].was_closed)
 
     def test_complete_media_backup_and_restore(self):
         from PIL import Image
