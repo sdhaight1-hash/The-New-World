@@ -1,6 +1,6 @@
 # Architecture Decision Record 001 — Unified World Bible Platform
 
-**Decision:** Accepted design direction, implementation pending.  
+**Decision:** Accepted unified design, **first integrated application implemented** in [World Bible Studio](../app/README.md). This document also specifies advanced milestones not yet delivered.  
 **Supersedes conflicting architectural guidance** in RFCs 001–005; the RFCs remain research/history, not independent mandates.  
 **Scope:** global alternate-history encyclopedia, with historical atlas, genealogy, organizations, timelines, media and discovery.
 
