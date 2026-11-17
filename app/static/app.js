@@ -10,7 +10,7 @@ const themes={
 function luminance(hex){const v=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(x=>x<=0.04045?x/12.92:((x+0.055)/1.055)**2.4);return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2];}
 function contrast(a,b){const [hi,lo]=[luminance(a),luminance(b)].sort((x,y)=>y-x);return (hi+0.05)/(lo+0.05);}
 
-const state={worlds:[],world:null,entries:[],entry:null,panel:"article",mode:"read",relations:[],media:[],allMedia:[],incoming:[],outgoing:[],layout:[],dirty:false,designDirty:false};
+const state={worlds:[],world:null,entries:[],entry:null,panel:"home",mode:"read",relations:[],media:[],allMedia:[],incoming:[],outgoing:[],layout:[],dirty:false,designDirty:false,networkFilter:"all",globalMedia:[],mediaUses:[]};
 const escapeHTML=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const el=(tag,text,cls)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;if(cls)x.className=cls;return x;};
 const byId=id=>state.entries.find(e=>e.id===id);
@@ -65,44 +65,164 @@ async function worlds(){
  $("world").replaceChildren(...state.worlds.map(w=>new Option(w.name,w.id)));
  $("world").value=wid();localStorage.setItem("wb-world",wid());
  $("worldDescription").textContent=state.world.description||"Separate worldbuilding workspace.";
- await refresh();
+ await refresh();workspaceChrome();
+}
+const SPACE_META={
+ home:{name:"World Overview",label:"OVERVIEW",description:"Your worldbuilding workspace, records, and progress.",icon:"⌂",accent:"#8ebfb5"},
+ article:{name:"Encyclopedia",label:"KNOWLEDGE LIBRARY",description:"Read, author, design, and link world records.",icon:"▤",accent:"#89bdac"},
+ atlas:{name:"Historical Atlas",label:"GEOGRAPHICAL WORKSPACE",description:"Explore mapped places, resources, and routes in 2D.",icon:"◇",accent:"#9ebf8b"},
+ timeline:{name:"Chronology",label:"HISTORICAL WORKSPACE",description:"Study events and relationships across time.",icon:"◷",accent:"#d3b081"},
+ network:{name:"Connections",label:"RELATIONSHIP WORKSPACE",description:"Trace the network joining people, places, and organizations.",icon:"⌘",accent:"#b49dce"},
+ media:{name:"Media Library",label:"VISUAL ARCHIVE",description:"Images, source artwork, portraits and their usage.",icon:"▧",accent:"#92bcd5"}
+};
+const displayType=t=>({person:"People",place:"Locations",event:"Events",organization:"Factions & organizations",family:"Families & households",object:"Objects & resources",source:"Sources & research",subject:"Topics & articles"})[t]||t.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());
+const groupOrder=["place","organization","person","family","event","object","source","subject"];
+function categoryCounts(){
+ const counts=new Map();
+ for(const e of state.entries)counts.set(e.type,(counts.get(e.type)||0)+1);
+ return [...counts].sort((a,b)=>{
+  const ia=groupOrder.indexOf(a[0]),ib=groupOrder.indexOf(b[0]);
+  return (ia===-1?999:ia)-(ib===-1?999)||a[0].localeCompare(b[0]);
+ });
+}
+function workspaceChrome(){
+ const p=state.panel,meta=SPACE_META[p]||SPACE_META.home;
+ document.body.dataset.space=p;
+ document.body.style.setProperty("--space-accent",meta.accent);
+ $("spaceHeading").textContent=meta.name;
+ $("spaceEyebrow").textContent=state.world?.name.toUpperCase()+" / "+meta.label;
+ $("spaceSubtitle").textContent=meta.description;
+ $("spaceEmblem").textContent=meta.icon;
+ $("workspaceScope").textContent=p==="article"&&state.entry?displayType(state.entry.type)+" · "+state.entry.status:"WORLD · "+(state.world?.name||"");
+ $("entryToolbar").hidden=p!=="article"||!state.entry;
+ $("modeNav").hidden=p!=="article"||!state.entry;
+ $("welcome").hidden=p!=="article"||!!state.entry;
+ document.querySelectorAll("[data-panel]").forEach(b=>{
+  const active=b.dataset.panel===p;
+  b.classList.toggle("active",active);
+  if(active)b.setAttribute("aria-current","page");
+  else b.removeAttribute("aria-current");
+ });
+ $("libraryHeading").textContent=p==="home"?"World index":p==="media"?"Record navigator":p==="network"?"Connected records":p==="timeline"?"Chronology index":p==="atlas"?"Geographical index":"Entity Explorer";
+ $("navHelp").textContent=p==="media"?"Select the records these assets appear in.":p==="atlas"?"Find places and linked settlements.":p==="timeline"?"Find historical events and participants.":p==="network"?"Browse the people, places and organizations in this network.":"Browse by type or search the full encyclopedia.";
+ const count=state.entries.length;
+ $("navStats").textContent=count+" "+(count===1?"entry":"entries")+" · "+categoryCounts().length+" types";
 }
 async function refresh(){
  state.entries=await api(q("/api/entities",{world_id:wid()}));
  const filter=$("typeFilter"),before=filter.value;
- for(const type of new Set(state.entries.map(e=>e.type)))
-   if(![...filter.options].some(o=>o.value===type))filter.add(new Option(type,type));
- filter.value=before;
- renderList();timeline();atlas(false);
- if(state.entry){state.entry=byId(state.entry.id)||null;render();}
+ filter.replaceChildren(new Option("All entries",""));
+ for(const [type] of categoryCounts())filter.add(new Option(displayType(type),type));
+ filter.value=[...filter.options].some(o=>o.value===before)?before:"";
+ renderList();
+ renderHome();
+ if(state.panel==="timeline")timeline();
+ if(state.panel==="atlas")atlas(false);
+ if(state.panel==="network")network();
+ if(state.panel==="media")mediaWorkspace();
+ if(state.entry){state.entry=byId(state.entry.id)||null;if(state.panel==="article")render();}
+ workspaceChrome();
+}
+function categoryControls(){
+ const root=$("categoryChips");root.replaceChildren();
+ const counts=categoryCounts(),selected=$("typeFilter").value;
+ const all=button("All · "+state.entries.length,()=>{ $("typeFilter").value="";renderList();},"category-chip"+(!selected?" active":""));
+ root.append(all);
+ for(const [type,count] of counts){
+  const chip=button(displayType(type)+" · "+count,()=>{
+   $("typeFilter").value=type;renderList();
+  },"category-chip"+(selected===type?" active":""));
+  root.append(chip);
+ }
 }
 function renderList(){
+ if(!state.world)return;
  const search=$("search").value.toLowerCase().trim(),type=$("typeFilter").value;
- const entries=state.entries.filter(e=>(!type||e.type===type)&&(!search||[e.title,e.summary,e.body,...e.aliases].some(t=>String(t).toLowerCase().includes(search))));
+ const entries=state.entries.filter(e=>(!type||e.type===type)&&
+  (!search||[e.title,e.summary,e.body,...e.aliases].some(t=>String(t).toLowerCase().includes(search))));
  const root=$("entryList");root.replaceChildren();
- for(const e of entries){const b=button(e.title,()=>open(e.id),"entry-item"+(state.entry?.id===e.id?" current":""));b.append(el("small",e.type+" · "+e.status));root.append(b);}
- if(!entries.length)root.append(el("p","No matching entries","muted"));
+ $("entryCount").textContent=String(entries.length);
+ categoryControls();
+ if(!entries.length){root.append(el("p","No matching entries. Try another search or category.","muted"));return;}
+ const ordered=[...entries].sort((a,b)=>{
+  const ai=groupOrder.indexOf(a.type),bi=groupOrder.indexOf(b.type);
+  return (ai===-1?999:ai)-(bi===-1?999)||a.type.localeCompare(b.type)||a.title.localeCompare(b.title);
+ });
+ let lastType="";
+ for(const e of ordered){
+  if(e.type!==lastType){lastType=e.type;const h=el("div",displayType(e.type),"entry-group");root.append(h);}
+  const b=button(e.title,()=>open(e.id),"entry-item"+(state.entry?.id===e.id?" current":""));
+  b.append(el("small",e.status+(e.summary?" · "+e.summary.slice(0,58):"")));
+  if(e.id===state.entry?.id)b.setAttribute("aria-current","true");
+  root.append(b);
+ }
 }
+function renderHome(){
+ const w=state.world;if(!w)return;
+ $("homeWorldTitle").textContent=w.name;
+ $("homeWorldDescription").textContent=w.description||"An independent worldbuilding project. Build places, people, events and relationships in one knowledge space.";
+ const counts=categoryCounts(),total=state.entries.length,events=counts.find(x=>x[0]==="event")?.[1]||0,places=counts.find(x=>x[0]==="place")?.[1]||0;
+ const established=state.entries.filter(e=>e.status==="established").length;
+ const metrics=[["All records",total,"Open the encyclopedia","article"],["Locations",places,"Explore mapped and unmapped places","atlas"],["Historical events",events,"View your chronology","timeline"],["Established",established,"Records marked established","article"]];
+ const grid=$("homeMetrics");grid.replaceChildren();
+ for(const [name,value,detail,target] of metrics){
+  const tile=button("",()=>panel(target),"metric-card");
+  tile.append(el("span",name,"metric-label"),el("strong",String(value),"metric-value"),el("span",detail,"metric-detail"));
+  grid.append(tile);
+ }
+ const recent=$("recentEntries");recent.replaceChildren();
+ const items=[...state.entries].sort((a,b)=>b.updated_at.localeCompare(a.updated_at)).slice(0,8);
+ if(!items.length)recent.append(el("p","Create your first entry to begin building your world.","empty-state"));
+ for(const e of items){
+  const row=button("",()=>open(e.id),"home-record");
+  row.append(el("span",e.title,"home-record-title"),el("small",displayType(e.type)+" · "+e.status));
+  recent.append(row);
+ }
+ const cats=$("homeCategories");cats.replaceChildren();
+ for(const [type,count] of counts){
+  const row=button("",()=>{$("typeFilter").value=type;renderList();panel("article");},"home-category");
+  row.append(el("span",displayType(type)),el("strong",String(count)));
+  cats.append(row);
+ }
+ if(!counts.length)cats.append(el("p","Your categories will appear as entries are added.","empty-state"));
+ const statuses=$("homeStatuses");statuses.replaceChildren();
+ for(const name of ["established","working","disputed","superseded"]){
+  const n=state.entries.filter(e=>e.status===name).length;
+  const row=el("div",undefined,"status-row");
+  row.append(el("span",name,"status-label status-"+name),el("strong",String(n)));
+  statuses.append(row);
+ }
+}
+
 async function context(){
  if(!state.entry)return;const id=state.entry.id,p={world_id:wid(),entity_id:id};
  const [r,m,all,i,o]=await Promise.all([api(q("/api/relations",p)),api(q("/api/media",p)),api(q("/api/media",{world_id:wid()})),api(q("/api/backlinks",p)),api(q("/api/outgoing",p))]);
  if(state.entry?.id===id)Object.assign(state,{relations:r,media:m,allMedia:all,incoming:i,outgoing:o});
 }
 async function open(id){
- if(!safeExit())return;state.entry=byId(id);if(!state.entry)return;
- dirty(false);state.designDirty=false;state.mode="read";await context();panel("article");render();
+ if(!safeExit())return;
+ const target=byId(id);if(!target)return;
+ state.entry=target;dirty(false);state.designDirty=false;state.mode="read";
+ state.panel="article";
+ await context();
+ panel("article");render();
 }
 function panel(p){
- if(p===state.panel&&state.entry&&(state.dirty||state.designDirty))return;
+ if(!Object.hasOwn(SPACE_META,p))return;
  if(!safeExit())return;
  if(p!==state.panel){if(state.dirty)dirty(false);state.designDirty=false;}
  state.panel=p;
- for(const name of ["article","timeline","atlas"])$(name+"Panel").hidden=p!==name;
+ for(const name of ["home","article","timeline","atlas","network","media"])$(name+"Panel").hidden=p!==name;
  $("welcome").hidden=p!=="article"||!!state.entry;
- $("modeNav").hidden=p!=="article"||!state.entry;
- document.querySelectorAll("[data-panel]").forEach(b=>b.classList.toggle("active",b.dataset.panel===p));
- if(p==="timeline")timeline();if(p==="atlas")atlas(true);if(p==="article")render();
+ workspaceChrome();
+ if(p==="home")renderHome();
+ if(p==="timeline")timeline();
+ if(p==="atlas")atlas(true);
+ if(p==="network")network();
+ if(p==="media")mediaWorkspace();
+ if(p==="article")render();
 }
+
 function mode(m){
  if((state.mode==="write"||state.mode==="design")&&m!==state.mode&&!safeExit())return;
  state.designDirty=false;
@@ -110,14 +230,29 @@ function mode(m){
 }
 function render(){
  const e=state.entry;
- if(!e){$("welcome").hidden=state.panel!=="article";$("modeNav").hidden=true;$("breadcrumb").textContent="Select an entry";return;}
- $("welcome").hidden=true;$("breadcrumb").textContent=e.type+" / "+e.title;
+ if(!e){
+  $("welcome").hidden=state.panel!=="article";
+  $("entryToolbar").hidden=true;
+  $("modeNav").hidden=true;
+  $("breadcrumb").textContent="Select an entry";
+  workspaceChrome();
+  return;
+ }
+ $("breadcrumb").textContent=displayType(e.type)+" / "+e.title;
+ workspaceChrome();
  for(const m of ["read","write","design","explore"])$(m+"Panel").hidden=state.mode!==m;
- document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("active",b.dataset.mode===state.mode));
- if(state.mode==="read")read();if(state.mode==="write")write();
- if(state.mode==="design")design();if(state.mode==="explore")explore();
+ document.querySelectorAll("[data-mode]").forEach(b=>{
+  const selected=b.dataset.mode===state.mode;
+  b.classList.toggle("active",selected);
+  b.setAttribute("aria-pressed",String(selected));
+ });
+ if(state.mode==="read")read();
+ if(state.mode==="write")write();
+ if(state.mode==="design")design();
+ if(state.mode==="explore")explore();
  inspector();renderList();
 }
+
 function read(){
  const e=state.entry,root=$("readPanel");root.replaceChildren();setTheme(root,e);
  const head=el("header",undefined,"entry-hero"),hero=state.media.find(x=>x.role==="hero");
@@ -289,6 +424,74 @@ async function saveDesign(){
  try{state.entry=await api(q("/api/entity",{world_id:wid(),id:state.entry.id}),"PATCH",{theme_id:$("dTheme").value,accent:$("dAccent").value,layout:state.layout});state.designDirty=false;
  await refresh();await context();render();notice("Design saved.");}catch(err){notice(err.message,true);}
 }
+async function network(){
+ if(!state.world)return;
+ const world=wid();
+ try{
+  const rels=await api(q("/api/relations",{world_id:world}));
+  if(world!==wid()||state.panel!=="network")return;
+  $("networkSummary").textContent=rels.length+" "+(rels.length===1?"relationship":"relationships");
+  const byType=new Map(),byEntity=new Map();
+  for(const r of rels){
+   byType.set(r.predicate,(byType.get(r.predicate)||0)+1);
+   for(const id of [r.source_id,r.target_id])byEntity.set(id,(byEntity.get(id)||0)+1);
+  }
+  const types=$("networkPredicates");types.replaceChildren();
+  const all=button("All connections · "+rels.length,()=>{state.networkFilter="all";network();},"network-filter"+(state.networkFilter==="all"?" active":""));types.append(all);
+  for(const [type,count] of [...byType].sort((a,b)=>b[1]-a[1])){
+   const b=button(type.replaceAll("_"," ")+" · "+count,()=>{state.networkFilter=type;network();},"network-filter"+(state.networkFilter===type?" active":""));types.append(b);
+  }
+  const records=$("networkEntries");records.replaceChildren();
+  for(const [id,count] of [...byEntity].sort((a,b)=>b[1]-a[1]).slice(0,14)){
+   const e=byId(id);if(!e)continue;
+   const row=button("",()=>open(e.id),"network-record");row.append(el("span",e.title),el("small",count+" connections"));records.append(row);
+  }
+  if(!byEntity.size)records.append(el("p","Link two entries to begin building the relationship graph.","empty-state"));
+  const list=$("networkRelations");list.replaceChildren();
+  const selected=rels.filter(x=>state.networkFilter==="all"||x.predicate===state.networkFilter);
+  for(const r of selected.slice(0,250)){
+   const a=byId(r.source_id),b=byId(r.target_id);if(!a||!b)continue;
+   const row=el("div",undefined,"network-row");
+   row.append(linkTo(a),el("span",r.predicate.replaceAll("_"," ")+" → ","network-predicate"),linkTo(b));
+   const detail=el("span",r.status+(r.start_year!==null||r.end_year!==null?" · "+when(r):""),"network-period");row.append(detail);
+   list.append(row);
+  }
+  if(selected.length>250)list.append(el("p","Showing the first 250 records. Refine by relationship type.","muted"));
+  if(!selected.length)list.append(el("p","No relationships in this category.","empty-state"));
+ }catch(e){notice("Connections unavailable: "+e.message,true);}
+}
+async function mediaWorkspace(){
+ if(!state.world)return;
+ const world=wid();
+ try{
+  const [all,uses]=await Promise.all([api(q("/api/media",{world_id:world})),api(q("/api/media-uses",{world_id:world}))]);
+  if(world!==wid()||state.panel!=="media")return;
+  state.globalMedia=all;state.mediaUses=uses;
+  renderMediaGrid();
+ }catch(e){notice("Media library unavailable: "+e.message,true);}
+}
+function renderMediaGrid(){
+ const search=$("mediaSearch").value.toLowerCase().trim(),filter=$("mediaFilter").value;
+ const root=$("globalMediaGrid");root.replaceChildren();
+ const media=state.globalMedia.filter(m=>{
+  const uses=state.mediaUses.filter(u=>u.media_id===m.id);
+  return (filter==="all"||(filter==="used"?uses.length>0:uses.length===0))&&
+   (!search||[m.title,m.filename,m.credit,m.alt].some(t=>String(t||"").toLowerCase().includes(search)));
+ });
+ $("mediaSummary").textContent=state.globalMedia.length+" "+(state.globalMedia.length===1?"image":"images");
+ for(const m of media){
+  const card=el("article",undefined,"global-media-card"),img=el("img");
+  img.src="/media/"+wid()+"/"+m.id+"-preview";img.alt=m.alt||m.title;img.loading="lazy";
+  const info=el("div",undefined,"global-media-info");info.append(el("h3",m.title),el("p",m.credit||"No credit recorded","muted"));
+  const refs=state.mediaUses.filter(u=>u.media_id===m.id);
+  info.append(el("small",refs.length+" "+(refs.length===1?"placement":"placements")));
+  for(const u of refs.slice(0,7)){
+   const e=byId(u.entity_id);if(e)info.append(linkTo(e));
+  }
+  card.append(img,info);root.append(card);
+ }
+ if(!media.length)root.append(el("p","No images match these filters. Open an entry → Explore to upload or attach images.","empty-state"));
+}
 function timeline(){timelineLoad().catch(err=>notice("Timeline failed: "+err.message,true));}
 async function timelineLoad(){
  if(!state.world)return;
@@ -366,7 +569,7 @@ async function switchWorld(id){
  if(!safeExit()){$("world").value=wid();return;}state.world=state.worlds.find(w=>w.id===id);
  state.entry=null;state.relations=[];state.media=[];state.incoming=[];state.outgoing=[];
  localStorage.setItem("wb-world",id);$("worldDescription").textContent=state.world.description||"";
- await refresh();panel("article");render();
+ await refresh();panel("home");render();
 }
 async function createWorld(){
  if(!safeExit())return;const name=prompt("New world name");if(!name)return;
@@ -406,7 +609,15 @@ async function importWorld(){
  finally{$("importFile").value="";}
 }
 function wire(){
- $("world").onchange=e=>switchWorld(e.target.value);$("worldSettings").onclick=editWorld;$("cancelCreate").onclick=()=>$("createDialog").close();$("createForm").onsubmit=e=>{e.preventDefault();submitCreate();};$("importWorld").onclick=()=>$("importFile").click();$("importFile").onchange=importWorld;$("addWorld").onclick=createWorld;$("newEntry").onclick=createEntry;$("welcomeNew").onclick=createEntry;$("export").onclick=exportWorld;
+ $("homeNew").onclick=createEntry;
+ $("homeBrowse").onclick=()=>panel("article");
+ $("homeToAtlas").onclick=()=>panel("atlas");
+ $("homeToTime").onclick=()=>panel("timeline");
+ $("homeToNetwork").onclick=()=>panel("network");
+ $("homeToMedia").onclick=()=>panel("media");
+ $("mediaSearch").oninput=renderMediaGrid;
+ $("mediaFilter").onchange=renderMediaGrid;
+  $("world").onchange=e=>switchWorld(e.target.value);$("worldSettings").onclick=editWorld;$("cancelCreate").onclick=()=>$("createDialog").close();$("createForm").onsubmit=e=>{e.preventDefault();submitCreate();};$("importWorld").onclick=()=>$("importFile").click();$("importFile").onchange=importWorld;$("addWorld").onclick=createWorld;$("newEntry").onclick=createEntry;$("welcomeNew").onclick=createEntry;$("export").onclick=exportWorld;
  $("welcomeTimeline").onclick=()=>panel("timeline");$("welcomeAtlas").onclick=()=>panel("atlas");
  $("search").oninput=renderList;$("typeFilter").onchange=renderList;$("globalYear").onchange=()=>setHistoricalYear($("globalYear").value);
  document.querySelectorAll("[data-panel]").forEach(b=>b.onclick=()=>panel(b.dataset.panel));
@@ -424,5 +635,5 @@ function wire(){
  $("timelineScope").onchange=timeline;$("timelineAll").onchange=timeline;
  setupMap();window.addEventListener("beforeunload",e=>{if(state.dirty||state.designDirty){e.preventDefault();e.returnValue="";}});
 }
-async function init(){wire();try{await worlds();render();notice("World Bible Studio ready.");}catch(err){notice("Server error: "+err.message,true);}}
+async function init(){wire();try{await worlds();panel("home");notice("World Bible Studio ready.");}catch(err){notice("Server error: "+err.message,true);}}
 init();
