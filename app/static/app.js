@@ -1072,6 +1072,7 @@ function wire(){
  $("homeToTime").onclick=()=>panel("timeline");
  $("homeToNetwork").onclick=()=>panel("network");
  $("homeToMedia").onclick=()=>panel("media");
+ $("homeToBoards").onclick=()=>panel("boards");
  $("mediaSearch").oninput=renderMediaGrid;
  $("mediaFilter").onchange=renderMediaGrid;
   $("world").onchange=e=>switchWorld(e.target.value);$("worldSettings").onclick=editWorld;$("cancelCreate").onclick=()=>$("createDialog").close();$("createForm").onsubmit=e=>{e.preventDefault();submitCreate();};$("importWorld").onclick=()=>$("importFile").click();$("importFile").onchange=importWorld;$("addWorld").onclick=createWorld;$("newEntry").onclick=createEntry;$("welcomeNew").onclick=createEntry;$("export").onclick=exportWorld;
