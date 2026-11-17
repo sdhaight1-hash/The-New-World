@@ -1,8 +1,10 @@
-# Genealogy, kinship and dynastic succession
+# Genealogy, family history, kinship and optional dynastic succession
 
 **Status:** architecture adopted; historical family entries and political houses not yet created.
 
-In Year 50 America, parentage and inherited relationships can influence land, marriage alliances, military obligations, social standing and political legitimacy. But **family =/= house =/= office =/= estate**. These must remain independent records, historically dated and linked with explicit claims.
+**Primary purpose:** organize the people of the world and their lives through time: families, households, friendships, migrations, occupations, communities and biographies. In some Year 50 societies ancestry also influences land, alliances, office and political legitimacy. But **family =/= house =/= office =/= estate**. These remain independent records. Succession is an *optional specialized view*, not the organizing center.
+
+See the [unified world-bible information architecture](08-world-bible-architecture.md) for how genealogy connects to places, events, organizations and sources.
 
 ## Domains
 
