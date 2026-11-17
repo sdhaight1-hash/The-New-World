@@ -24,6 +24,10 @@ Every workspace has a distinctive icon, heading, subtitle, accent and active rai
 
 The right **Record Context** panel is visible only when reading an entry. Writing, Design and Explore expand the central canvas to avoid repeating controls. Other workspaces use their own dedicated panels.
 
+## Start a new record
+
+Click **+ New** in the Entity Explorer or **Create entry** on Overview. Choose a record type and decide whether to use an **editable starter outline**. Different types suggest different sections and use appropriate initial article themes (for example, Atlas for places and Civic for organizations). These are writing aids only—no fictional facts, coordinates or organizations are generated for you.
+
 ## Four entry tasks
 
 - **Read**: article as a reader encounters it, with contextual references, status, maps and relevant media.
