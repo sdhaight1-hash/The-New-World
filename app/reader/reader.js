@@ -83,6 +83,16 @@ function renderCard(e){
   node("span","Read article →","article-open"));
  a.append(cover,info);return a;
 }
+function v2CategoryLabel(category){
+ const names=[category.name],seen=new Set([category.id]);
+ let pid=category.parent_id;
+ while(pid&&!seen.has(pid)){
+  seen.add(pid);
+  const p=state.categories.find(c=>c.id===pid);if(!p)break;
+  names.unshift(p.name);pid=p.parent_id;
+ }
+ return names.join(" / ");
+}
 function renderHome(){
  syncWorld();
  const route=$("readingRoute");route.replaceChildren();
@@ -143,7 +153,7 @@ function renderBrowse(type=""){
  select.value=type||previously;
  const params=new URLSearchParams(location.hash.split("?")[1]||"");
  const categorySelected=params.get("category")||cat.value,tagSelected=params.get("tag")||tag.value;
- cat.replaceChildren(new Option("All collections",""),...state.categories.map(c=>new Option(c.name,c.id)));
+ cat.replaceChildren(new Option("All collections",""),...state.categories.map(c=>new Option(v2CategoryLabel(c),c.id)));
  tag.replaceChildren(new Option("All topics",""),...state.tags.map(t=>new Option(t.name,t.id)));
  cat.value=[...cat.options].some(x=>x.value===categorySelected)?categorySelected:"";
  tag.value=[...tag.options].some(x=>x.value===tagSelected)?tagSelected:"";
