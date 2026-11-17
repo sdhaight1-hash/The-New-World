@@ -647,7 +647,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if route.startswith("/app/"):
                 rel = route[5:] or "index.html"
-                require(rel in ("index.html", "app.js", "style.css"), "Asset not found", 404)
+                require(rel in ("index.html", "app.js", "style.css", "workspaces.css"), "Asset not found", 404)
                 f = ROOT / "static" / rel
                 require(f.is_file(), "Asset not found", 404)
                 data = f.read_bytes()
