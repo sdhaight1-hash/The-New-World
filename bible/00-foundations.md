@@ -12,13 +12,13 @@
 
 ## The opening era — established setting direction
 
-- **Historical beginning:** November 30, 2022, OpenAI's public introduction of ChatGPT (GPT-3.5 family). This is a real historical event; GPT-3 itself predates it.
+- **Historical beginning:** 2019. The world’s real-world timeline covers late-2019 COVID-19 emergence and the subsequent pandemic, economic and political changes, regional wars, global trade, climate, energy, technology and other influential developments. ChatGPT’s public release on November 30, 2022 is a major technological milestone, not the beginning of the timeline.
 - **Documented cutoff:** real history through November 17, 2026, including increasing AI capabilities and adoption, but without asserting real economy-wide labor displacement.
 - **First major alternate-history divergence:** a convincing worldwide AGI announcement in **December 2026**. Exact day, announcing party and implementation remain open.
 - **Brief AI and automation age:** 2027–2029 sees intense, globally uneven deployment and large-scale loss or transformation of human jobs. Economic productivity and private capital concentrations can rise alongside weakened wages, careers and local fiscal capacity.
 - **Causal role:** the later Great Plague begins amid existing employment upheaval and social strain; AI is not the pathogen's cause, and the separate Cascade physically disrupts infrastructure sustaining many automated systems. Some offline/local AI technology can survive.
 
-See [The Brief Age of AI](20-brief-age-of-ai.md).
+See [The Pre-Divergence World (2019–2026)](21-real-world-2019-2026.md) and [The Brief Age of AI](20-brief-age-of-ai.md).
 
 ## Provisional (not locked)
 
