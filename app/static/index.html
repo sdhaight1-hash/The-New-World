@@ -26,7 +26,7 @@
 <div id="articlePanel" hidden>
 <div id="readPanel" class="article-sheet"></div>
 <div id="writePanel" class="form-shell" hidden><h2>Edit entry</h2><form id="editForm">
-<div class="form-grid"><label>Title<input id="eTitle" required maxlength="250"></label><label>Type<select id="eType"><option>person</option><option>place</option><option>event</option><option>organization</option><option>family</option><option>object</option><option>source</option><option>subject</option><option value="custom">Custom category…</option></select></label>
+<div class="form-grid"><label>Title<input id="eTitle" required maxlength="250"></label><label>Type<select id="eType"><option>person</option><option>place</option><option>event</option><option>organization</option><option>family</option><option>object</option><option>source</option><option>subject</option><option value="custom">Custom category…</option></select></label><label id="editCustomTypeField" hidden>Custom category ID<input id="editCustomType" placeholder="e.g. species"></label>
 <label>Status<select id="eStatus"><option>working</option><option>established</option><option>disputed</option><option>superseded</option></select></label><label>Aliases (comma separated)<input id="eAliases"></label>
 <label>Start year (Gregorian or project year)<input id="eStart" type="number" placeholder="Optional"></label><label>End year<input id="eEnd" type="number" placeholder="Optional"></label>
 <label>Latitude<input id="eLat" type="number" min="-90" max="90" step="any" placeholder="Optional: no invented coordinates"></label><label>Longitude<input id="eLon" type="number" min="-180" max="180" step="any" placeholder="Optional"></label></div>
