@@ -45,9 +45,9 @@ Existing full-archive backups include all moodboards and media. JSON-only data i
 
 The repository includes [the structured initial canon inventory](../canon/entries.json) and a [provenance and coverage guide](../canon/README.md). Running `python app/launch.py` or the Windows launcher automatically loads missing material into the dedicated **The New World** world.
 
-A fresh import currently yields **83 records** (23 original Markdown sources and 60 additional structured entries) and **58 typed relationships**. The original plague and Cascade articles are authoritative and are not duplicated. Structured records are searchable and linked through the Encyclopedia, Chronology and Connections workspaces; geographic entries intentionally do not invent coordinates where no source establishes them.
+A fresh import currently yields **68 genuine world-content records** (8 world-lore source articles and 60 additional structured entries) and **58 typed relationships**. The original plague and Cascade articles are authoritative and are not duplicated. Structured records are searchable and linked through the Encyclopedia, Chronology and Connections workspaces; geographic entries intentionally do not invent coordinates where no source establishes them.
 
-Importing is *additive*: it preserves all prior local edits, publication settings and manually authored pages. No content is published to the reader automatically. You can inspect records individually and publish approved entries through the Studio.
+Importing preserves all prior local edits, publication settings and manually authored pages. A one-time migration safely removes untouched *non-world* software-document entries after writing a complete backup. It reports edited or published copies for manual review. No content is published to the reader automatically. You can inspect records individually and publish approved entries through the Studio.
 
 ## Available now
 
