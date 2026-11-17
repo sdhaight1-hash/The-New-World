@@ -1029,6 +1029,30 @@
       "source": "bible/21-real-world-2019-2026.md",
       "status": "established",
       "theme_id": "archive"
+    },
+    {
+      "key": "iran-conflict-2026",
+      "type": "event",
+      "title": "US–Israel–Iran conflict (from February 2026)",
+      "summary": "US and Israeli strikes against Iran and Iranian retaliation make Persian Gulf security and energy trade central pre-divergence concerns.",
+      "body": "On February 28, 2026, the United States and Israel begin major attacks on Iranian targets; Iran responds with attacks in the region and attempts to restrict the Strait of Hormuz. Supreme Leader Ali Khamenei is killed during the initial strikes. A June memorandum of understanding and earlier ceasefire do not resolve the dispute. As of November 17 the conflict is not treated as concluded. This is documented real history, not a consequence of the fictional December 2026 AGI announcement. Sources: https://www.everycrsreport.com/reports/R48887.html and https://www.cfr.org/global-conflict-tracker/conflict/confrontation-between-united-states-and-iran",
+      "source": "bible/21-real-world-2019-2026.md",
+      "status": "established",
+      "start_year": -8,
+      "end_year": -8,
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "us-midterms-2026",
+      "type": "event",
+      "title": "United States midterm elections (November 2026)",
+      "summary": "AP projects Democrats gaining control of both houses of Congress in the November 3, 2026 elections.",
+      "body": "The United States holds midterm elections on November 3, 2026. The Associated Press calls Democratic control of both the Senate and House; not all individual races and seat totals are necessarily certified by November 17. The newly elected members are due to take office in 2027. The fictional AGI announcement later in December happens after this historical political turning point, so assumptions about government policy afterward must explicitly account for the new Congress and contested political priorities, not invent a completed legislative response. Sources: https://www.ap.org/the-definitive-source/behind-the-news/calling-control-of-congress-in-the-2026-midterm-elections/ and https://rollcall.com/2026/11/03/key-midterm-election-results/",
+      "source": "bible/21-real-world-2019-2026.md",
+      "status": "established",
+      "start_year": -8,
+      "end_year": -8,
+      "theme_id": "chronicle"
     }
   ],
   "relations": [
@@ -1672,6 +1696,36 @@
       "source": "trade-uncertainty-2026",
       "target": "agi-announcement-2026",
       "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "iran-conflict-2026",
+      "target": "trade-uncertainty-2026",
+      "predicate": "intensified",
+      "status": "established"
+    },
+    {
+      "source": "iran-conflict-2026",
+      "target": "global-supply-dependence",
+      "predicate": "exposed",
+      "status": "established"
+    },
+    {
+      "source": "us-election-2024",
+      "target": "us-midterms-2026",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "us-midterms-2026",
+      "target": "agi-announcement-2026",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "us-midterms-2026",
+      "target": "institutional-resilience-2019",
+      "predicate": "relevant_to",
       "status": "established"
     }
   ]
