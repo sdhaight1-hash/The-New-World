@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "id": "template-reference-article",
+  "name": "Reference Article",
+  "description": "A non-canonical presentation template; all dynamic data resolve by entity ID.",
+  "theme_id": "archive",
+  "blocks": [
+    {
+      "id": "header",
+      "type": "hero",
+      "props": {
+        "variant": "compact",
+        "show_title": true,
+        "show_subtitle": true
+      }
+    },
+    {
+      "id": "main",
+      "type": "columns",
+      "props": {
+        "ratios": [
+          2,
+          1
+        ]
+      },
+      "children": [
+        {
+          "id": "article",
+          "type": "article_body",
+          "props": {
+            "show_toc": true
+          }
+        },
+        {
+          "id": "aside",
+          "type": "stack",
+          "children": [
+            {
+              "id": "facts",
+              "type": "fact_panel",
+              "props": {
+                "include_status": true
+              }
+            },
+            {
+              "id": "refs",
+              "type": "backlinks",
+              "props": {
+                "limit": 12
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "related",
+      "type": "related_entries",
+      "props": {
+        "limit": 12
+      }
+    },
+    {
+      "id": "sources",
+      "type": "sources",
+      "props": {
+        "show_provenance": true
+      }
+    }
+  ]
+}
