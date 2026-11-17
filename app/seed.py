@@ -27,6 +27,7 @@ WORLD_SOURCE_PATHS = {
     "bible/03-cascade.md",
     "bible/04-technology.md",
     "bible/05-successor-societies.md",
+    "bible/20-brief-age-of-ai.md",
     "regions/southern-california.md",
     "regions/clatsop-county.md",
     "regions/wyoming.md",
