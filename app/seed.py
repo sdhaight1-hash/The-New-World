@@ -39,6 +39,8 @@ WORLD_SOURCE_PATHS = {
     "history/07-southern-california-local-2018-2026.md",
     "history/08-clatsop-local-2018-2026.md",
     "history/09-wyoming-local-2018-2026.md",
+    "history/10-big-bear-valley-2018-2026.md",
+    "history/11-victor-valley-2018-2026.md",
     "regions/southern-california.md",
     "regions/clatsop-county.md",
     "regions/wyoming.md",
