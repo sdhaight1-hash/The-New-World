@@ -1,0 +1,30 @@
+name: World Bible Studio tests
+
+on:
+  push:
+    paths:
+      - "app/**"
+      - ".github/workflows/test-studio.yml"
+  pull_request:
+    paths:
+      - "app/**"
+      - ".github/workflows/test-studio.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: app/requirements.txt
+      - run: python -m pip install -r app/requirements.txt
+      - run: python -m unittest discover -s app/tests -v
+      - run: python app/seed.py --db /tmp/world-bible-seed.sqlite3
+      - run: python app/seed.py --db /tmp/world-bible-seed.sqlite3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check app/static/app.js
