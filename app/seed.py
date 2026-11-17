@@ -82,7 +82,7 @@ def base_text(entry: dict) -> str:
     return (
         entry["body"].strip() + "\n\n"
         "## Record provenance\n\n"
-        f"Source reference: \`{entry['source']}\`. "
+        f"Source reference: `{entry['source']}`. "
         f"Canon status: **{entry.get('status', 'working')}**. "
         "Documented geography is distinct from hypothetical future history. "
         "Dates, borders, people and population estimates not established in the source remain open."
