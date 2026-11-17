@@ -785,6 +785,7 @@ function renderBoardItems(){
    const img=el("img");img.src="/media/"+wid()+"/"+item.media_id+"-preview";img.alt=item.media_title||item.content;
    img.loading="lazy";body.append(img);
    if(item.content)body.append(el("span",item.content,"mood-caption"));
+   if(item.media_credit)body.append(el("small","Credit: "+item.media_credit,"mood-credit"));
   }else if(item.kind==="entry"){
    const e=byId(item.entity_id);
    body.append(el("span",e?displayType(e.type):"Entry","mood-entry-type"));
