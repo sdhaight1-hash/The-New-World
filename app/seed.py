@@ -9,6 +9,9 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from datetime import datetime, timezone
+
+from backup import make_backup
 from uuid import uuid5, NAMESPACE_URL
 
 from server import Store, DB_DEFAULT
@@ -16,6 +19,19 @@ from server import Store, DB_DEFAULT
 ROOT = Path(__file__).resolve().parent.parent
 WORLD_ID = str(uuid5(NAMESPACE_URL, "the-new-world/initial-workspace"))
 KIND = {"regions": "place", "bible": "subject"}
+# Only documents about the world are source material for encyclopedia entries.
+# UX, software design, research TODOs and system architecture stay in GitHub.
+WORLD_SOURCE_PATHS = {
+    "bible/01-chronology.md",
+    "bible/02-great-plague.md",
+    "bible/03-cascade.md",
+    "bible/04-technology.md",
+    "bible/05-successor-societies.md",
+    "regions/southern-california.md",
+    "regions/clatsop-county.md",
+    "regions/wyoming.md",
+}
+
 EVENTS = {"02-great-plague.md", "03-cascade.md"}
 INDEX = ROOT / "discovery" / "index.json"
 CANON = ROOT / "canon" / "entries.json"
@@ -71,6 +87,8 @@ def load_canon() -> dict:
         raise ValueError("Duplicate canon keys")
     known = set(keys)
     for item in entries:
+        if item["source"] not in WORLD_SOURCE_PATHS:
+            raise ValueError(f"Non-world source rejected: {item['source']}")
         if not (ROOT / item["source"]).is_file():
             raise ValueError(f"Missing source for {item['key']}: {item['source']}")
         if item.get("reuse_source") and item["reuse_source"] != item["source"]:
@@ -102,9 +120,8 @@ def seed(path=DB_DEFAULT):
 
         added_docs = added_canon = skipped = related = 0
         # Preserve the original source Markdown VERBATIM as research/reference pages.
-        for folder in ("bible", "regions"):
-            for file in sorted((ROOT / folder).glob("*.md")):
-                relative = file.relative_to(ROOT).as_posix()
+        for relative in sorted(WORLD_SOURCE_PATHS):
+                file = ROOT / relative
                 eid = source_id(relative)
                 if store.one("SELECT 1 FROM entities WHERE id=?", (eid,)):
                     skipped += 1
