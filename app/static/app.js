@@ -129,11 +129,18 @@ async function save(){
   start_year:num($("eStart").value),end_year:num($("eEnd").value),lat:num($("eLat").value),lon:num($("eLon").value)};
  try{state.entry=await api(q("/api/entity",{world_id:wid(),id:e.id}),"PATCH",data);dirty(false);await refresh();await context();render();notice("Saved.");}catch(err){notice(err.message,true);}
 }
-async function createEntry(){
- if(!safeExit())return;const title=prompt("Entry title");if(!title)return;
- const type=prompt("Type: person, place, event, organization, family, object, source or subject","place")||"place";
- try{const e=await api(q("/api/entities",{world_id:wid()}),"POST",{title,type});await refresh();await open(e.id);mode("write");}catch(err){notice(err.message,true);}
+function createEntry(){
+ if(!safeExit())return;$("createTitle").value="";$("createType").value="place";$("createDialog").showModal();$("createTitle").focus();
 }
+async function submitCreate(){
+ const title=$("createTitle").value.trim(),type=$("createType").value;
+ if(!title)return;
+ try{
+  const e=await api(q("/api/entities",{world_id:wid()}),"POST",{title,type});
+  $("createDialog").close();await refresh();await open(e.id);mode("write");
+ }catch(err){notice(err.message,true);}
+}
+
 async function remove(){
  if(!confirm("Delete this entry? Referenced entries cannot be deleted without resolving their links."))return;
  try{await api(q("/api/entity",{world_id:wid(),id:state.entry.id}),"DELETE");state.entry=null;await refresh();render();notice("Deleted.");}catch(err){notice(err.message,true);}
@@ -268,6 +275,23 @@ async function createWorld(){
  if(!safeExit())return;const name=prompt("New world name");if(!name)return;
  try{const w=await api("/api/worlds","POST",{name});state.worlds.push(w);$("world").add(new Option(w.name,w.id));await switchWorld(w.id);notice("New independent world created.");}catch(err){notice(err.message,true);}
 }
+async function editWorld(){
+ if(!safeExit())return;
+ const name=prompt("World name",state.world.name);if(name===null)return;
+ const description=prompt("World description",state.world.description||"");if(description===null)return;
+ const epochText=prompt("Calendar anchor year (optional; leave blank for unconfirmed)",state.world.epoch_year??"");
+ if(epochText===null)return;
+ const epoch_year=epochText.trim()===""?null:Number(epochText);
+ if(epoch_year!==null&&!Number.isInteger(epoch_year))return notice("Invalid epoch year.",true);
+ try{
+  const updated=await api(q("/api/world",{world_id:wid()}),"PATCH",{name,description,epoch_year});
+  state.world=updated;
+  state.worlds=state.worlds.map(w=>w.id===updated.id?updated:w);
+  $("world").selectedOptions[0].textContent=updated.name;
+  $("worldDescription").textContent=updated.description||"";
+  notice("World settings saved.");
+ }catch(err){notice(err.message,true);}
+}
 async function exportWorld(){
  try{const data=await api(q("/api/export",{world_id:wid()})),blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=el("a");a.href=url;a.download="world-bible-export.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);notice("Data exported; back up image originals separately.");}catch(err){notice(err.message,true);}
 }
@@ -285,7 +309,7 @@ async function importWorld(){
  finally{$("importFile").value="";}
 }
 function wire(){
- $("world").onchange=e=>switchWorld(e.target.value);$("importWorld").onclick=()=>$("importFile").click();$("importFile").onchange=importWorld;$("addWorld").onclick=createWorld;$("newEntry").onclick=createEntry;$("welcomeNew").onclick=createEntry;$("export").onclick=exportWorld;
+ $("world").onchange=e=>switchWorld(e.target.value);$("worldSettings").onclick=editWorld;$("cancelCreate").onclick=()=>$("createDialog").close();$("createForm").onsubmit=e=>{e.preventDefault();submitCreate();};$("importWorld").onclick=()=>$("importFile").click();$("importFile").onchange=importWorld;$("addWorld").onclick=createWorld;$("newEntry").onclick=createEntry;$("welcomeNew").onclick=createEntry;$("export").onclick=exportWorld;
  $("welcomeTimeline").onclick=()=>panel("timeline");$("welcomeAtlas").onclick=()=>panel("atlas");
  $("search").oninput=renderList;$("typeFilter").onchange=renderList;
  document.querySelectorAll("[data-panel]").forEach(b=>b.onclick=()=>panel(b.dataset.panel));
