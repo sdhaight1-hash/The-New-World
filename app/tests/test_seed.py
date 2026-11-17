@@ -127,7 +127,7 @@ class CanonSeedTests(unittest.TestCase):
         seed(self.path)
         with closing(Store(self.path)) as store:
             years=[e for e in store.entries(WORLD_ID) if e["type"]=="event"]
-            self.assertEqual(min(e["start_year"] for e in years if e["start_year"] is not None),-15)
+            self.assertEqual(min(e["start_year"] for e in years if e["start_year"] is not None),-16)
             self.assertEqual(store.check_entity(WORLD_ID,canon_id("chatgpt-public-launch"))["start_year"],-12)
             self.assertEqual(store.check_entity(WORLD_ID,canon_id("agi-announcement-2026"))["start_year"],-8)
             self.assertEqual(store.check_entity(WORLD_ID,canon_id("automation-boom-2028"))["start_year"],-6)
@@ -158,23 +158,23 @@ class CanonSeedTests(unittest.TestCase):
         self.assertEqual(items["covid-emergence-2019"]["start_year"],-15)
         self.assertEqual(items["trade-uncertainty-2026"]["end_year"],-8)
         self.assertEqual(items["agi-announcement-2026"]["start_year"],-8)
-        self.assertEqual(len(manifest["relations"]),143)
-        self.assertEqual(len(manifest["entries"]),109)
+        self.assertEqual(len(manifest["relations"]),159)
+        self.assertEqual(len(manifest["entries"]),117)
         self.assertTrue(all(e["status"]=="established" for e in manifest["entries"]
                             if e["source"]=="bible/21-real-world-2019-2026.md"))
         self.assertNotIn("great plague",items["covid-pandemic-2020"]["title"].lower())
         seed(self.path)
         with closing(Store(self.path)) as store:
-            self.assertEqual(len(store.entries(WORLD_ID)),117)
-            self.assertEqual(len(store.relation_list(WORLD_ID)),143)
+            self.assertEqual(len(store.entries(WORLD_ID)),125)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),159)
             self.assertEqual(store.public_entries(WORLD_ID),[])
             original=(ROOT/"bible/21-real-world-2019-2026.md").read_text(encoding="utf-8")
             self.assertEqual(store.check_entity(WORLD_ID,source_id("bible/21-real-world-2019-2026.md"))["body"],original)
             self.assertGreaterEqual(len(store.backlinks(WORLD_ID,canon_id("covid-pandemic-2020"))),2)
         seed(self.path)
         with closing(Store(self.path)) as store:
-            self.assertEqual(len(store.entries(WORLD_ID)),117)
-            self.assertEqual(len(store.relation_list(WORLD_ID)),143)
+            self.assertEqual(len(store.entries(WORLD_ID)),125)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),159)
 
     def test_zooming_historical_layers_reuse_original_articles_and_preserve_edits(self):
         manifest=load_canon()
@@ -213,8 +213,32 @@ class CanonSeedTests(unittest.TestCase):
         seed(self.path)
         with closing(Store(self.path)) as store:
             self.assertEqual(store.check_entity(WORLD_ID,california)["body"],"My revised California history")
-            self.assertEqual(len(store.entries(WORLD_ID)),117)
-            self.assertEqual(len(store.relation_list(WORLD_ID)),143)
+            self.assertEqual(len(store.entries(WORLD_ID)),125)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),159)
+
+    def test_2018_to_2026_year_span_and_regional_event_grounding(self):
+        manifest=load_canon()
+        entries={entry["key"]:entry for entry in manifest["entries"]}
+        required={
+            "trade-war-2018":-16,"ipcc-report-2018":-16,
+            "camp-fire-2018":-16,"usmca-effective-2020":-14,
+            "oregon-labor-day-fires-2020":-14,
+            "pnw-heat-dome-2021":-13,
+            "california-atmospheric-rivers-2023":-12,
+            "la-fires-2025":-9,
+        }
+        for key,year in required.items():
+            self.assertEqual(entries[key]["start_year"],year)
+            self.assertTrue((ROOT/entries[key]["source"]).is_file())
+            self.assertEqual(entries[key]["type"],"event")
+        self.assertEqual(len(manifest["entries"]),117)
+        self.assertEqual(len(manifest["relations"]),159)
+        seed(self.path)
+        with closing(Store(self.path)) as store:
+            self.assertEqual(len(store.entries(WORLD_ID)),125)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),159)
+            self.assertTrue(store.relation_list(WORLD_ID,canon_id("camp-fire-2018")))
+            self.assertEqual(store.public_entries(WORLD_ID),[])
 
     def test_repeat_seed_never_duplicates_or_overwrites_personal_edits(self):
         seed(self.path)
