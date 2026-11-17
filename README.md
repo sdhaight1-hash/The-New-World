@@ -38,7 +38,7 @@ The application supports independent worlds, encyclopedia editing, identity-pres
 
 ## Existing worldbuilding canon — imported into Studio
 
-The first structured canon population is now in [`canon/entries.json`](canon/entries.json), with a [source and provenance guide](canon/README.md). It covers **105 world-content records** in a fresh database (10 historical/geographical source articles plus 95 structured records), including **107 typed relationships** connecting regions, settlements, catastrophe phases, technology and institutional themes.
+The first structured canon population is now in [`canon/entries.json`](canon/entries.json), with a [source and provenance guide](canon/README.md). It covers **107 world-content records** in a fresh database (10 historical/geographical source articles plus 97 structured records), including **112 typed relationships** connecting regions, settlements, catastrophe phases, technology and institutional themes.
 
 The normal launcher imports this content automatically, **without replacing existing Studio edits or publishing drafts**. Earlier imports mistakenly included software-design documents; the launcher now removes their untouched copies only after making a complete backup. Edited or published copies are protected and flagged for review. It reuses the original Great Plague and Cascade documents as the authoritative event records rather than duplicating them.
 
