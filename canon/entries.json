@@ -729,6 +729,306 @@
       "source": "bible/20-brief-age-of-ai.md",
       "status": "established",
       "theme_id": "civic"
+    },
+    {
+      "key": "global-baseline-2019",
+      "type": "event",
+      "title": "The connected world of 2019",
+      "summary": "Starting point for The New World's documented world history: international trade, digital networks and rising geopolitical friction.",
+      "body": "The historical timeline begins in 2019, before COVID-19 and before ChatGPT. Global supply chains, airports, maritime trade, multinational manufacturing, finance, governments and local institutions are interdependent, while trade disputes and regional political tension already shape the period. This is a historical reference condition, not a single instantaneous disaster.",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -15,
+      "end_year": -15,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "hong-kong-2019",
+      "type": "event",
+      "title": "Hong Kong protests and autonomy conflict (2019–2020)",
+      "summary": "Major demonstrations and subsequent national-security legislation become prominent international political disputes.",
+      "body": "In 2019 protests in Hong Kong begin in opposition to an extradition proposal and broaden into demands concerning governance, accountability and political rights. The June 2020 national security law significantly changes the political and legal environment. Chinese, Hong Kong and other governments express conflicting assessments; describe documented measures, demonstrations and consequences rather than attributing motives as established facts. Sources: https://www.cecc.gov/publications/commission-analysis/rapid-deterioration-of-human-rights-in-hong-kong-after-passage-of",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -15,
+      "end_year": -14,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "covid-emergence-2019",
+      "type": "event",
+      "title": "Emergence of COVID-19 (December 2019)",
+      "summary": "Reports of an unexplained pneumonia cluster in Wuhan mark the beginning of the later global pandemic.",
+      "body": "On December 31, 2019, WHO becomes aware of a cluster of pneumonia cases of unknown cause in Wuhan, China. A novel coronavirus is subsequently identified. This is part of documented history and is not identical to The New World's separate fictional Great Plague around 2030. Source: https://www.who.int/europe/emergencies/situations/Covid-19",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -15,
+      "end_year": -15,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "covid-pandemic-2020",
+      "type": "event",
+      "title": "COVID-19 global pandemic (2020–2023 emergency period)",
+      "summary": "A global public-health emergency alters work, travel, medicine, public trust and government operations.",
+      "body": "WHO declares COVID-19 a Public Health Emergency of International Concern on January 30, 2020 and characterizes it as a pandemic on March 11, 2020. COVID-19's PHEIC status ends May 5, 2023, but infections and public-health consequences continue. Government measures and outcomes differ by jurisdiction. The fictional Great Plague remains a distinct later crisis. Source: https://www.who.int/europe/emergencies/situations/Covid-19",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -14,
+      "end_year": -11,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "pandemic-recession-2020",
+      "type": "event",
+      "title": "The Great Lockdown and global recession (2020)",
+      "summary": "Pandemic responses and health disruption cause a sharp, internationally uneven economic contraction.",
+      "body": "The COVID-19 crisis disrupts travel, services, manufacturing, employment and supply chains. The IMF's April 2020 forecast projected a 3% global contraction; that figure is a dated forecast, not a final GDP measurement. Governments and central banks use emergency measures to support households and businesses. Remote work expands in occupations capable of moving online while many physical and care occupations remain on site. Source: https://www.imf.org/en/publications/weo/issues/2020/04/14/weo-april-2020",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -14,
+      "end_year": -14,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "us-election-2020",
+      "type": "event",
+      "title": "United States presidential election (November 2020)",
+      "summary": "Joe Biden defeats incumbent Donald Trump during the pandemic period.",
+      "body": "The November 2020 US presidential election takes place during the COVID-19 pandemic. Joe Biden wins and is sworn in as the 46th president on January 20, 2021. The election is a fixed real-world chronological fact, not a claim that a particular later policy or institutional outcome was inevitable. Source: https://www.aoc.gov/what-we-do/programs-ceremonies/inauguration",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -14,
+      "end_year": -14,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "afghanistan-2021",
+      "type": "event",
+      "title": "Taliban takeover of Kabul (August 2021)",
+      "summary": "The Afghan republic collapses amid Taliban advance and international military withdrawal.",
+      "body": "Taliban forces enter Kabul on August 15, 2021, as Afghanistan's former government collapses amid the withdrawal of US and allied forces. The transition creates major humanitarian, economic, security and displacement consequences. It supplies context for later state capacity and migration histories, without predetermining the fate of the region in speculative years. Source: https://www.unhcr.org/sites/default/files/2023-07/evaluation-report-l3-emergency-afghanistan-june-2023.pdf",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -13,
+      "end_year": -13,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "supply-inflation-2021",
+      "type": "event",
+      "title": "Supply-chain constraints and inflation pressures (2021–2023)",
+      "summary": "Pandemic reopening, production bottlenecks, energy shocks and monetary responses transform economic conditions.",
+      "body": "As demand returns following pandemic restrictions, supply disruptions, shipping capacity problems and commodity prices contribute to inflation across many economies. Russia's February 2022 invasion of Ukraine adds energy and food disruptions. Central banks in multiple jurisdictions raise interest rates. The causes, timing and distribution vary; no single factor or government policy explains all price changes. Source: https://documents1.worldbank.org/curated/en/099031409142266105/pdf/IDU01ed08ada0dcb1048f809c390d3ba1acab4e2.pdf",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -13,
+      "end_year": -11,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "ukraine-invasion-2022",
+      "type": "event",
+      "title": "Russia's full-scale invasion of Ukraine (February 2022)",
+      "summary": "The invasion broadens the conflict begun in 2014 and substantially changes European security and global commodity trade.",
+      "body": "Russia launches a full-scale invasion of Ukraine on February 24, 2022, following the earlier conflict beginning in 2014. Ukrainian resistance, international support, sanctions, displacement and the war's economic impact reshape European security calculations. As of the November 17, 2026 historical cutoff, do not assign an invented final outcome. Source: https://www.cfr.org/global-conflict-tracker/conflict/conflict-ukraine",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -12,
+      "end_year": -8,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "nato-enlargement-2023",
+      "type": "event",
+      "title": "Finland and Sweden join NATO (2023–2024)",
+      "summary": "Finland joins on April 4, 2023 and Sweden on March 7, 2024, following changes in European security policy.",
+      "body": "Finland and Sweden apply to join NATO after the 2022 Russian invasion of Ukraine. Finland becomes a member April 4, 2023, and Sweden March 7, 2024. These accessions affect the alliance's geography and military planning; they do not by themselves determine any later fictional conflict. Source: https://www.nato.int/en/about-us/organization/nato-member-countries",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -11,
+      "end_year": -10,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "sudan-war-2023",
+      "type": "event",
+      "title": "War in Sudan (from April 2023)",
+      "summary": "Fighting between Sudan's Armed Forces and Rapid Support Forces causes severe displacement and civilian hardship.",
+      "body": "War breaks out April 15, 2023 between the Sudanese Armed Forces and the Rapid Support Forces. Fighting, displacement, hunger, damaged infrastructure and interrupted services create one of the major humanitarian emergencies of the period. Its course varies by region and remains unresolved at the November 2026 cutoff. Source: https://www.un.org/en/spotlight-on-sudan/background",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -11,
+      "end_year": -8,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "israel-gaza-2023",
+      "type": "event",
+      "title": "October 7 attacks and Israel–Gaza war (from 2023)",
+      "summary": "Hamas-led attacks in Israel and the ensuing Israeli military campaign create extensive human suffering and regional tensions.",
+      "body": "On October 7, 2023, Hamas and other Palestinian armed groups attack southern Israeli communities and military targets, killing people and taking hostages. Israel launches large-scale military operations in Gaza, resulting in massive casualties, destruction and displacement. Military and humanitarian developments extend beyond 2023. Contested legal and political claims must be attributed to sources, while documented attacks and humanitarian consequences are recorded factually. Source: https://digitallibrary.un.org/record/4092971/files/A_80_502-EN.pdf",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -11,
+      "end_year": -8,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "red-sea-shipping-2023",
+      "type": "event",
+      "title": "Red Sea shipping disruptions (2023–2024)",
+      "summary": "Attacks on vessels near the Red Sea force shipping diversions and increase logistics costs.",
+      "body": "Attacks by Yemen-based Houthis against shipping in the Red Sea and Gulf of Aden prompt carriers to divert routes around Africa, reducing Suez Canal transits. UNCTAD documents substantial shipping declines and rising costs in early 2024. The episode illustrates the global effects of chokepoint disruption without implying that all maritime trade ceased. Source: https://unctad.org/news/unprecedented-shipping-disruptions-raise-risk-global-trade-unctad-warns",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -11,
+      "end_year": -10,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "eu-ai-act-2024",
+      "type": "event",
+      "title": "European Union AI Act enters into force (August 2024)",
+      "summary": "The EU establishes a phased risk-based regulatory framework for artificial intelligence.",
+      "body": "The European Union's AI Act enters into force on August 1, 2024. Different provisions begin applying at different dates; entry into force is not the same as universal immediate enforcement. It provides one real-world example of diverging government approaches to AI governance before the speculative December 2026 AGI announcement. Source: https://commission.europa.eu/news-and-media/news/ai-act-enters-force-2024-08-01_en",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -10,
+      "end_year": -10,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "us-election-2024",
+      "type": "event",
+      "title": "United States presidential election (November 2024)",
+      "summary": "Donald Trump defeats Kamala Harris in the 2024 presidential election.",
+      "body": "In the November 5, 2024 presidential election Donald Trump receives 312 electoral votes and Kamala Harris 226. Trump is sworn in January 20, 2025 as the 47th US president. These are documented results; disputed political evaluations and claims about later policy effects should be attributed and dated rather than adopted as objective descriptions. Sources: https://www.archives.gov/electoral-college/2024 and https://www.inaugural.senate.gov/60th-inaugural-ceremonies/",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -10,
+      "end_year": -10,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "climate-2024",
+      "type": "event",
+      "title": "Record global warmth in 2024",
+      "summary": "The World Meteorological Organization identifies 2024 as the warmest recorded calendar year in its consolidated analysis.",
+      "body": "WMO reports an annual average global near-surface temperature in 2024 approximately 1.55°C above its 1850–1900 baseline, with uncertainty. One calendar year above 1.5°C does not establish that the Paris Agreement's long-term warming threshold has been permanently crossed. Climate trends matter to later drought, heat, water and agricultural histories but cannot be used to invent local event dates. Source: https://wmo.int/news/media-centre/wmo-confirms-2024-warmest-year-record-about-155degc-above-pre-industrial-level",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -10,
+      "end_year": -10,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "us-presidency-2025",
+      "type": "event",
+      "title": "Second Trump administration begins (January 2025)",
+      "summary": "Donald Trump becomes the 47th US president on January 20, 2025, starting a nonconsecutive second term.",
+      "body": "Donald Trump is inaugurated on January 20, 2025. Policy choices concerning trade, immigration, foreign relations, energy, public spending and industrial production become relevant to the pre-AGI historical backdrop. Specific effects require dated evidence rather than assumptions about a politician's motives or performance. Source: https://www.inaugural.senate.gov/60th-inaugural-ceremonies/",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -9,
+      "end_year": -9,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "military-spending-2025",
+      "type": "event",
+      "title": "Global military expenditure rises in 2025",
+      "summary": "SIPRI reports $2.887 trillion in worldwide military spending for 2025, continuing an extended expansion.",
+      "body": "SIPRI's April 2026 report estimates 2025 global military expenditure at $2.887 trillion, rising 2.9% in real terms from 2024, the 11th consecutive annual increase in its series. Contributions differ by country and region. Defense capacity, warehouses, manufacturing and trained personnel are relevant to later regional conditions without implying a uniform stockpile after the Cascade. Source: https://www.sipri.org/publications/2026/sipri-fact-sheets/trends-world-military-expenditure-2025",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -9,
+      "end_year": -9,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "ai-investment-2025",
+      "type": "event",
+      "title": "Global corporate investment in AI expands (2025)",
+      "summary": "Stanford's 2026 AI Index reports global corporate AI investment more than doubled in 2025.",
+      "body": "Stanford's 2026 AI Index reports exceptional growth of corporate and private AI investment during 2025. Investment and model capability do not imply a fully automated real-world labor market. The fictional mass displacement begins with the AGI divergence in December 2026. Source: https://hai.stanford.edu/ai-index/2026-ai-index-report/economy",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -9,
+      "end_year": -9,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "trade-uncertainty-2026",
+      "type": "event",
+      "title": "Trade fragmentation and economic uncertainty (2025–2026)",
+      "summary": "Trade-policy disputes and changes to international commerce form part of the documented pre-divergence backdrop.",
+      "body": "The WTO's 2026 world-trade analysis describes prolonged strains on multilateral trade arrangements and changing policy, industrial and security priorities. Its March 2026 trade-growth numbers are forecasts at publication, not verified final 2026 outcomes. The historical record here stops November 17, 2026. Source: https://www.wto.org/english/res_e/publications_e/world-trade-report-2026_execsum_e.htm",
+      "source": "bible/21-real-world-2019-2026.md",
+      "start_year": -9,
+      "end_year": -8,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "institutional-resilience-2019",
+      "type": "subject",
+      "title": "Institutional capacity before the fictional collapse",
+      "summary": "Public-health systems, local governments, public trust and international networks shape resilience after future shocks.",
+      "body": "Between 2019 and 2026, pandemic responses, elections, wars, economic shifts and technology policy leave different institutions with different capabilities. This is a research framework, not a claim that every state or community grew weaker. For future worldbuilding, establish staffing, budgets, health care, public trust, legal authority and community organizations separately by region. Historical background: bible/21-real-world-2019-2026.md.",
+      "source": "bible/21-real-world-2019-2026.md",
+      "status": "established",
+      "theme_id": "archive"
+    },
+    {
+      "key": "global-supply-dependence",
+      "type": "subject",
+      "title": "Global supply-chain and industrial dependencies",
+      "summary": "World-scale trade and specialized components create both prosperity and vulnerabilities before the Cascade.",
+      "body": "An interconnected world relies on semiconductors, ships, ports, aircraft, energy networks, manufacturers, logistics and skilled workers. COVID-19, Ukraine-war shocks and Red Sea diversions highlight different supply-chain risks. For post-collapse modeling distinguish loss of transport from destruction of machinery, and loss of raw materials from loss of technicians. Historical background: bible/21-real-world-2019-2026.md.",
+      "source": "bible/21-real-world-2019-2026.md",
+      "status": "established",
+      "theme_id": "archive"
+    },
+    {
+      "key": "energy-and-compute-baseline",
+      "type": "subject",
+      "title": "Energy, semiconductors and computing infrastructure",
+      "summary": "Chip production, data centers, electricity and communications are material preconditions for later AI deployment.",
+      "body": "AI and industrial automation require physical computing hardware, networks and power. The semiconductor supply chain and data-center concentration in the 2020s are relevant to later disparities. Some local systems can continue after outages when resources and expertise persist; cloud services need broader infrastructure. The geographic distribution of plants and computing facilities must be researched before detailed fictional outcomes are assigned.",
+      "source": "bible/21-real-world-2019-2026.md",
+      "status": "established",
+      "theme_id": "archive"
+    },
+    {
+      "key": "public-health-memory",
+      "type": "subject",
+      "title": "Memory of COVID-19 and pandemic institutions",
+      "summary": "Experiences from 2020–2023 shape how people may respond to a different, future epidemic.",
+      "body": "The real COVID-19 pandemic establishes memories of public-health orders, vaccination, misinformation, employment interruption, schooling disruption, community aid and differentiated medical access. These could shape the fictional 2030 Great Plague response, but the effects must not be assumed identical across countries or households. COVID-19 and the Great Plague are separate events.",
+      "source": "bible/21-real-world-2019-2026.md",
+      "status": "established",
+      "theme_id": "archive"
+    },
+    {
+      "key": "trade-energy-inflation",
+      "type": "subject",
+      "title": "Trade, energy prices, inflation and household insecurity",
+      "summary": "A multi-year economic background influences the setting's later employment and fiscal crisis.",
+      "body": "Pandemic-era disruptions, recovering demand, the Ukraine war and subsequent monetary measures contributed to differing inflation and interest-rate conditions in the early 2020s. AI investment and trade-policy disputes then added distinct pressures. For the alternate 2027–2029 economy, track wages, income, debt, government capacity and ownership, not only total output. Historical background: bible/21-real-world-2019-2026.md.",
+      "source": "bible/21-real-world-2019-2026.md",
+      "status": "established",
+      "theme_id": "archive"
+    },
+    {
+      "key": "global-climate-baseline",
+      "type": "subject",
+      "title": "Climate and resource pressures before the Plague",
+      "summary": "Climate change, water demand, heat and extreme weather affect settlement constraints independently of later catastrophes.",
+      "body": "Recorded warming and regional climate hazards predate the fictional 2030 Great Plague and 2034–2035 Cascade. The 2024 global record is documented, but local drought, rainfall, floods, irrigation conditions and agricultural carrying capacities require local data. Avoid treating one global temperature statistic as a map of every region's conditions.",
+      "source": "bible/21-real-world-2019-2026.md",
+      "status": "established",
+      "theme_id": "archive"
     }
   ],
   "relations": [
@@ -1181,6 +1481,198 @@
       "target": "successor-governance",
       "predicate": "influenced",
       "status": "working"
+    },
+    {
+      "source": "global-baseline-2019",
+      "target": "covid-emergence-2019",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "hong-kong-2019",
+      "target": "global-baseline-2019",
+      "predicate": "part_of",
+      "status": "established"
+    },
+    {
+      "source": "covid-emergence-2019",
+      "target": "covid-pandemic-2020",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "covid-pandemic-2020",
+      "target": "pandemic-recession-2020",
+      "predicate": "contributed_to",
+      "status": "established"
+    },
+    {
+      "source": "covid-pandemic-2020",
+      "target": "public-health-memory",
+      "predicate": "informed",
+      "status": "established"
+    },
+    {
+      "source": "covid-pandemic-2020",
+      "target": "global-supply-dependence",
+      "predicate": "exposed",
+      "status": "established"
+    },
+    {
+      "source": "us-election-2020",
+      "target": "global-baseline-2019",
+      "predicate": "followed",
+      "status": "established"
+    },
+    {
+      "source": "afghanistan-2021",
+      "target": "global-baseline-2019",
+      "predicate": "followed",
+      "status": "established"
+    },
+    {
+      "source": "pandemic-recession-2020",
+      "target": "supply-inflation-2021",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "supply-inflation-2021",
+      "target": "trade-energy-inflation",
+      "predicate": "contributed_to",
+      "status": "established"
+    },
+    {
+      "source": "ukraine-invasion-2022",
+      "target": "trade-energy-inflation",
+      "predicate": "contributed_to",
+      "status": "established"
+    },
+    {
+      "source": "ukraine-invasion-2022",
+      "target": "nato-enlargement-2023",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "nato-enlargement-2023",
+      "target": "global-baseline-2019",
+      "predicate": "later_security_development",
+      "status": "established"
+    },
+    {
+      "source": "sudan-war-2023",
+      "target": "global-baseline-2019",
+      "predicate": "later_security_development",
+      "status": "established"
+    },
+    {
+      "source": "israel-gaza-2023",
+      "target": "red-sea-shipping-2023",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "red-sea-shipping-2023",
+      "target": "global-supply-dependence",
+      "predicate": "exposed",
+      "status": "established"
+    },
+    {
+      "source": "eu-ai-act-2024",
+      "target": "pre-agi-adoption",
+      "predicate": "regulated",
+      "status": "established"
+    },
+    {
+      "source": "us-election-2024",
+      "target": "us-presidency-2025",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "climate-2024",
+      "target": "global-climate-baseline",
+      "predicate": "illustrated",
+      "status": "established"
+    },
+    {
+      "source": "military-spending-2025",
+      "target": "institutional-resilience-2019",
+      "predicate": "context_for",
+      "status": "established"
+    },
+    {
+      "source": "ai-investment-2025",
+      "target": "pre-agi-adoption",
+      "predicate": "context_for",
+      "status": "established"
+    },
+    {
+      "source": "ai-investment-2025",
+      "target": "energy-and-compute-baseline",
+      "predicate": "intensified",
+      "status": "established"
+    },
+    {
+      "source": "energy-and-compute-baseline",
+      "target": "ai-infrastructure-legacy",
+      "predicate": "developed_into",
+      "status": "established"
+    },
+    {
+      "source": "trade-uncertainty-2026",
+      "target": "global-supply-dependence",
+      "predicate": "affected",
+      "status": "established"
+    },
+    {
+      "source": "public-health-memory",
+      "target": "plague-era",
+      "predicate": "may_influence_response_to",
+      "status": "working"
+    },
+    {
+      "source": "global-supply-dependence",
+      "target": "cascade-event",
+      "predicate": "influenced_vulnerability_to",
+      "status": "established"
+    },
+    {
+      "source": "trade-energy-inflation",
+      "target": "pre-plague-economic-disruption",
+      "predicate": "historical_precondition_for",
+      "status": "established"
+    },
+    {
+      "source": "institutional-resilience-2019",
+      "target": "pre-plague-economic-disruption",
+      "predicate": "historical_precondition_for",
+      "status": "established"
+    },
+    {
+      "source": "global-climate-baseline",
+      "target": "water-infrastructure",
+      "predicate": "relevant_to",
+      "status": "established"
+    },
+    {
+      "source": "global-baseline-2019",
+      "target": "chatgpt-public-launch",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "global-baseline-2019",
+      "target": "age-of-ai",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "trade-uncertainty-2026",
+      "target": "agi-announcement-2026",
+      "predicate": "preceded",
+      "status": "established"
     }
   ]
 }
