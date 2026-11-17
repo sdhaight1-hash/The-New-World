@@ -1061,8 +1061,8 @@ function wire(){
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){
    e.preventDefault();$("search").focus();$("search").select();return;
   }
-  if(e.altKey&&!e.ctrlKey&&!e.metaKey&&/^[1-6]$/.test(e.key)){
-   e.preventDefault();const names=["home","article","atlas","timeline","network","media"];
+  if(e.altKey&&!e.ctrlKey&&!e.metaKey&&/^[1-7]$/.test(e.key)){
+   e.preventDefault();const names=["home","article","atlas","timeline","network","media","boards"];
    panel(names[Number(e.key)-1]);
   }
  });
