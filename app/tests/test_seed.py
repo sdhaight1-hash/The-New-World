@@ -115,6 +115,27 @@ class CanonSeedTests(unittest.TestCase):
                                        (source_id("bible/00-foundations.md"),)))
             self.assertTrue(store.backlinks(WORLD_ID,source_id("bible/01-chronology.md")))
 
+    def test_opening_ai_era_and_documented_vs_alternate_history(self):
+        manifest=load_canon()
+        opening={e["key"]:e for e in manifest["entries"]}
+        self.assertIn("bible/20-brief-age-of-ai.md",WORLD_SOURCE_PATHS)
+        self.assertEqual(opening["chatgpt-public-launch"]["status"],"established")
+        self.assertIn("November 30, 2022",opening["chatgpt-public-launch"]["title"])
+        self.assertIn("GPT-3.5",opening["chatgpt-public-launch"]["body"])
+        self.assertIn("alternate",opening["agi-announcement-2026"]["body"].lower())
+        self.assertIn("not yet established",opening["social-fracture-2029"]["body"])
+        seed(self.path)
+        with closing(Store(self.path)) as store:
+            years=[e for e in store.entries(WORLD_ID) if e["type"]=="event"]
+            self.assertEqual(min(e["start_year"] for e in years if e["start_year"] is not None),-12)
+            self.assertEqual(store.check_entity(WORLD_ID,canon_id("chatgpt-public-launch"))["start_year"],-12)
+            self.assertEqual(store.check_entity(WORLD_ID,canon_id("agi-announcement-2026"))["start_year"],-8)
+            self.assertEqual(store.check_entity(WORLD_ID,canon_id("automation-boom-2028"))["start_year"],-6)
+            self.assertEqual(store.public_entries(WORLD_ID),[])
+            self.assertGreaterEqual(len(store.relation_list(WORLD_ID)),75)
+            self.assertIn("November 30, 2022",store.check_entity(
+                WORLD_ID,source_id("bible/20-brief-age-of-ai.md"))["body"])
+
     def test_repeat_seed_never_duplicates_or_overwrites_personal_edits(self):
         seed(self.path)
         with closing(Store(self.path)) as store:
