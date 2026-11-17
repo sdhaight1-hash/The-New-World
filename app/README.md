@@ -41,11 +41,15 @@ Existing full-archive backups include all moodboards and media. JSON-only data i
 
 [**VVD × Canva × Notion research and moodboard architecture**](../bible/19-visual-worldbuilding-and-moodboards.md)
 
+## Explore geographic historical depth
+
+The [historical atlas](../history/README.md) uses **ten source chapters**, linked by nine `narrows_to` relations: world → Western Hemisphere → United States → Western United States → California, Oregon, Wyoming → Southern California, Clatsop County and the unresolved Wyoming ranch study. These records appear in the Studio Encyclopedia and Connections, and can be explicitly published to the reader. Published articles expose **wider context** and **go deeper** links. No artificial details have been assigned to the unidentified Wyoming ranch or reservation.
+
 ## Populate The New World from established source entries
 
 The repository includes [the structured initial canon inventory](../canon/entries.json) and a [provenance and coverage guide](../canon/README.md). Running `python app/launch.py` or the Windows launcher automatically loads missing material into the dedicated **The New World** world.
 
-A fresh import currently yields **107 world-content records** (10 world-lore source articles and 97 additional structured entries) and **112 typed relationships**. The original plague and Cascade articles are authoritative and are not duplicated. The starting timeline now includes **2019–November 17, 2026 documented world history**, across public health, economy, international trade, politics, war, climate and AI, followed by the fictional December 2026 AGI announcement and the 2027–2029 automation and labor crisis. Structured records are searchable and linked through the Encyclopedia, Chronology and Connections workspaces; geographic entries intentionally do not invent coordinates where no source establishes them.
+A fresh import currently yields **125 world-content records** (20 source articles and 105 distinct structured entries) and **159 typed relationships**. The original plague and Cascade articles are authoritative and are not duplicated. The starting timeline now includes **January 1, 2018–November 17, 2026 documented world history**, across public health, economy, international trade, politics, war, climate and AI, followed by the fictional December 2026 AGI announcement and the 2027–2029 automation and labor crisis. Structured records are searchable and linked through the Encyclopedia, Chronology and Connections workspaces; geographic entries intentionally do not invent coordinates where no source establishes them.
 
 Importing preserves all prior local edits, publication settings and manually authored pages. A one-time migration safely removes untouched *non-world* software-document entries after writing a complete backup. It reports edited or published copies for manual review. No content is published to the reader automatically. You can inspect records individually and publish approved entries through the Studio.
 
