@@ -1,6 +1,15 @@
 "use strict";
 const $=id=>document.getElementById(id),blocks=["body","facts","relationships","backlinks","timeline","map","gallery","sources"];
-const themes={archive:["#18232D","#23333D","#F0F3F2","#9AD4D0"],atlas:["#142520","#233A32","#EFF5F0","#ACDDB0"],chronicle:["#282019","#392C24","#F7F1E9","#F5C584"],kinship:["#251E2B","#362B3D","#F7EFF6","#E9B5CD"],civic:["#1C2633","#2B3847","#EEF3FA","#A9CCF1"]};
+const themes={
+ archive:{dark:["#18232D","#23333D","#F0F3F2","#9AD4D0"],light:["#F7F5EF","#FFFFFF","#213035","#116A6C"]},
+ atlas:{dark:["#142520","#233A32","#EFF5F0","#ACDDB0"],light:["#F1F5ED","#FFFFFF","#21352C","#226B43"]},
+ chronicle:{dark:["#282019","#392C24","#F7F1E9","#F5C584"],light:["#FBF5EA","#FFFDFC","#372A21","#8A451A"]},
+ kinship:{dark:["#251E2B","#362B3D","#F7EFF6","#E9B5CD"],light:["#FCF5FB","#FFFFFF","#36283A","#8E376B"]},
+ civic:{dark:["#1C2633","#2B3847","#EEF3FA","#A9CCF1"],light:["#F3F6FB","#FFFFFF","#203347","#245C91"]}
+};
+function luminance(hex){const v=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(x=>x<=0.04045?x/12.92:((x+0.055)/1.055)**2.4);return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2];}
+function contrast(a,b){const [hi,lo]=[luminance(a),luminance(b)].sort((x,y)=>y-x);return (hi+0.05)/(lo+0.05);}
+
 const state={worlds:[],world:null,entries:[],entry:null,panel:"article",mode:"read",relations:[],media:[],allMedia:[],incoming:[],outgoing:[],layout:[],dirty:false};
 const escapeHTML=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const el=(tag,text,cls)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;if(cls)x.className=cls;return x;};
@@ -22,9 +31,12 @@ function safeExit(){return !state.dirty||confirm("Discard unsaved article edits?
 function dirty(v){state.dirty=v;$("dirtyIndicator").textContent=v?"Unsaved changes":"Saved";}
 function setTheme(root,entry){
  const mode=$("appearance").value;
- const a=themes[entry.theme_id==="custom"?"archive":entry.theme_id]||themes.archive;
- const colors=mode==="light"?["#F7F5EF","#FFFFFF","#223238","#116A6C"]:mode==="high-contrast"?["#000000","#111111","#FFFFFF","#FFFF00"]:a;
- for(const [key,index] of [["--entry-bg",0],["--entry-surface",1],["--entry-text",2],["--entry-accent",3]])root.style.setProperty(key,key==="--entry-accent"&&entry.accent&&mode!=="high-contrast"?entry.accent:colors[index]);
+ const preset=themes[entry.theme_id==="custom"?"archive":entry.theme_id]||themes.archive;
+ const colors=mode==="high-contrast"?["#000000","#111111","#FFFFFF","#FFFF00"]:preset[mode==="light"?"light":"dark"];
+ const accent=entry.accent&&mode!=="high-contrast"&&contrast(entry.accent,colors[0])>=4.5
+   &&contrast(entry.accent,colors[1])>=4.5?entry.accent:colors[3];
+ for(const [key,index] of [["--entry-bg",0],["--entry-surface",1],["--entry-text",2],["--entry-accent",3]])
+   root.style.setProperty(key,index===3?accent:colors[index]);
 }
 function prose(text){
  // Untrusted author HTML is escaped before generating the controlled subset of tags.
