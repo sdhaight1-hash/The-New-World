@@ -1,0 +1,6 @@
+# Local runtime database, working media and temporary files
+.worldbible/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
