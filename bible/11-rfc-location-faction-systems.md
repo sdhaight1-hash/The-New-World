@@ -1,6 +1,6 @@
 # RFC 002 — Location Builder and Organization/Faction System
 
-**Status:** research-backed implementation specification, not a claim of completed interactive tools.  
+**Status:** partial implementation: generic place/organization entries, coordinates, typed/dated relations and 2D map pins work in [World Bible Studio](../app/README.md). Polygon editing, advanced territories and dedicated faction-management views remain planned.  
 **Depends on:** [RFC 001 historical knowledge core](10-rfc-historical-knowledge-core.md) and its stable IDs, dated relationships, sources and shared editor.  
 **Scope:** globally reusable, beginning with Southern California, Clatsop County and Wyoming.
 
