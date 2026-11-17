@@ -84,6 +84,11 @@ CREATE TABLE IF NOT EXISTS media_uses(
  UNIQUE(entity_id,media_id,role)
 );
 CREATE INDEX IF NOT EXISTS ix_media_uses_entity ON media_uses(entity_id);
+CREATE TABLE IF NOT EXISTS publications(
+ entity_id TEXT PRIMARY KEY REFERENCES entities(id) ON DELETE CASCADE,
+ published_at TEXT NOT NULL
+);
+
 """
 ENTITY_COLUMNS = ("id", "world_id", "type", "title", "aliases", "summary", "body", "status",
                   "start_year", "end_year", "lat", "lon", "theme_id", "accent", "layout",
@@ -193,6 +198,81 @@ class Store:
         r = self.one("SELECT * FROM entities WHERE id=? AND world_id=?", (eid, wid))
         require(r, "Entry not found in this world", 404)
         return canonical(r)
+
+    def publication(self, wid, eid, publish):
+        """Publishing is separate from canon status; unpublished records remain editable."""
+        self.check_entity(wid, eid)
+        require(type(publish) is bool, "Published must be boolean")
+        with self.lock, self.db:
+            if publish:
+                self.db.execute("""INSERT INTO publications(entity_id,published_at) VALUES(?,?)
+                    ON CONFLICT(entity_id) DO NOTHING""", (eid, now()))
+            else:
+                self.db.execute("DELETE FROM publications WHERE entity_id=?", (eid,))
+        return {"entity_id":eid,"published":publish}
+
+    def is_published(self, wid, eid):
+        self.check_world(wid)
+        return bool(self.one("""SELECT 1 FROM publications p
+            JOIN entities e ON e.id=p.entity_id
+            WHERE e.world_id=? AND e.id=?""",(wid,eid)))
+
+    def public_worlds(self):
+        return self.rows("""SELECT w.* FROM worlds w
+            WHERE EXISTS(SELECT 1 FROM entities e JOIN publications p ON p.entity_id=e.id
+                         WHERE e.world_id=w.id)
+            ORDER BY w.name""")
+
+    def public_entries(self, wid, search="", typ=None):
+        self.check_world(wid)
+        require(isinstance(search,str) and len(search)<=200, "Invalid search")
+        if typ:
+            require(isinstance(typ,str) and TYPE_PATTERN.fullmatch(typ), "Invalid type")
+        sql = """SELECT e.* FROM entities e JOIN publications p ON p.entity_id=e.id
+                 WHERE e.world_id=?"""
+        args=[wid]
+        if typ:
+            sql+=" AND e.type=?"
+            args.append(typ)
+        if search:
+            sql+=" AND (e.title LIKE ? OR e.summary LIKE ? OR e.aliases LIKE ? OR e.body LIKE ?)"
+            args.extend(["%"+search+"%"]*4)
+        sql+=" ORDER BY e.title COLLATE NOCASE"
+        with self.lock:
+            return [canonical(row) for row in self.db.execute(sql,args)]
+
+    def public_entity(self, wid, eid):
+        require(self.is_published(wid,eid), "Published article not found", 404)
+        return self.check_entity(wid,eid)
+
+    def public_relations(self, wid, eid=None):
+        self.check_world(wid)
+        if eid:
+            require(self.is_published(wid,eid), "Published article not found", 404)
+        sql = """SELECT r.* FROM relations r
+                 JOIN entities a ON a.id=r.source_id
+                 JOIN publications pa ON pa.entity_id=a.id
+                 JOIN entities b ON b.id=r.target_id
+                 JOIN publications pb ON pb.entity_id=b.id
+                 WHERE r.world_id=? AND a.world_id=? AND b.world_id=?"""
+        args=[wid,wid,wid]
+        if eid:
+            sql+=" AND (r.source_id=? OR r.target_id=?)"
+            args.extend([eid,eid])
+        return self.rows(sql+" ORDER BY r.created_at",args)
+
+    def public_links(self, wid, eid, incoming=False):
+        require(self.is_published(wid,eid), "Published article not found", 404)
+        target_col="l.source_id" if incoming else "l.target_id"
+        where_col="l.target_id" if incoming else "l.source_id"
+        return self.rows(f"""SELECT e.id,e.title,e.type FROM content_links l
+           JOIN entities e ON e.id={target_col}
+           JOIN publications p ON p.entity_id=e.id
+           WHERE {where_col}=? AND e.world_id=? ORDER BY e.title""", (eid,wid))
+
+    def public_media(self, wid, eid):
+        require(self.is_published(wid,eid), "Published article not found", 404)
+        return self.media_list(wid,eid)
 
     def worlds(self):
         return self.rows("SELECT * FROM worlds ORDER BY created_at,name")
@@ -526,6 +606,10 @@ class Store:
                     queue.append(child)
         require(visited == len(ids), "Imported parentage contains an ancestry cycle")
         old_new = {id_: str(uuid4()) for id_ in ids}
+        pub_records = payload.get("publications", [])
+        require(isinstance(pub_records,list) and all(isinstance(p,dict) and p.get("entity_id") in old_new
+          for p in pub_records),"Invalid publication records")
+        require(len(set(p["entity_id"] for p in pub_records))==len(pub_records),"Duplicate publications")
         world_id = str(uuid4())
         epoch = source_world.get("epoch_year")
         require(epoch is None or type(epoch) is int and -100000 <= epoch <= 100000, "Invalid imported epoch")
@@ -558,6 +642,9 @@ class Store:
                 self._sync_links(world_id, old_new[e["id"]], LINK_PATTERN.sub(
                     lambda m: "[[" + old_new[m.group(1)] + ("|" + m.group(0).split("|",1)[1] if "|" in m.group(0) else "]]"),
                     e["body"]))
+            for pub in pub_records:
+                self.db.execute("INSERT INTO publications(entity_id,published_at) VALUES (?,?)",
+                    (old_new[pub["entity_id"]],now()))
             for rel in relations:
                 require(isinstance(rel, dict) and rel.get("source_id") in old_new
                         and rel.get("target_id") in old_new, "Invalid imported relationship target")
@@ -583,8 +670,11 @@ class Store:
             relations = self.relation_list(wid)
             media = self.media_list(wid)
             uses = self.rows("SELECT * FROM media_uses WHERE world_id=?", (wid,))
+            published = self.rows("""SELECT p.entity_id,p.published_at FROM publications p
+                    JOIN entities e ON e.id=p.entity_id WHERE e.world_id=?""",(wid,))
         return {"format":"world-bible-export-v1","world":world,"entities":entries,
                 "relations":relations,"media_metadata":media,"media_uses":uses,
+                "publications":published,
                 "notice":"Image binaries are not included. Back up the .worldbible/media folder separately."}
 
 
@@ -642,9 +732,46 @@ class Handler(BaseHTTPRequestHandler):
             s = self.server.store
             if route == "/":
                 self.send_response(302)
-                self.send_header("Location", "/app/")
+                self.send_header("Location", "/read/")
                 self.end_headers()
                 return
+            if route.startswith("/read/"):
+                rel = route[6:] or "index.html"
+                require(rel in ("index.html", "reader.js", "reader.css"), "Asset not found", 404)
+                f = ROOT / "reader" / rel
+                require(f.is_file(), "Asset not found", 404)
+                blob=f.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", mimetypes.guess_type(f.name)[0] or "application/octet-stream")
+                self.send_header("Content-Length", str(len(blob)))
+                self.send_header("Cache-Control","no-store")
+                self.send_header("X-Content-Type-Options","nosniff")
+                self.send_header("Content-Security-Policy",
+                  "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+                  "img-src 'self' https://tile.openstreetmap.org data:; connect-src 'self'; "
+                  "object-src 'none'; frame-ancestors 'none'; base-uri 'none'")
+                self.end_headers()
+                self.wfile.write(blob)
+                return
+            if route == "/api/public/worlds":
+                return self.reply(s.public_worlds())
+            if route == "/api/public/entities":
+                return self.reply(s.public_entries(self.get_arg(q,"world_id"),
+                     q.get("search",[""])[0], q.get("type",[None])[0]))
+            if route == "/api/public/entity":
+                return self.reply(s.public_entity(self.get_arg(q,"world_id"),self.get_arg(q,"id")))
+            if route == "/api/public/relations":
+                return self.reply(s.public_relations(self.get_arg(q,"world_id"),
+                    q.get("entity_id",[None])[0]))
+            if route == "/api/public/backlinks":
+                return self.reply(s.public_links(self.get_arg(q,"world_id"),
+                    self.get_arg(q,"entity_id"),incoming=True))
+            if route == "/api/public/outgoing":
+                return self.reply(s.public_links(self.get_arg(q,"world_id"),
+                    self.get_arg(q,"entity_id"),incoming=False))
+            if route == "/api/public/media":
+                return self.reply(s.public_media(self.get_arg(q,"world_id"),
+                    self.get_arg(q,"entity_id")))
             if route.startswith("/app/"):
                 rel = route[5:] or "index.html"
                 require(rel in ("index.html", "app.js", "style.css", "workspaces.css"), "Asset not found", 404)
@@ -724,6 +851,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(s.create_world(data),201)
             if route=="/api/world" and verb=="PATCH":
                 return self.reply(s.update_world(wid,data))
+            if route=="/api/publication" and verb=="POST":
+                require(isinstance(data,dict) and set(data)=={"published"},"Invalid publication payload")
+                return self.reply(s.publication(wid,self.get_arg(q,"id"),data["published"]))
             if route=="/api/entities" and verb=="POST":
                 return self.reply(s.create_entry(wid,data),201)
             if route=="/api/entity":
