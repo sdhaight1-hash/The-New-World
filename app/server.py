@@ -172,10 +172,12 @@ class Store:
         self.db.close()
 
     def one(self, sql, args=()):
-        return self.db.execute(sql, args).fetchone()
+        with self.lock:
+            return self.db.execute(sql, args).fetchone()
 
     def rows(self, sql, args=()):
-        return [dict(r) for r in self.db.execute(sql, args).fetchall()]
+        with self.lock:
+            return [dict(r) for r in self.db.execute(sql, args).fetchall()]
 
     def check_world(self, wid):
         require(self.one("SELECT 1 FROM worlds WHERE id=?", (wid,)), "World not found", 404)
@@ -218,7 +220,8 @@ class Store:
             sql += " AND (title LIKE ? OR aliases LIKE ? OR body LIKE ? OR summary LIKE ?)"
             args += ["%" + search + "%"] * 4
         sql += " ORDER BY title COLLATE NOCASE LIMIT 500"
-        return [canonical(r) for r in self.db.execute(sql, args)]
+        with self.lock:
+            return [canonical(r) for r in self.db.execute(sql, args)]
 
     def create_entry(self, wid, data, specified_id=None):
         self.check_world(wid)
@@ -426,7 +429,9 @@ class Store:
 
     def export(self, wid):
         world = self.one_world(wid)
-        entries = self.entries(wid)
+        with self.lock:
+            entries = [canonical(r) for r in self.db.execute(
+                "SELECT * FROM entities WHERE world_id=? ORDER BY id", (wid,))]
         relations = self.relation_list(wid)
         media = self.media_list(wid)
         uses = self.rows("SELECT * FROM media_uses WHERE world_id=?", (wid,))
