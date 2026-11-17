@@ -10,7 +10,7 @@ const themes={
 function luminance(hex){const v=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(x=>x<=0.04045?x/12.92:((x+0.055)/1.055)**2.4);return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2];}
 function contrast(a,b){const [hi,lo]=[luminance(a),luminance(b)].sort((x,y)=>y-x);return (hi+0.05)/(lo+0.05);}
 
-const state={worlds:[],world:null,entries:[],entry:null,panel:"article",mode:"read",relations:[],media:[],allMedia:[],incoming:[],outgoing:[],layout:[],dirty:false};
+const state={worlds:[],world:null,entries:[],entry:null,panel:"article",mode:"read",relations:[],media:[],allMedia:[],incoming:[],outgoing:[],layout:[],dirty:false,designDirty:false};
 const escapeHTML=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const el=(tag,text,cls)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;if(cls)x.className=cls;return x;};
 const byId=id=>state.entries.find(e=>e.id===id);
@@ -27,7 +27,7 @@ async function api(path,method="GET",body){
  const init={method,headers:{}};if(method!=="GET"){init.headers["X-World-Bible"]="1";if(body!==undefined){init.headers["Content-Type"]="application/json";init.body=JSON.stringify(body);}}
  const res=await fetch(path,init),val=await res.json();if(!res.ok)throw Error(val.error||"Request failed");return val;
 }
-function safeExit(){return !state.dirty||confirm("Discard unsaved article edits?");}
+function safeExit(){return (!state.dirty&&!state.designDirty)||confirm("Discard unsaved article or design edits?");}
 function dirty(v){state.dirty=v;$("dirtyIndicator").textContent=v?"Unsaved changes":"Saved";}
 function setTheme(root,entry){
  const mode=$("appearance").value;
@@ -90,7 +90,7 @@ async function context(){
 }
 async function open(id){
  if(!safeExit())return;state.entry=byId(id);if(!state.entry)return;
- dirty(false);state.mode="read";await context();panel("article");render();
+ dirty(false);state.designDirty=false;state.mode="read";await context();panel("article");render();
 }
 function panel(p){
  if(!safeExit())return;
@@ -102,7 +102,8 @@ function panel(p){
  if(p==="timeline")timeline();if(p==="atlas")atlas(true);if(p==="article")render();
 }
 function mode(m){
- if(state.mode==="write"&&m!=="write"&&!safeExit())return;
+ if((state.mode==="write"||state.mode==="design")&&m!==state.mode&&!safeExit())return;
+ state.designDirty=false;
  state.mode=m;render();
 }
 function render(){
@@ -272,9 +273,9 @@ function design(){
 function layoutControls(){
  const root=$("layoutBlocks");root.replaceChildren();
  for(const name of blocks){const row=el("div",undefined,"layout-row"),check=el("input");check.type="checkbox";check.checked=state.layout.includes(name);
-  check.onchange=()=>{state.layout=check.checked?[...state.layout,name]:state.layout.filter(x=>x!==name);layoutControls();};
+  check.onchange=()=>{state.layout=check.checked?[...state.layout,name]:state.layout.filter(x=>x!==name);state.designDirty=true;layoutControls();};
   row.append(check,el("span",name,"layout-name"));const i=state.layout.indexOf(name);
-  if(i>=0){row.append(button("↑",()=>{if(i>0)[state.layout[i-1],state.layout[i]]=[state.layout[i],state.layout[i-1]];layoutControls();}),button("↓",()=>{if(i<state.layout.length-1)[state.layout[i+1],state.layout[i]]=[state.layout[i],state.layout[i+1]];layoutControls();}));}root.append(row);
+  if(i>=0){row.append(button("↑",()=>{if(i>0){[state.layout[i-1],state.layout[i]]=[state.layout[i],state.layout[i-1]];state.designDirty=true;}layoutControls();}),button("↓",()=>{if(i<state.layout.length-1){[state.layout[i+1],state.layout[i]]=[state.layout[i],state.layout[i+1]];state.designDirty=true;}layoutControls();}));}root.append(row);
  }
  previewDesign();
 }
@@ -283,7 +284,7 @@ function previewDesign(){
  root.append(el("h3",state.entry.title),el("p","Visible sections: "+(state.layout.join(" → ")||"none")));
 }
 async function saveDesign(){
- try{state.entry=await api(q("/api/entity",{world_id:wid(),id:state.entry.id}),"PATCH",{theme_id:$("dTheme").value,accent:$("dAccent").value,layout:state.layout});
+ try{state.entry=await api(q("/api/entity",{world_id:wid(),id:state.entry.id}),"PATCH",{theme_id:$("dTheme").value,accent:$("dAccent").value,layout:state.layout});state.designDirty=false;
  await refresh();await context();render();notice("Design saved.");}catch(err){notice(err.message,true);}
 }
 function timeline(){
@@ -315,9 +316,26 @@ function atlas(paint=true){
  $("mapReadout").textContent="Zoom "+map.zoom+" · Year "+year+" · "+places.length+" mapped";
 }
 function setupMap(){
- const frame=$("map");frame.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;map.drag={x:e.clientX,y:e.clientY,p:project(map.lon,map.lat,map.zoom)};frame.setPointerCapture(e.pointerId);});
- frame.addEventListener("pointermove",e=>{if(!map.drag)return;const d=map.drag,pt=inverse(d.p.x-(e.clientX-d.x),d.p.y-(e.clientY-d.y),map.zoom);map.lon=Math.max(-180,Math.min(180,pt.lon));map.lat=Math.max(-85,Math.min(85,pt.lat));atlas(true);});
- for(const event of ["pointerup","pointercancel"])frame.addEventListener(event,()=>map.drag=null);
+ const frame=$("map");
+ frame.addEventListener("pointerdown",e=>{
+  if(e.target.closest("button"))return;
+  map.drag={x:e.clientX,y:e.clientY,p:project(map.lon,map.lat,map.zoom),dx:0,dy:0};
+  frame.setPointerCapture(e.pointerId);
+ });
+ frame.addEventListener("pointermove",e=>{
+  if(!map.drag)return;
+  map.drag.dx=e.clientX-map.drag.x;map.drag.dy=e.clientY-map.drag.y;
+  for(const layer of ["tiles","pins"])$(layer).style.transform="translate("+map.drag.dx+"px,"+map.drag.dy+"px)";
+ });
+ function endDrag(){
+  if(!map.drag)return;
+  const d=map.drag;map.drag=null;
+  const pt=inverse(d.p.x-d.dx,d.p.y-d.dy,map.zoom);
+  map.lon=Math.max(-180,Math.min(180,pt.lon));map.lat=Math.max(-85,Math.min(85,pt.lat));
+  for(const layer of ["tiles","pins"])$(layer).style.transform="";
+  atlas(true);
+ }
+ for(const event of ["pointerup","pointercancel"])frame.addEventListener(event,endDrag);
  frame.addEventListener("wheel",e=>{e.preventDefault();map.zoom=Math.max(1,Math.min(15,map.zoom+(e.deltaY<0?1:-1)));atlas(true);},{passive:false});
  $("mapZoomIn").onclick=()=>{map.zoom=Math.min(15,map.zoom+1);atlas(true);};
  $("mapZoomOut").onclick=()=>{map.zoom=Math.max(1,map.zoom-1);atlas(true);};
@@ -376,17 +394,17 @@ function wire(){
  document.querySelectorAll("[data-panel]").forEach(b=>b.onclick=()=>panel(b.dataset.panel));
  document.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>mode(b.dataset.mode));
  $("appearance").value=localStorage.getItem("wb-mode")||"dark";document.body.dataset.appearance=$("appearance").value;
- $("appearance").onchange=()=>{document.body.dataset.appearance=$("appearance").value;localStorage.setItem("wb-mode",$("appearance").value);render();};
+ $("appearance").onchange=()=>{document.body.dataset.appearance=$("appearance").value;localStorage.setItem("wb-mode",$("appearance").value);if(state.mode==="read"&&state.entry)read();if(state.mode==="design"&&state.entry)previewDesign();};
  $("createType").onchange=()=>{$("customTypeField").hidden=$("createType").value!=="custom";};
  $("eType").onchange=()=>{$("editCustomTypeField").hidden=$("eType").value!=="custom";};
  $("relType").onchange=()=>{$("relCustom").hidden=$("relType").value!=="custom";};
  $("editForm").onsubmit=e=>{e.preventDefault();save();};$("editForm").oninput=()=>dirty(true);
  $("deleteEntry").onclick=remove;$("findLinks").onclick=discover;$("addRelation").onclick=addRelation;
  $("uploadImage").onclick=uploadImage;$("attachImage").onclick=attachImage;
- $("dTheme").onchange=previewDesign;$("dAccent").oninput=previewDesign;$("saveDesign").onclick=saveDesign;
- $("resetDesign").onclick=()=>{state.layout=[...blocks];layoutControls();};
+ $("dTheme").onchange=()=>{state.designDirty=true;previewDesign();};$("dAccent").oninput=()=>{state.designDirty=true;previewDesign();};$("saveDesign").onclick=saveDesign;
+ $("resetDesign").onclick=()=>{state.layout=[...blocks];state.designDirty=true;layoutControls();};
  $("timelineScope").onchange=timeline;$("timelineAll").onchange=timeline;
- setupMap();window.addEventListener("beforeunload",e=>{if(state.dirty){e.preventDefault();e.returnValue="";}});
+ setupMap();window.addEventListener("beforeunload",e=>{if(state.dirty||state.designDirty){e.preventDefault();e.returnValue="";}});
 }
 async function init(){wire();try{await worlds();render();notice("World Bible Studio ready.");}catch(err){notice("Server error: "+err.message,true);}}
 init();
