@@ -6,6 +6,10 @@ This directory contains the **source-grounded population manifest** for the loca
 - [`../app/seed.py`](../app/seed.py) — deterministic, repeatable importer. Source article content is preserved verbatim, and editing an existing database record never causes a later seed to overwrite it.
 - [`../app/tests/test_seed.py`](../app/tests/test_seed.py) — tests record totals, related entries and backlinks, source fidelity, world isolation by IDs, stable reimports, preservation of edited content and publication state.
 
+## Quality and scope audit
+
+The original importer accidentally treated 15 editorial/software-design documents as world entries. The [content audit](CONTENT_AUDIT.md) documents every excluded file and flags remaining historical placeholders for review. A fresh seeded encyclopedia contains **68 world-content records**, not the previous 83. Existing local databases receive a backup-first cleanup that preserves edited or published content.
+
 ## What counts as canon here?
 
 **Established:** creator-approved broad premises or real-world geographical baseline; it does *not* mean that all future details, dates, populations or institutions are settled.
