@@ -191,57 +191,103 @@ async function renderArticle(id){
  wrap.append(heroHeading);
  const hero=media.find(m=>m.role==="hero"||m.role==="portrait");
  if(hero){const fig=makeMedia(hero);fig.className="article-hero";fig.querySelector("img").loading="eager";wrap.append(fig);}
- const cols=node("div",undefined,"article-columns"),main=node("div",undefined,"article-main"),aside=node("aside",undefined,"article-aside");
- const body=node("article",undefined,"reader-prose");body.innerHTML=markup(entry.body||"There is no full article text published for this entry.");
- main.append(body);
- const headings=body.querySelectorAll("h2,h3,h4,h5");
- if(headings.length){
-  const toc=node("section",undefined,"aside-panel"),list=node("nav",undefined,"toc");
-  list.setAttribute("aria-label","On this page");toc.append(node("h2","In this article"));
-  for(const h of headings){
-   const jump=node("button",h.textContent,"toc-jump");
-   jump.onclick=()=>h.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
-   list.append(jump);
+ const cols=node("div",undefined,"article-columns");
+ const main=node("div",undefined,"article-main");
+ const aside=node("aside",undefined,"article-aside");
+ const layout=entry.layout?.length?entry.layout:["body","facts","relationships","backlinks","timeline","map","gallery","sources"];
+ const body=node("article",undefined,"reader-prose");
+ body.innerHTML=markup(entry.body||"This entry has no extended article text yet.");
+ if(layout.includes("body")){
+  const headings=body.querySelectorAll("h2,h3,h4,h5");
+  if(headings.length){
+   const toc=node("section",undefined,"aside-panel"),list=node("nav",undefined,"toc");
+   list.setAttribute("aria-label","On this page");toc.append(node("h2","In this article"));
+   for(const heading of headings){
+    const jump=node("button",heading.textContent,"toc-jump");
+    jump.onclick=()=>heading.scrollIntoView({
+     behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",
+     block:"start"
+    });
+    list.append(jump);
+   }
+   toc.append(list);aside.append(toc);
   }
-  toc.append(list);aside.append(toc);
  }
- const details=node("section",undefined,"aside-panel");details.append(node("h2","At a glance"));
- details.append(node("p",category(entry).label));
- if(entry.start_year!==null||entry.end_year!==null)details.append(node("p",readableDate(entry)));
- if(entry.aliases?.length)details.append(node("p","Also known as: "+entry.aliases.join(", ")));
- aside.append(details);
  const connections=[...new Map([...relations.map(r=>{
   const other=byId(r.source_id===id?r.target_id:r.source_id);
   return other?[other.id,{entry:other,relation:humanize(r.predicate)}]:null;
- }).filter(Boolean),...outgoing.map(e=>[e.id,{entry:byId(e.id),relation:"Read more"}])]).values()].filter(x=>x.entry&&x.entry.id!==id);
+ }).filter(Boolean),...outgoing.map(e=>[e.id,{entry:byId(e.id),relation:"Read more"}])]).values()]
+ .filter(x=>x.entry&&x.entry.id!==id);
+ const gallery=media.filter(m=>m.id!==hero?.id);
+ const contentSection=(title)=>{const section=node("section",undefined,"reader-data-section");section.append(node("h2",title));return section;};
+ for(const name of layout){
+  if(name==="body"){
+   main.append(body);
+  }else if(name==="facts"){
+   const section=contentSection("At a glance"),facts=node("dl",undefined,"reader-facts");
+   const add=(term,value)=>{facts.append(node("dt",term),node("dd",value));};
+   add("Subject",category(entry).label);
+   if(entry.start_year!==null||entry.end_year!==null)add("Period",readableDate(entry));
+   if(entry.aliases?.length)add("Also known as",entry.aliases.join(", "));
+   if(entry.lat!==null&&entry.lon!==null)add("Location",entry.lat+", "+entry.lon);
+   section.append(facts);main.append(section);
+  }else if(name==="relationships"&&connections.length){
+   const section=contentSection("People, places & connections"),list=node("div",undefined,"relation-list");
+   for(const rel of connections.slice(0,16)){
+    const a=link("","#/article/"+rel.entry.id,"relation-item");
+    a.append(node("small",rel.relation),node("strong",rel.entry.title));list.append(a);
+   }
+   section.append(list);main.append(section);
+  }else if(name==="backlinks"&&incoming.length){
+   const section=contentSection("Referenced elsewhere");
+   const list=node("div",undefined,"relation-list");
+   for(const e of incoming.slice(0,12)){
+    const item=link("","#/article/"+e.id,"relation-item");
+    item.append(node("small","Referenced by"),node("strong",e.title));list.append(item);
+   }
+   section.append(list);main.append(section);
+  }else if(name==="timeline"){
+   const events=connections.filter(c=>c.entry.type==="event");
+   if(events.length){
+    const section=contentSection("Historical connections");
+    for(const ev of events.slice(0,12)){
+     const row=node("p",undefined,"reader-history-link");
+     row.append(node("time",readableDate(ev.entry)+" · "),link(ev.entry.title,"#/article/"+ev.entry.id));section.append(row);
+    }
+    main.append(section);
+   }
+  }else if(name==="map"&&entry.lat!==null&&entry.lon!==null){
+   const section=contentSection("In the atlas");
+   section.append(node("p","Recorded coordinates: "+entry.lat+", "+entry.lon));
+   section.append(link("Find this place on the map →","#/atlas/"+encodeURIComponent(entry.id),"reader-map-link"));
+   main.append(section);
+  }else if(name==="gallery"&&gallery.length){
+   const section=contentSection("Images & documents"),strip=node("div",undefined,"gallery-strip");
+   for(const m of gallery){
+    const fig=makeMedia(m),img=fig.querySelector("img");
+    const original=state.staticBundle?mediaUrl(m.media_id,false):"/media/"+encodeURIComponent(currentId())+"/"+encodeURIComponent(m.media_id);
+    const a=link("",original);a.target="_blank";a.rel="noopener noreferrer";a.title="Open original image: "+m.title;
+    img.remove();a.append(img);fig.prepend(a);strip.append(fig);
+   }
+   section.append(strip);main.append(section);
+  }else if(name==="sources"){
+   const sources=[...connections,...outgoing.map(e=>({entry:byId(e.id)}))]
+    .filter(c=>c.entry?.type==="source");
+   const unique=[...new Map(sources.map(c=>[c.entry.id,c.entry])).values()];
+   if(unique.length){
+    const section=contentSection("Documents & sources");
+    for(const e of unique)section.append(link(e.title,"#/article/"+e.id,"reader-source-link"));
+    main.append(section);
+   }
+  }
+ }
  if(connections.length){
-  const related=node("section",undefined,"aside-panel");related.append(node("h2","Explore related"));
+  const related=node("section",undefined,"aside-panel");
+  related.append(node("h2","Continue exploring"));
   for(const rel of connections.slice(0,8))related.append(link(rel.entry.title,"#/article/"+rel.entry.id));
   aside.append(related);
  }
  cols.append(main,aside);wrap.append(cols);
- const gallery=media.filter(m=>m.id!==hero?.id);
- if(gallery.length){
-  const section=node("section",undefined,"article-related");
-  section.append(node("h2","Images and documents"));
-  const strip=node("div",undefined,"gallery-strip");
-  for(const m of gallery){
-   const fig=makeMedia(m),a=link("","/media/"+encodeURIComponent(currentId())+"/"+encodeURIComponent(m.media_id));
-   a.target="_blank";a.rel="noopener noreferrer";a.title="Open original image: "+m.title;
-   const img=fig.querySelector("img");img.remove();a.append(img);fig.prepend(a);strip.append(fig);
-  }
-  section.append(strip);wrap.append(section);
- }
- if(connections.length||incoming.length){
-  const section=node("section",undefined,"article-related");section.append(node("p","FURTHER READING","eyebrow"),node("h2","Continue exploring"));
-  const list=node("div",undefined,"relation-list");
-  const relatedItems=[...connections,...incoming.map(e=>({entry:byId(e.id),relation:"Referenced by"}))]
-    .filter(item=>item.entry);
-  const suggested=[...new Map(relatedItems.map(item=>[item.entry.id,item])).values()].slice(0,12);
-  for(const rel of suggested){const a=link("","#/article/"+rel.entry.id,"relation-item");
-   a.append(node("small",rel.relation),node("strong",rel.entry.title));list.append(a);}
-  section.append(list);wrap.append(section);
- }
  root.append(wrap);
  window.scrollTo(0,0);
 }
@@ -336,7 +382,13 @@ async function navigate(){
  if(route==="home"){showRoute("home");renderHome();setTitle("Discover");}
  else if(route==="browse")renderBrowse(parts[1]||"");
  else if(route==="article"){try{await renderArticle(parts[1]);}catch(e){missing("Article unavailable","This article could not be loaded.");}}
- else if(route==="atlas"){showRoute("atlas");setTitle("Atlas");paintMap();}
+ else if(route==="atlas"){
+  const selected=byId(parts[1]);
+  if(selected&&selected.lat!==null&&selected.lon!==null){
+   state.map.lon=selected.lon;state.map.lat=selected.lat;state.map.zoom=8;
+  }
+  showRoute("atlas");setTitle("Atlas");paintMap();
+ }
  else if(route==="history")renderHistory();
  else missing("Page not found","Choose a destination from the navigation above.");
  window.scrollTo(0,0);
