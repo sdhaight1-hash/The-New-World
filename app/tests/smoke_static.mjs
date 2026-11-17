@@ -11,10 +11,14 @@ try{
  await page.locator("#coverTitle").waitFor({state:"visible",timeout:15000});
  assert.equal(await page.locator("#studioLink").count(),0);
  assert.equal(await page.locator("#coverCount").innerText(),"1 published articles");
+ assert.equal(await page.locator("#coverArticleNumber").innerText(),"01");
+ assert.equal(await page.locator("#readingRoute .reading-route-item").count(),1);
+ assert.equal(await page.locator("#readingRoute .reading-route-item strong").first().innerText(),"Navigation Test Settlement");
  await page.locator("#featuredCards .article-card").first().click();
  await page.locator("#articleContent h1").waitFor({state:"visible"});
  assert.equal(await page.locator("#articleContent h1").innerText(),"Navigation Test Settlement");
  assert.match(await page.locator("#articleContent .reader-prose").innerText(),/Initial data entry/);
+ assert.equal(await page.locator("#articleContent .archive-context strong").innerText(),"Places");
  await page.locator(".primary-nav a[href='#/browse']").click();
  await page.locator("#browseCards .article-card").first().waitFor({state:"visible"});
  await page.locator("#searchToggle").click();
@@ -33,6 +37,8 @@ try{
  await page.locator("#readerAtlas").waitFor({state:"visible"});
  await page.setViewportSize({width:390,height:720});
  assert.equal(await page.locator("#readerAtlas").isVisible(),true);
+ await page.locator(".primary-nav a[href='#/']").click();
+ assert.equal(await page.locator("#readingRoute .reading-route-item").count(),1);
  assert.deepEqual(errors,[]);
  console.log("PASS: static publication browse/article/search/theme/history/atlas/mobile (no Studio)");
 }finally{
