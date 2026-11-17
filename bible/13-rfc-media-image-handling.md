@@ -1,6 +1,6 @@
 # RFC 004 — Media Library, Image Handling and Visual Annotation
 
-**Status:** research-backed specification; NOT an implemented image manager.
+**Status:** initial image upload, library reuse, captions, alt text and previews implemented in [World Bible Studio](../app/README.md). Annotation hotspots, versions, galleries management and rights workflows remain planned.
 **Depends on:** [Historical Knowledge Core](10-rfc-historical-knowledge-core.md), [Location/Faction Systems](11-rfc-location-faction-systems.md), [Timeline Engine](12-rfc-timeline-engine.md).
 **Core principle:** assets are first-class records reused across all encyclopedia views, not copied into separate map, genealogy, article or faction image stores.
 
