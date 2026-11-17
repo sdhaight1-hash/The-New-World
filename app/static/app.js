@@ -289,12 +289,28 @@ async function saveDesign(){
  try{state.entry=await api(q("/api/entity",{world_id:wid(),id:state.entry.id}),"PATCH",{theme_id:$("dTheme").value,accent:$("dAccent").value,layout:state.layout});state.designDirty=false;
  await refresh();await context();render();notice("Design saved.");}catch(err){notice(err.message,true);}
 }
-function timeline(){
- if(!state.world)return;const s=$("timelineScope"),selected=s.value;optionList(s,state.entries,"Entire world");if(byId(selected))s.value=selected;
- const root=$("timelineList");root.replaceChildren(),year=num($("timelineYear").value)??50;
- const events=state.entries.filter(e=>e.type==="event"&&($("timelineAll").checked||active(e,year))&&(!s.value||e.id===s.value||state.relations.some(r=>[r.source_id,r.target_id].includes(e.id)&&[r.source_id,r.target_id].includes(s.value)))).sort((a,b)=>(a.start_year??999999)-(b.start_year??999999));
- for(const e of events){const row=el("div",undefined,"timeline-event");row.append(el("time",when(e)),linkTo(e),el("p",e.summary||"No summary","muted"));root.append(row);}
- if(!events.length)root.append(el("p","No matching historical events.","muted"));
+function timeline(){timelineLoad().catch(err=>notice("Timeline failed: "+err.message,true));}
+async function timelineLoad(){
+ if(!state.world)return;
+ const scope=$("timelineScope"),old=scope.value;
+ optionList(scope,state.entries,"Entire world");
+ if(byId(old))scope.value=old;
+ const selected=scope.value,world=wid();
+ const related=selected?await api(q("/api/relations",{world_id:world,entity_id:selected})):[];
+ if(world!==wid()||scope.value!==selected)return;
+ const root=$("timelineList");root.replaceChildren();
+ const year=num($("timelineYear").value)??50;
+ const list=state.entries.filter(e=>
+   e.type==="event"&&($("timelineAll").checked||active(e,year))&&
+   (!selected||e.id===selected||related.some(r=>
+     [r.source_id,r.target_id].includes(e.id)&&[r.source_id,r.target_id].includes(selected))))
+   .sort((a,b)=>(a.start_year??999999)-(b.start_year??999999));
+ for(const e of list){
+   const row=el("div",undefined,"timeline-event");
+   row.append(el("time",when(e)),linkTo(e),el("p",e.summary||"No summary","muted"));
+   root.append(row);
+ }
+ if(!list.length)root.append(el("p","No matching historical events.","muted"));
 }
 const map={lon:0,lat:25,zoom:2,drag:null},TILE=256;
 function project(lon,lat,z){const scale=TILE*2**z,r=Math.max(-85,Math.min(85,lat))*Math.PI/180;return{x:(lon+180)/360*scale,y:(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*scale};}
