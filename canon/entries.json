@@ -625,6 +625,110 @@
       "body": "Fishing, timber, wetlands, river navigation and limited coastal lowland farming all matter to Clatsop County. Food preservation, salt, vessels, trained labor and safe estuary crossings are constraints rather than guaranteed Year 50 solutions.",
       "source": "regions/clatsop-county.md",
       "status": "working"
+    },
+    {
+      "key": "age-of-ai",
+      "type": "event",
+      "title": "The Brief Age of AI (2022–2030)",
+      "summary": "Opening historical era of The New World, from mass-market conversational AI to the societal disruptions preceding the Great Plague.",
+      "body": "The public introduction of ChatGPT on November 30, 2022 opened the first defining period in the world's chronology. Through November 17, 2026 its technological and economic history follows documented reality. A convincing public announcement of AGI in December 2026 begins the alternate timeline. From 2027 through 2029, rapidly increasing automation displaces human labor across many sectors and destabilizes wage-dependent households, political institutions and public services. When the Great Plague begins around 2030, the world is already economically and socially unsettled. AI itself is not the biological cause of the epidemic or the physical cause of the later Cascade.",
+      "source": "bible/20-brief-age-of-ai.md",
+      "start_year": -12,
+      "end_year": -4,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "chatgpt-public-launch",
+      "type": "event",
+      "title": "Public introduction of ChatGPT (November 30, 2022)",
+      "summary": "OpenAI releases ChatGPT to the public, marking the beginning of the setting's Age of AI.",
+      "body": "On November 30, 2022, OpenAI introduced ChatGPT as a free research preview using a GPT-3.5-family model. GPT-3 itself had been introduced in 2020. This documented real-world event becomes the chosen opening milestone for The New World's historical chronology, because it places powerful conversational AI in everyday public use. Historical source: https://openai.com/index/chatgpt/.",
+      "source": "bible/20-brief-age-of-ai.md",
+      "start_year": -12,
+      "end_year": -12,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "pre-agi-adoption",
+      "type": "event",
+      "title": "Expansion of generative AI and agents (2023–2026)",
+      "summary": "Documented growth of multimodal AI, generative tools and software agents before the alternate-history divergence.",
+      "body": "Between 2023 and November 17, 2026, generative and agentic systems spread across consumer and professional software. GPT-4 was introduced on March 14, 2023; GPT-4o on May 13, 2024; and ChatGPT agent was announced July 17, 2025. Labor effects were not uniform and widespread economy-wide displacement had not been demonstrated as of the cutoff. This part of the timeline remains documented history, not alternate-fiction. Sources and distinctions are listed in the Brief Age of AI source chapter.",
+      "source": "bible/20-brief-age-of-ai.md",
+      "start_year": -11,
+      "end_year": -8,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "agi-announcement-2026",
+      "type": "event",
+      "title": "Public announcement of AGI (December 2026)",
+      "summary": "The defining alternate-history divergence: AGI is convincingly demonstrated and announced to the world.",
+      "body": "In December 2026, an artificial general intelligence is convincingly announced publicly. Its exact announcement day, developer, system name, demonstration, validation criteria, country-by-country response and initial access arrangements remain unresolved. This is a fixed turning point of The New World's alternate chronology, not a real-world claim. Practical deployment remains constrained by computing, energy, trust, capital and physical infrastructure.",
+      "source": "bible/20-brief-age-of-ai.md",
+      "start_year": -8,
+      "end_year": -8,
+      "status": "established",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "labor-displacement-2027",
+      "type": "event",
+      "title": "Early mass labor displacement (2027)",
+      "summary": "Following the AGI announcement, automation begins rapidly restructuring the human labor market.",
+      "body": "In 2027, AI is increasingly used to replace, rather than solely assist, substantial categories of digital and administrative work. Early-career pipelines, customer service, clerical operations, routine analysis, creative production and some software tasks are especially exposed. Impacts vary enormously by location, sector, infrastructure and firm; physical work and care remain differently constrained. Precise worldwide unemployment numbers, laws, strike waves and corporate names are not yet established.",
+      "source": "bible/20-brief-age-of-ai.md",
+      "start_year": -7,
+      "end_year": -7,
+      "status": "working",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "automation-boom-2028",
+      "type": "event",
+      "title": "Global automation boom (2028)",
+      "summary": "The AI-driven economy grows more productive and capital-intensive even as conventional employment weakens.",
+      "body": "During 2028, the automation wave expands through software operations and selected robotics-intensive industries. Some automated businesses achieve extraordinary output with far fewer employees, but energy, factories, physical maintenance, chips and finance remain real limits. Effects vary among wealthy industrial centers, developing economies and communities already experiencing labor dislocation. Whether particular countries embrace, resist or restrict automation remains to be decided.",
+      "source": "bible/20-brief-age-of-ai.md",
+      "start_year": -6,
+      "end_year": -6,
+      "status": "working",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "social-fracture-2029",
+      "type": "event",
+      "title": "Automated prosperity and social fracture (2029)",
+      "summary": "Pre-Plague tensions sharpen as high automated output coexists with weakened wages and institutional strain.",
+      "body": "By 2029 the setting's brief age of widespread AGI-led automation creates a contradiction between productive capacity and income distribution. Displaced households struggle with housing, healthcare and food security; governments face contested choices about relief, taxes, employment and AI ownership. Social movements, migration and changing trust set the stage for the Great Plague. Exact national policies, outcomes, percentages and named organizations have not been established.",
+      "source": "bible/20-brief-age-of-ai.md",
+      "start_year": -5,
+      "end_year": -5,
+      "status": "working",
+      "theme_id": "chronicle"
+    },
+    {
+      "key": "ai-infrastructure-legacy",
+      "type": "subject",
+      "title": "Legacy of pre-Cascade automation",
+      "summary": "The advantages and vulnerabilities inherited from the brief age of AI after the Plague and Cascade.",
+      "body": "AI-dependent supply chains, labor reorganization and the concentration of equipment and technical knowledge influence how survivors weather the Great Plague and later infrastructure failure. Some local models, datasets, machines, robots, printed documentation and generators may survive; widespread cloud computing and complex automated plants require dependable power, networks, replacement components and skilled maintenance. The Cascade does not make AI physically impossible. Communities with surviving experts and less fragile local infrastructure can follow different paths.",
+      "source": "bible/20-brief-age-of-ai.md",
+      "status": "established",
+      "theme_id": "archive"
+    },
+    {
+      "key": "pre-plague-economic-disruption",
+      "type": "subject",
+      "title": "Pre-Plague employment and institutional crisis",
+      "summary": "Economic dislocation before 2030 helps explain later migration, political legitimacy and pandemic vulnerability.",
+      "body": "The 2027–2029 fictional AGI and automation boom eliminates or transforms many human positions faster than social institutions adapt. Wages and entry-level opportunities weaken even when automated production expands, redistributing economic security according to ownership, sector and geography. Households, cities and governments may face fiscal and social stress before the epidemic. This is not a claim that the real 2026 global economy already had mass AI unemployment; specific national responses and statistics remain open.",
+      "source": "bible/20-brief-age-of-ai.md",
+      "status": "established",
+      "theme_id": "civic"
     }
   ],
   "relations": [
@@ -974,6 +1078,108 @@
       "source": "coastal-livelihood",
       "target": "clatsop-county",
       "predicate": "relevant_to",
+      "status": "working"
+    },
+    {
+      "source": "chatgpt-public-launch",
+      "target": "age-of-ai",
+      "predicate": "initiated",
+      "status": "established"
+    },
+    {
+      "source": "chatgpt-public-launch",
+      "target": "pre-agi-adoption",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "pre-agi-adoption",
+      "target": "agi-announcement-2026",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "agi-announcement-2026",
+      "target": "age-of-ai",
+      "predicate": "part_of",
+      "status": "established"
+    },
+    {
+      "source": "agi-announcement-2026",
+      "target": "labor-displacement-2027",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "labor-displacement-2027",
+      "target": "automation-boom-2028",
+      "predicate": "preceded",
+      "status": "working"
+    },
+    {
+      "source": "automation-boom-2028",
+      "target": "social-fracture-2029",
+      "predicate": "preceded",
+      "status": "working"
+    },
+    {
+      "source": "social-fracture-2029",
+      "target": "plague-era",
+      "predicate": "preceded",
+      "status": "working"
+    },
+    {
+      "source": "labor-displacement-2027",
+      "target": "pre-plague-economic-disruption",
+      "predicate": "contributed_to",
+      "status": "established"
+    },
+    {
+      "source": "automation-boom-2028",
+      "target": "pre-plague-economic-disruption",
+      "predicate": "contributed_to",
+      "status": "established"
+    },
+    {
+      "source": "social-fracture-2029",
+      "target": "pre-plague-economic-disruption",
+      "predicate": "characterizes",
+      "status": "working"
+    },
+    {
+      "source": "pre-plague-economic-disruption",
+      "target": "plague-era",
+      "predicate": "increased_vulnerability_before",
+      "status": "working"
+    },
+    {
+      "source": "age-of-ai",
+      "target": "plague-era",
+      "predicate": "preceded",
+      "status": "established"
+    },
+    {
+      "source": "age-of-ai",
+      "target": "ai-infrastructure-legacy",
+      "predicate": "left_behind",
+      "status": "established"
+    },
+    {
+      "source": "ai-infrastructure-legacy",
+      "target": "cascade-event",
+      "predicate": "affected_by",
+      "status": "established"
+    },
+    {
+      "source": "ai-infrastructure-legacy",
+      "target": "local-power",
+      "predicate": "dependent_on",
+      "status": "established"
+    },
+    {
+      "source": "pre-plague-economic-disruption",
+      "target": "successor-governance",
+      "predicate": "influenced",
       "status": "working"
     }
   ]
