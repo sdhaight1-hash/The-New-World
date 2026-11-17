@@ -41,6 +41,14 @@ Existing full-archive backups include all moodboards and media. JSON-only data i
 
 [**VVD × Canva × Notion research and moodboard architecture**](../bible/19-visual-worldbuilding-and-moodboards.md)
 
+## Populate The New World from established source entries
+
+The repository includes [the structured initial canon inventory](../canon/entries.json) and a [provenance and coverage guide](../canon/README.md). Running `python app/launch.py` or the Windows launcher automatically loads missing material into the dedicated **The New World** world.
+
+A fresh import currently yields **83 records** (23 original Markdown sources and 60 additional structured entries) and **58 typed relationships**. The original plague and Cascade articles are authoritative and are not duplicated. Structured records are searchable and linked through the Encyclopedia, Chronology and Connections workspaces; geographic entries intentionally do not invent coordinates where no source establishes them.
+
+Importing is *additive*: it preserves all prior local edits, publication settings and manually authored pages. No content is published to the reader automatically. You can inspect records individually and publish approved entries through the Studio.
+
 ## Available now
 
 - Multiple independent worlds with editable names/description, search/filterable entries, and custom entity categories (person/place/event/organization/family/source and other user-defined types).
