@@ -9,6 +9,7 @@ page.on("pageerror",error=>errors.push(error.message));
 try{
  await page.goto(base,{waitUntil:"domcontentloaded"});
  await page.locator("#homeWorldTitle").waitFor({state:"visible",timeout:15000});
+ await page.locator('body[data-space="home"]').waitFor({state:"visible",timeout:15000});
  assert.match(await page.locator("#spaceHeading").innerText(),/World Overview/);
  assert.equal(await page.locator("body").getAttribute("data-space"),"home",
   JSON.stringify({errors,notice:await page.locator("#notice").textContent(),body:await page.evaluate(()=>({space:document.body.dataset.space,outer:document.body.outerHTML.slice(0,360)}))}));
