@@ -10,6 +10,16 @@
 - **Social trajectory:** localized power and landholding arrangements can become hereditary and feudal-like, but republics, tribal governments, town councils, federations and industrial enclaves may also persist.
 - **Initial areas to detail:** (1) Big Bear–Victor Valley and connected Southern California, (2) Clatsop County including Astoria, Seaside and Cannon Beach, (3) Wyoming country between the user-described Diamond Ranch and a reservation. These are **not** exclusive areas.
 
+## The opening era — established setting direction
+
+- **Historical beginning:** November 30, 2022, OpenAI's public introduction of ChatGPT (GPT-3.5 family). This is a real historical event; GPT-3 itself predates it.
+- **Documented cutoff:** real history through November 17, 2026, including increasing AI capabilities and adoption, but without asserting real economy-wide labor displacement.
+- **First major alternate-history divergence:** a convincing worldwide AGI announcement in **December 2026**. Exact day, announcing party and implementation remain open.
+- **Brief AI and automation age:** 2027–2029 sees intense, globally uneven deployment and large-scale loss or transformation of human jobs. Economic productivity and private capital concentrations can rise alongside weakened wages, careers and local fiscal capacity.
+- **Causal role:** the later Great Plague begins amid existing employment upheaval and social strain; AI is not the pathogen's cause, and the separate Cascade physically disrupts infrastructure sustaining many automated systems. Some offline/local AI technology can survive.
+
+See [The Brief Age of AI](20-brief-age-of-ai.md).
+
 ## Provisional (not locked)
 
 - **2030** men's World Cup as early international amplification event for the plague; outbreak timeline and biological traits unmodeled.
