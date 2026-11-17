@@ -207,6 +207,26 @@ class Store:
         self.check_world(wid)
         return dict(self.one("SELECT * FROM worlds WHERE id=?", (wid,)))
 
+    def update_world(self, wid, data):
+        current = self.one_world(wid)
+        require(isinstance(data, dict) and set(data) <= {"name", "description", "epoch_year"},
+                "Invalid world settings")
+        if "name" in data:
+            require(isinstance(data["name"], str) and 0 < len(data["name"].strip()) <= 150,
+                    "Invalid world name")
+            data["name"] = data["name"].strip()
+        if "description" in data:
+            require(isinstance(data["description"], str) and len(data["description"]) <= 3000,
+                    "Invalid world description")
+        if "epoch_year" in data:
+            require(data["epoch_year"] is None or type(data["epoch_year"]) is int
+                    and -100000 <= data["epoch_year"] <= 100000, "Invalid epoch")
+        if data:
+            with self.lock, self.db:
+                self.db.execute("UPDATE worlds SET " + ",".join(k+"=?" for k in data)
+                                +" WHERE id=?", (*data.values(),wid))
+        return self.one_world(wid)
+
     def entries(self, wid, search="", typ=None):
         self.check_world(wid)
         sql = "SELECT * FROM entities WHERE world_id=?"
@@ -641,6 +661,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(s.import_data(data),201)
             if route=="/api/worlds" and verb=="POST":
                 return self.reply(s.create_world(data),201)
+            if route=="/api/world" and verb=="PATCH":
+                return self.reply(s.update_world(wid,data))
             if route=="/api/entities" and verb=="POST":
                 return self.reply(s.create_entry(wid,data),201)
             if route=="/api/entity":
