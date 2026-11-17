@@ -28,6 +28,7 @@
 <div class="nav-stats" id="navStats"></div>
 <input id="search" placeholder="Search entries and content…" aria-label="Search entries">
 <select id="typeFilter" aria-label="Filter entry type"><option value="">All entry types</option><option>person</option><option>place</option><option>event</option><option>organization</option><option>family</option><option>object</option><option>source</option><option>subject</option></select>
+<div class="v2-library-filters"><label for="v2CategoryFilter">Collection</label><select id="v2CategoryFilter"><option value="">All collections</option></select><label for="v2TagFilter">Topic tag</label><select id="v2TagFilter"><option value="">All tags</option></select><div class="v2-new-class"><input id="v2NewCategory" placeholder="New collection name" aria-label="New collection name"><button id="v2AddCategory" type="button" title="Add a world collection">+</button></div></div>
 <div class="library-divider"><span id="entryListHeading">ENTRIES</span><span id="entryCount">0</span></div><div id="categoryChips" class="category-chips" aria-label="Quick category filters"></div>
 <div id="entryList" class="entry-list" aria-label="Entries"></div>
 <div class="nav-footer"><div id="worldDescription"></div><small>Offline-first knowledge. Saved in SQLite on your computer.</small></div>
@@ -77,9 +78,20 @@
 <label>Start year (Gregorian or project year)<input id="eStart" type="number" placeholder="Optional"></label><label>End year<input id="eEnd" type="number" placeholder="Optional"></label>
 <label>Latitude<input id="eLat" type="number" min="-90" max="90" step="any" placeholder="Optional: no invented coordinates"></label><label>Longitude<input id="eLon" type="number" min="-180" max="180" step="any" placeholder="Optional"></label></div>
 <label>Summary<textarea id="eSummary" rows="3"></textarea></label>
+<section id="v2MetadataEditor" class="v2-metadata">
+  <div class="v2-heading"><div><p class="section-overline">STRUCTURED KNOWLEDGE</p><h3>Entry properties & classification</h3><p class="muted">Type-aware facts, collections and tags are separate from your article prose.</p></div><span id="v2MetaStatus" role="status"></span></div>
+  <div class="form-grid">
+    <label>Subtype<select id="v2Subtype"><option value="">No subtype</option></select></label>
+    <label>Collections<select id="v2Categories" multiple size="4" aria-label="Entry collections"></select></label>
+    <label>Tags<select id="v2Tags" multiple size="4" aria-label="Entry topic tags"></select></label>
+    <label>Create topic tag<span class="v2-inline-form"><input id="v2NewTag" placeholder="Research topic" aria-label="New topic tag"><button id="v2AddTag" type="button">Add</button></span></label>
+  </div>
+  <div id="v2PropertyFields" class="form-grid"></div>
+  <button id="v2SaveMetadata" type="button" class="primary">Save properties & classification</button>
+</section>
 <div class="editor-bar"><span>Article Markdown · use <code>[[entity-id|visible label]]</code> for durable links</span><button id="findLinks" type="button">Discover references</button></div>
 <textarea id="eBody" class="body-editor" aria-label="Article body in Markdown" spellcheck="true"></textarea>
-<div id="suggestions" class="suggestions" hidden></div>
+<div id="suggestions" class="suggestions" hidden aria-live="polite"></div>
 <div class="form-actions"><button class="primary" type="submit">Save entry</button><button id="deleteEntry" type="button" class="danger">Delete…</button><span id="dirtyIndicator">Saved</span></div></form></div>
 <div id="designPanel" class="form-shell" hidden><h2>Entry designer</h2><p class="muted">Appearance is separate from historical facts. Layout sections always reference this entry’s canonical records.</p>
 <div class="form-grid"><label>Entry theme<select id="dTheme"><option value="archive">Archive</option><option value="atlas">Atlas</option><option value="chronicle">Chronicle</option><option value="kinship">Kinship</option><option value="civic">Civic</option><option value="custom">Custom</option></select></label><label class="accent-choice"><span>Accent color</span><span class="accent-control"><input id="dOverrideAccent" type="checkbox"><span>Override preset</span><input type="color" id="dAccent" value="#77B7AE" disabled aria-label="Custom accent color"></span></label></div>
