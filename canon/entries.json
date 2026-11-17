@@ -1249,6 +1249,38 @@
       "source": "history/04-california-2018-2026.md",
       "status": "established",
       "theme_id": "chronicle"
+    },
+    {
+      "key": "history-big-bear",
+      "source": "history/10-big-bear-valley-2018-2026.md",
+      "reuse_source": "history/10-big-bear-valley-2018-2026.md",
+      "type": "subject",
+      "title": "Big Bear Valley pre-divergence history",
+      "summary": "Actual history of Big Bear Valley through November 2026",
+      "body": "See historical chapter",
+      "status": "established"
+    },
+    {
+      "key": "history-victor",
+      "source": "history/11-victor-valley-2018-2026.md",
+      "reuse_source": "history/11-victor-valley-2018-2026.md",
+      "type": "subject",
+      "title": "Victor Valley pre-divergence history",
+      "summary": "Actual history of Victor Valley through November 2026",
+      "body": "See historical chapter",
+      "status": "established"
+    },
+    {
+      "key": "san-bernardino-snowstorm-2023",
+      "source": "history/10-big-bear-valley-2018-2026.md",
+      "type": "event",
+      "title": "San Bernardino Mountain winter emergency (February–March 2023)",
+      "summary": "Exceptional snow closes mountain roads and disrupts fuel, electricity, transport and communications.",
+      "body": "A major storm begins in late February 2023 after a rare blizzard warning for San Bernardino County's mountains on February 23. Snow accumulates over successive storms, making roads impassable and complicating fuel, electricity, communications, supplies and emergency access. The county declares an emergency February 27, with later state and federal declarations; the county's after-action report describes highways reopening to the public by March 12. The whole mountainous region is not identical to Big Bear, and exact closure severity varies locally. The event provides a real-world stress test for future mountain-supply modeling, not evidence of an already-occurring Plague or solar Cascade. Source: https://main.sbcounty.gov/wp-content/uploads/sites/80/Uploads/Content/SanBernardinoCounty-2023-Winter-Storm-After-Action-Report.pdf",
+      "start_year": -11,
+      "end_year": -11,
+      "status": "established",
+      "theme_id": "chronicle"
     }
   ],
   "relations": [
@@ -2204,6 +2236,42 @@
       "source": "la-fires-2025",
       "target": "history-so-cal-local",
       "predicate": "regional_context_for",
+      "status": "established"
+    },
+    {
+      "source": "history-so-cal-local",
+      "target": "history-big-bear",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-so-cal-local",
+      "target": "history-victor",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-big-bear",
+      "target": "big-bear-valley",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "history-victor",
+      "target": "victor-valley",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "san-bernardino-snowstorm-2023",
+      "target": "history-big-bear",
+      "predicate": "documented_in",
+      "status": "established"
+    },
+    {
+      "source": "san-bernardino-snowstorm-2023",
+      "target": "big-bear-valley",
+      "predicate": "affected",
       "status": "established"
     }
   ]
