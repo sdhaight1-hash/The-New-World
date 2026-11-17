@@ -282,7 +282,9 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(len(self.store.public_relations(self.a, subject["id"])), 1)
         self.assertEqual([x["title"] for x in self.store.public_links(self.a,subject["id"],incoming=True)],
                          ["River history"])
-        self.assertEqual(self.store.public_links(self.a,hidden["id"]), [])
+        with self.assertRaises(Error) as ctx:
+            self.store.public_links(self.a,hidden["id"])
+        self.assertEqual(ctx.exception.status,404)
 
     def test_publications_preserved_after_archive_import(self):
         source = self.add(self.a, "Published port", "place")
@@ -350,8 +352,9 @@ class ServerTests(unittest.TestCase):
 
     def test_reader_pages_and_published_api(self):
         status, page, headers = self.request("/")
-        self.assertEqual(status,302)
-        self.assertEqual(headers["Location"],"/read/")
+        # urllib automatically follows the root redirect to the reader page.
+        self.assertEqual(status,200)
+        self.assertIn(b"Explore the World",page)
         status, page, headers = self.request("/read/")
         self.assertEqual(status,200)
         self.assertIn(b"Explore the World",page)
