@@ -167,7 +167,7 @@ def seed(path=DB_DEFAULT):
                 body = file.read_text(encoding="utf-8")
                 title = next((line.removeprefix("# ").strip()
                               for line in body.splitlines() if line.startswith("# ")), file.stem)
-                typ = "event" if file.name in EVENTS else KIND[folder]
+                typ = "event" if file.name in EVENTS else ("place" if relative.startswith("regions/") else "subject")
                 aliases = REGION_SOURCE_ALIASES.get(relative, alias_by_path.get(relative, []))
                 properties = {
                     "title": title, "type": typ, "body": body,
