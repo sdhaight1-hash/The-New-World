@@ -6,6 +6,8 @@
 
 The New World now includes a **working, local-first worldbuilding application** that can host multiple independent worlds. The repository's historical Bible is the initial dataset; the engine itself uses generic person, place, organization, family, event, subject, and media records.
 
+**Windows quick launch:** double-click `Launch-World-Bible.cmd` after cloning the repository and installing Python 3.11+. Image uploads need Pillow (see below). The launcher safely imports missing original Markdown pages and opens the browser.
+
 From the project directory with Python 3.11+:
 
 1. Install the image dependency: \`python -m pip install -r app/requirements.txt\`
