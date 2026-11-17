@@ -28,6 +28,7 @@ WORLD_SOURCE_PATHS = {
     "bible/04-technology.md",
     "bible/05-successor-societies.md",
     "bible/20-brief-age-of-ai.md",
+    "bible/21-real-world-2019-2026.md",
     "regions/southern-california.md",
     "regions/clatsop-county.md",
     "regions/wyoming.md",
