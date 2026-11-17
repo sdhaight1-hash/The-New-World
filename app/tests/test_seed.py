@@ -123,7 +123,7 @@ class CanonSeedTests(unittest.TestCase):
         self.assertIn("November 30, 2022",opening["chatgpt-public-launch"]["title"])
         self.assertIn("GPT-3.5",opening["chatgpt-public-launch"]["body"])
         self.assertIn("alternate",opening["agi-announcement-2026"]["body"].lower())
-        self.assertIn("not yet established",opening["social-fracture-2029"]["body"])
+        self.assertIn("have not been established",opening["social-fracture-2029"]["body"])
         seed(self.path)
         with closing(Store(self.path)) as store:
             years=[e for e in store.entries(WORLD_ID) if e["type"]=="event"]
