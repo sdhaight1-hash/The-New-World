@@ -42,3 +42,17 @@ button,input,select{font:inherit}button,input,select{color:var(--ink);border:1px
 .toc-jump:hover{color:var(--article-accent);background:transparent;text-decoration:underline}
 .gallery-strip a{display:block}
 .gallery-strip a:hover img{outline:2px solid var(--article-accent);outline-offset:2px}
+
+/* Author-composed article sections are live projections, not duplicated data. */
+.reader-data-section{border-top:1px solid var(--line);margin:31px 0 0;padding-top:23px}
+.reader-data-section h2{font-family:Georgia,serif;font-size:28px;line-height:1.2;font-weight:400;letter-spacing:-.025em;margin:0 0 18px}
+.reader-data-section p{font-size:13px;line-height:1.7;color:var(--secondary)}
+.reader-facts{display:grid;grid-template-columns:minmax(105px,.42fr) 1fr;margin:0;gap:0}
+.reader-facts dt,.reader-facts dd{font-size:12px;margin:0;padding:10px 5px;border-bottom:1px solid var(--line)}
+.reader-facts dt{font-weight:750;color:var(--secondary)}
+.reader-facts dd{color:var(--ink)}
+.reader-data-section .relation-list{grid-template-columns:1fr 1fr}
+.reader-source-link{display:block;color:var(--article-accent);font-size:13px;padding:9px 0;border-bottom:1px solid var(--line)}
+.reader-map-link{color:var(--article-accent);font-size:13px;font-weight:750}
+.reader-history-link time{color:var(--gold)}
+@media(max-width:740px){.reader-data-section .relation-list{grid-template-columns:1fr}}
