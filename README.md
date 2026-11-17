@@ -2,6 +2,25 @@
 
 **A realistic, globally scoped, post-industrial alternate future Earth.** The primary reference era is approximately fifty years after the Cascade. This is an open-ended **worldbuilding project**, not a novel outline; no protagonists, book sequence, or fixed geographical limits are assumed.
 
+## Run World Bible Studio
+
+The New World now includes a **working, local-first worldbuilding application** that can host multiple independent worlds. The repository's historical Bible is the initial dataset; the engine itself uses generic person, place, organization, family, event, subject, and media records.
+
+From the project directory with Python 3.11+:
+
+1. Install the image dependency: \`python -m pip install -r app/requirements.txt\`
+2. Import the existing Bible without overwriting later edits: \`python app/seed.py\`
+3. Launch the application: \`python app/server.py\`
+4. Open **http://127.0.0.1:8765/app/**
+
+**[Studio setup and features](app/README.md)** · **[Automated tests](https://github.com/sdhaight1-hash/The-New-World/actions/workflows/test-studio.yml)**
+
+The application supports independent worlds, encyclopedia editing, identity-preserving hyperlinks and backlinks, reference suggestions, typed/dated relationships, family connections, a chronological event list, a 2D map of documented locations, reusable images with captions, and entry-specific themes and section arrangements. Data lives locally in \`.worldbible/\`, which must be backed up. The Export button saves world metadata and text records as JSON; **media binaries require separate backup**.
+
+**Current maturity: functional foundation, not feature-complete.** Advanced GIS drawing, complex page builder drag-and-drop, high-volume indexing, full evidence/version systems, interactive multigenerational chart layouts and finished visual regression testing remain open. Previous stand-alone HTML tools are prototypes and should not be expanded as separate databases.
+
+---
+
 ## Begin here
 
 - [Canon, assumptions, and open questions](bible/00-foundations.md)
