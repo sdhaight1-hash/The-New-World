@@ -22,7 +22,7 @@ from uuid import uuid4
 
 ROOT = Path(__file__).resolve().parent
 DB_DEFAULT = ROOT.parent / ".worldbible" / "worlds.sqlite3"
-MAX_JSON = 2_000_000
+MAX_JSON = 25_000_000
 MAX_IMAGE = 12_000_000
 ALLOWED_TYPES = {"person", "place", "event", "organization", "family", "object", "source", "subject"}
 STATUSES = {"working", "established", "disputed", "superseded"}
