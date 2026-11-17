@@ -36,7 +36,9 @@ function syncWorld(){
 function renderCard(e){
  const a=link("", "#/article/"+encodeURIComponent(e.id),"article-card");
  const cover=node("div",undefined,"article-cover");
- const symbol=node("span",category(e).symbol);cover.append(symbol);
+ if(e.hero_media_id){
+  const image=node("img");image.src=mediaUrl(e.hero_media_id);image.alt="";image.loading="lazy";cover.append(image);
+ }else cover.append(node("span",category(e).symbol));
  const info=node("div",undefined,"article-info");
  info.append(node("span",category(e).short,"article-type"),node("h3",e.title,"article-title"),
   node("p",e.summary||"Explore this entry and its connections to the wider world.","article-desc"),
@@ -57,7 +59,9 @@ function renderHome(){
   grid.append(card);
  }
  if(!ordered.length)grid.append(node("p","Published categories will appear here.","empty-published"));
- const featured=$("featuredCards");featured.replaceChildren();
+ const frontHero=state.entries.find(e=>e.hero_media_id);
+ $("readerHome").style.setProperty("--cover-art",frontHero?'url("'+mediaUrl(frontHero.hero_media_id)+'")':"none");
+  const featured=$("featuredCards");featured.replaceChildren();
  const priority={"place":0,"person":1,"organization":2,"event":3};
  const shortlist=[...state.entries].sort((a,b)=>(priority[a.type]??9)-(priority[b.type]??9)||a.title.localeCompare(b.title)).slice(0,6);
  for(const e of shortlist)featured.append(renderCard(e));
@@ -114,6 +118,21 @@ function makeMedia(m){
  img.alt=m.alt||m.title;
  figure.append(img,node("figcaption",m.caption||m.credit||m.title));return figure;
 }
+function setArticleTheme(root,e){
+ const light=state.appearance==="light";
+ const tones={
+  atlas:["#b7cfad","#356747"],chronicle:["#d9c099","#855626"],
+  kinship:["#deb6d3","#8c436d"],civic:["#b5cae9","#32628b"],
+  archive:["#b8d4d0","#276468"],custom:["#b8d4d0","#276468"]
+ };
+ const color=e.accent||((tones[e.theme_id]||tones.archive)[light?1:0]);
+ if(!/^#[0-9a-f]{6}$/i.test(color))return;
+ // Maintain readable links when authors select a low contrast custom accent.
+ const lum=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4).reduce((sum,v,i)=>sum+v*[.2126,.7152,.0722][i],0);
+ const background=light?"#f4f2ea":"#101b20",a=lum(background),b=lum(color),ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+ root.style.setProperty("--article-accent",ratio>=4.5?color:(light?"#356747":"#b7cfad"));
+ root.dataset.theme=e.theme_id;
+}
 async function renderArticle(id){
  const entry=byId(id);
  if(!entry)return missing("Article unavailable","This article is not currently published.");
@@ -129,6 +148,7 @@ async function renderArticle(id){
  setTitle(entry.title);showRoute("article");
  const root=$("articleContent");root.replaceChildren();
  const wrap=node("div",undefined,"article-page-wrap");
+ setArticleTheme(wrap,entry);
  const crumbs=node("nav",undefined,"crumbs");crumbs.setAttribute("aria-label","Breadcrumb");
  crumbs.append(link("World","#/"),link("Encyclopedia","#/browse"),link(category(entry).short,"#/browse/"+entry.type),node("span",entry.title));
  wrap.append(crumbs);
@@ -145,7 +165,11 @@ async function renderArticle(id){
  if(headings.length){
   const toc=node("section",undefined,"aside-panel"),list=node("nav",undefined,"toc");
   list.setAttribute("aria-label","On this page");toc.append(node("h2","In this article"));
-  for(const h of headings)list.append(link(h.textContent,"#"+h.id));
+  for(const h of headings){
+   const jump=node("button",h.textContent,"toc-jump");
+   jump.onclick=()=>h.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+   list.append(jump);
+  }
   toc.append(list);aside.append(toc);
  }
  const details=node("section",undefined,"aside-panel");details.append(node("h2","At a glance"));
@@ -168,7 +192,12 @@ async function renderArticle(id){
   const section=node("section",undefined,"article-related");
   section.append(node("h2","Images and documents"));
   const strip=node("div",undefined,"gallery-strip");
-  for(const m of gallery)strip.append(makeMedia(m));section.append(strip);wrap.append(section);
+  for(const m of gallery){
+   const fig=makeMedia(m),a=link("","/media/"+encodeURIComponent(currentId())+"/"+encodeURIComponent(m.media_id));
+   a.target="_blank";a.rel="noopener noreferrer";a.title="Open original image: "+m.title;
+   const img=fig.querySelector("img");img.remove();a.append(img);fig.prepend(a);strip.append(fig);
+  }
+  section.append(strip);wrap.append(section);
  }
  if(connections.length||incoming.length){
   const section=node("section",undefined,"article-related");section.append(node("p","FURTHER READING","eyebrow"),node("h2","Continue exploring"));
