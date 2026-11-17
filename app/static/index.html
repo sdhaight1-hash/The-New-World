@@ -17,6 +17,7 @@
   <button class="space-item" data-panel="timeline"><span class="space-glyph" aria-hidden="true">◷</span><span>Chronology</span></button>
   <button class="space-item" data-panel="network"><span class="space-glyph" aria-hidden="true">⌘</span><span>Connections</span></button>
   <button class="space-item" data-panel="media"><span class="space-glyph" aria-hidden="true">▧</span><span>Media Library</span></button>
+  <button class="space-item" data-panel="boards"><span class="space-glyph" aria-hidden="true">▦</span><span>Moodboards</span></button>
   <div class="rail-foot"><span class="rail-foot-dot"></span> Local workspace</div>
 </nav>
 <div class="workspace">
@@ -91,6 +92,31 @@
 </div>
 <div id="networkPanel" class="full-panel" hidden><div class="view-top"><div><p class="section-overline">RELATIONSHIP EXPLORER</p><h2>Connections across the world</h2><p class="muted">Explore people, factions, settlements, and the evidence tying them together.</p></div><div id="networkSummary" class="view-chip">0 relationships</div></div><div class="network-layout"><div class="dashboard-panel"><h3>Relationship categories</h3><div id="networkPredicates"></div></div><div class="dashboard-panel"><h3>Connected records</h3><div id="networkEntries"></div></div></div><div class="dashboard-panel"><h3>Recorded connections</h3><div id="networkRelations"></div></div></div>
 <div id="mediaPanel" class="full-panel" hidden><div class="view-top"><div><p class="section-overline">VISUAL ARCHIVE</p><h2>Media Library</h2><p class="muted">Every image is stored once and can be reused across records.</p></div><div id="mediaSummary" class="view-chip">0 images</div></div><div class="toolbar media-toolbar"><label for="mediaSearch">Find image</label><input id="mediaSearch" placeholder="Search titles, descriptions, or credits"><select id="mediaFilter" aria-label="Media filter"><option value="all">All media</option><option value="used">Attached to records</option><option value="unused">Not yet attached</option></select></div><div id="globalMediaGrid" class="global-media-grid"></div></div>
+<section id="boardsPanel" class="full-panel" hidden>
+ <div class="view-top"><div><p class="section-overline">VISUAL WORLD DEVELOPMENT</p><h2>Moodboards</h2><p class="muted">Compose visual references for places, factions, characters, cultures and historical periods. Boards link to existing records and images.</p></div>
+ <button class="primary" id="newBoard">+ New board</button></div>
+ <div class="mood-layout">
+  <aside class="mood-sidebar">
+    <div class="mood-sidebar-head">BOARDS IN THIS WORLD <span id="boardCount">0</span></div>
+    <div id="boardList"></div>
+    <p class="muted">Boards are private Studio workspaces. Reuse images and entries without duplicating them.</p>
+  </aside>
+  <div class="mood-main">
+   <div id="boardEmpty" class="mood-empty"><h3>Start with a visual idea</h3><p>Create a moodboard for a settlement, society, aesthetic direction, climate, architecture or narrative atmosphere.</p><button id="boardEmptyCreate" class="primary">Create first board</button></div>
+   <div id="boardEditor" hidden>
+     <div class="mood-heading"><div><h3 id="boardTitle"></h3><p id="boardDescription" class="muted"></p></div>
+       <div class="mood-actions"><button id="boardRename">Details</button><button id="boardDelete" class="danger">Delete board</button></div></div>
+     <div class="mood-toolbar">
+       <button id="boardAddNote">+ Note</button><button id="boardAddImage">+ Image</button>
+       <button id="boardAddEntry">+ Linked entry</button><button id="boardAddSwatch">+ Color</button>
+       <label class="mood-zoom-label">Zoom <input id="boardZoom" type="range" min="50" max="150" step="10" value="100"><span id="boardZoomValue">100%</span></label>
+     </div>
+     <div class="mood-stage-viewport" id="boardViewport"><div id="boardCanvas" class="mood-canvas" role="group" aria-label="Draggable moodboard canvas"></div></div>
+     <p class="muted mood-hint">Drag a card by its header. Use Edit to change the note or caption, ↑ to bring it forward, or Remove to clear it from this board. Original entries and images stay intact.</p>
+   </div>
+  </div>
+ </div>
+</section>
 <div id="timelinePanel" class="full-panel" hidden><div class="view-top"><div><h1>Historical chronology</h1><p class="muted">One event can be shown in many views without duplicating it.</p></div><label>As-of year<input id="timelineYear" type="number" value="50"></label></div><div class="toolbar"><label>Filter by entry<select id="timelineScope"></select></label><label><input id="timelineAll" type="checkbox" checked> Show all event dates</label></div><div id="timelineList" class="timeline-list"></div></div>
 <div id="atlasPanel" class="full-panel" hidden><div class="view-top"><div><h1>Historical atlas</h1><p class="muted">2D map with sourced coordinates, dated place records, and links into the world bible.</p></div><label>As-of year<input id="atlasYear" type="number" value="50"></label></div><div class="map-tools"><button id="mapZoomIn" aria-label="Zoom in">+</button><button id="mapZoomOut" aria-label="Zoom out">−</button><button id="mapReset">World</button><label><input type="checkbox" id="mapLabels" checked> Labels</label><span id="mapReadout"></span></div><div class="atlas-map" id="map"><div id="tiles"></div><div id="pins"></div><div class="map-attribution">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · Modern reference basemap</div></div><p class="muted">Map positions are shown only for entries with documented coordinates. Scroll to zoom, drag to pan. Public tile service requires an internet connection.</p><div id="atlasResults"></div></div>
 </main>
