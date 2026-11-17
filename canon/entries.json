@@ -1053,6 +1053,106 @@
       "start_year": -8,
       "end_year": -8,
       "theme_id": "chronicle"
+    },
+    {
+      "key": "history-world",
+      "source": "history/00-world-2018-2026.md",
+      "reuse_source": "history/00-world-2018-2026.md",
+      "type": "subject",
+      "title": "Global history, 2018–2026",
+      "summary": "Historical regional reference layer",
+      "body": "See source chapter",
+      "status": "established"
+    },
+    {
+      "key": "history-hemisphere",
+      "source": "history/01-western-hemisphere-2018-2026.md",
+      "reuse_source": "history/01-western-hemisphere-2018-2026.md",
+      "type": "subject",
+      "title": "Western Hemisphere history, 2018–2026",
+      "summary": "Historical regional reference layer",
+      "body": "See source chapter",
+      "status": "established"
+    },
+    {
+      "key": "history-us",
+      "source": "history/02-united-states-2018-2026.md",
+      "reuse_source": "history/02-united-states-2018-2026.md",
+      "type": "subject",
+      "title": "United States history, 2018–2026",
+      "summary": "Historical regional reference layer",
+      "body": "See source chapter",
+      "status": "established"
+    },
+    {
+      "key": "history-west",
+      "source": "history/03-western-united-states-2018-2026.md",
+      "reuse_source": "history/03-western-united-states-2018-2026.md",
+      "type": "subject",
+      "title": "Western United States history, 2018–2026",
+      "summary": "Historical regional reference layer",
+      "body": "See source chapter",
+      "status": "established"
+    },
+    {
+      "key": "history-california",
+      "source": "history/04-california-2018-2026.md",
+      "reuse_source": "history/04-california-2018-2026.md",
+      "type": "subject",
+      "title": "California history, 2018–2026",
+      "summary": "Historical regional reference layer",
+      "body": "See source chapter",
+      "status": "established"
+    },
+    {
+      "key": "history-oregon",
+      "source": "history/05-oregon-2018-2026.md",
+      "reuse_source": "history/05-oregon-2018-2026.md",
+      "type": "subject",
+      "title": "Oregon history, 2018–2026",
+      "summary": "Historical regional reference layer",
+      "body": "See source chapter",
+      "status": "established"
+    },
+    {
+      "key": "history-wyoming",
+      "source": "history/06-wyoming-2018-2026.md",
+      "reuse_source": "history/06-wyoming-2018-2026.md",
+      "type": "subject",
+      "title": "Wyoming history, 2018–2026",
+      "summary": "Historical regional reference layer",
+      "body": "See source chapter",
+      "status": "established"
+    },
+    {
+      "key": "history-so-cal-local",
+      "source": "history/07-southern-california-local-2018-2026.md",
+      "reuse_source": "history/07-southern-california-local-2018-2026.md",
+      "type": "subject",
+      "title": "Southern California starting-region history, 2018–2026",
+      "summary": "Historical regional reference layer",
+      "body": "See source chapter",
+      "status": "established"
+    },
+    {
+      "key": "history-clatsop-local",
+      "source": "history/08-clatsop-local-2018-2026.md",
+      "reuse_source": "history/08-clatsop-local-2018-2026.md",
+      "type": "subject",
+      "title": "Clatsop County starting-region history, 2018–2026",
+      "summary": "Historical regional reference layer",
+      "body": "See source chapter",
+      "status": "established"
+    },
+    {
+      "key": "history-wyoming-local",
+      "source": "history/09-wyoming-local-2018-2026.md",
+      "reuse_source": "history/09-wyoming-local-2018-2026.md",
+      "type": "subject",
+      "title": "Wyoming ranchlands starting-region history, 2018–2026",
+      "summary": "Historical regional reference layer",
+      "body": "See source chapter",
+      "status": "established"
     }
   ],
   "relations": [
@@ -1727,6 +1827,192 @@
       "target": "institutional-resilience-2019",
       "predicate": "relevant_to",
       "status": "established"
+    },
+    {
+      "source": "history-world",
+      "target": "history-hemisphere",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-hemisphere",
+      "target": "history-us",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-us",
+      "target": "history-west",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-west",
+      "target": "history-california",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-west",
+      "target": "history-oregon",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-west",
+      "target": "history-wyoming",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-california",
+      "target": "history-so-cal-local",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-oregon",
+      "target": "history-clatsop-local",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-wyoming",
+      "target": "history-wyoming-local",
+      "predicate": "narrows_to",
+      "status": "established"
+    },
+    {
+      "source": "history-world",
+      "target": "global-baseline-2019",
+      "predicate": "documents",
+      "status": "established"
+    },
+    {
+      "source": "history-world",
+      "target": "covid-pandemic-2020",
+      "predicate": "documents",
+      "status": "established"
+    },
+    {
+      "source": "history-world",
+      "target": "ukraine-invasion-2022",
+      "predicate": "documents",
+      "status": "established"
+    },
+    {
+      "source": "history-world",
+      "target": "iran-conflict-2026",
+      "predicate": "documents",
+      "status": "established"
+    },
+    {
+      "source": "history-world",
+      "target": "agi-announcement-2026",
+      "predicate": "precedes",
+      "status": "established"
+    },
+    {
+      "source": "history-hemisphere",
+      "target": "global-supply-dependence",
+      "predicate": "documents",
+      "status": "established"
+    },
+    {
+      "source": "history-hemisphere",
+      "target": "trade-energy-inflation",
+      "predicate": "documents",
+      "status": "established"
+    },
+    {
+      "source": "history-us",
+      "target": "us-midterms-2026",
+      "predicate": "documents",
+      "status": "established"
+    },
+    {
+      "source": "history-us",
+      "target": "us-election-2024",
+      "predicate": "documents",
+      "status": "established"
+    },
+    {
+      "source": "history-west",
+      "target": "water-infrastructure",
+      "predicate": "documents",
+      "status": "established"
+    },
+    {
+      "source": "history-west",
+      "target": "global-climate-baseline",
+      "predicate": "documents",
+      "status": "established"
+    },
+    {
+      "source": "history-california",
+      "target": "southern-california-region",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "history-oregon",
+      "target": "clatsop-county",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "history-wyoming",
+      "target": "wyoming-ranchlands",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "history-so-cal-local",
+      "target": "big-bear-valley",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "history-so-cal-local",
+      "target": "victor-valley",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "history-so-cal-local",
+      "target": "cajon-pass",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "history-clatsop-local",
+      "target": "astoria",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "history-clatsop-local",
+      "target": "seaside",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "history-clatsop-local",
+      "target": "cannon-beach",
+      "predicate": "regional_background_for",
+      "status": "established"
+    },
+    {
+      "source": "history-wyoming-local",
+      "target": "diamond-ranch",
+      "predicate": "research_scope_for",
+      "status": "working"
+    },
+    {
+      "source": "history-wyoming-local",
+      "target": "wyoming-reservation",
+      "predicate": "research_scope_for",
+      "status": "working"
     }
   ]
 }
