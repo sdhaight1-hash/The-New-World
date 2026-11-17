@@ -12,13 +12,21 @@ try{
  assert.match(await page.locator("#spaceHeading").innerText(),/World Overview/);
  assert.equal(await page.locator("body").getAttribute("data-space"),"home");
  const nav=page.locator(".space-rail button[data-panel]");
- assert.equal(await nav.count(),6);
+ assert.equal(await nav.count(),7);
  for(const [space,heading] of [["article","Encyclopedia"],["timeline","Chronology"],["atlas","Historical Atlas"],["network","Connections"],["media","Media Library"],["home","World Overview"]]){
   await page.locator('.space-rail button[data-panel="'+space+'"]').click();
   assert.equal(await page.locator("body").getAttribute("data-space"),space);
   assert.equal(await page.locator("#spaceHeading").innerText(),heading);
   assert.equal(await page.locator('.space-rail button[data-panel="'+space+'"]').getAttribute("aria-current"),"page");
  }
+ await page.locator('.space-rail button[data-panel="boards"]').click();
+ assert.equal(await page.locator("#spaceHeading").innerText(),"Moodboards");
+ await page.locator("#boardEmptyCreate").click();
+ await page.locator("#boardEditor").waitFor({state:"visible"});
+ await page.locator("#boardAddNote").click();
+ await page.locator("#boardCanvas .mood-card").first().waitFor({state:"visible"});
+ assert.equal(await page.locator("#boardCanvas .mood-card").count(),1);
+ await page.locator('.space-rail button[data-panel="home"]').click();
  await page.locator("#homeNew").click();
  await page.locator("#createDialog").waitFor({state:"visible"});
  await page.locator("#createTitle").fill("Navigation Test Settlement");
