@@ -84,6 +84,23 @@ CREATE TABLE IF NOT EXISTS media_uses(
  UNIQUE(entity_id,media_id,role)
 );
 CREATE INDEX IF NOT EXISTS ix_media_uses_entity ON media_uses(entity_id);
+CREATE TABLE IF NOT EXISTS moodboards(
+ id TEXT PRIMARY KEY, world_id TEXT NOT NULL REFERENCES worlds(id) ON DELETE CASCADE,
+ title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '',
+ entity_id TEXT REFERENCES entities(id) ON DELETE SET NULL,
+ created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_moodboards_world ON moodboards(world_id,title);
+CREATE TABLE IF NOT EXISTS moodboard_items(
+ id TEXT PRIMARY KEY, board_id TEXT NOT NULL REFERENCES moodboards(id) ON DELETE CASCADE,
+ kind TEXT NOT NULL, content TEXT NOT NULL DEFAULT '',
+ media_id TEXT REFERENCES media(id) ON DELETE RESTRICT,
+ entity_id TEXT REFERENCES entities(id) ON DELETE SET NULL,
+ color TEXT, x INTEGER NOT NULL, y INTEGER NOT NULL,
+ w INTEGER NOT NULL, h INTEGER NOT NULL, z INTEGER NOT NULL,
+ created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_moodboard_items_board ON moodboard_items(board_id,z);
 CREATE TABLE IF NOT EXISTS publications(
  entity_id TEXT PRIMARY KEY REFERENCES entities(id) ON DELETE CASCADE,
  published_at TEXT NOT NULL
@@ -198,6 +215,116 @@ class Store:
         r = self.one("SELECT * FROM entities WHERE id=? AND world_id=?", (eid, wid))
         require(r, "Entry not found in this world", 404)
         return canonical(r)
+
+    def boards(self, wid):
+        self.check_world(wid)
+        return self.rows("""SELECT b.*,e.title AS entity_title,
+           (SELECT COUNT(*) FROM moodboard_items i WHERE i.board_id=b.id) AS item_count
+           FROM moodboards b LEFT JOIN entities e ON e.id=b.entity_id
+           WHERE b.world_id=? ORDER BY b.updated_at DESC,b.title""", (wid,))
+
+    def board(self, wid, bid):
+        self.check_world(wid)
+        row=self.one("SELECT * FROM moodboards WHERE id=? AND world_id=?", (bid,wid))
+        require(row,"Moodboard not found in this world",404)
+        return {"board":dict(row),"items":self.rows("""SELECT i.*,e.title AS entity_title,
+                 m.title AS media_title FROM moodboard_items i
+                 LEFT JOIN entities e ON e.id=i.entity_id
+                 LEFT JOIN media m ON m.id=i.media_id
+                 WHERE i.board_id=? ORDER BY i.z,i.created_at""",(bid,))}
+
+    def create_board(self, wid, data):
+        self.check_world(wid)
+        require(isinstance(data,dict) and set(data)<={"title","description","entity_id"},"Invalid board fields")
+        title=data.get("title","")
+        desc=data.get("description","")
+        eid=data.get("entity_id")
+        require(isinstance(title,str) and 0<len(title.strip())<=180,"Invalid moodboard title")
+        require(isinstance(desc,str) and len(desc)<=4000,"Invalid moodboard description")
+        if eid is not None:self.check_entity(wid,eid)
+        bid=str(uuid4());stamp=now()
+        with self.lock,self.db:
+            self.db.execute("INSERT INTO moodboards VALUES(?,?,?,?,?,?,?)",
+                            (bid,wid,title.strip(),desc,eid,stamp,stamp))
+        return self.board(wid,bid)
+
+    def update_board(self,wid,bid,data):
+        self.board(wid,bid)
+        require(isinstance(data,dict) and set(data)<={"title","description","entity_id"},"Invalid board fields")
+        if "title" in data:require(isinstance(data["title"],str) and 0<len(data["title"].strip())<=180,"Invalid board title")
+        if "description" in data:require(isinstance(data["description"],str) and len(data["description"])<=4000,"Invalid description")
+        if "entity_id" in data and data["entity_id"] is not None:self.check_entity(wid,data["entity_id"])
+        if "title" in data:data["title"]=data["title"].strip()
+        data["updated_at"]=now()
+        with self.lock,self.db:
+            self.db.execute("UPDATE moodboards SET "+",".join(k+"=?" for k in data)+" WHERE id=? AND world_id=?",
+                            (*data.values(),bid,wid))
+        return self.board(wid,bid)
+
+    def delete_board(self,wid,bid):
+        self.board(wid,bid)
+        with self.lock,self.db:
+            self.db.execute("DELETE FROM moodboards WHERE id=? AND world_id=?",(bid,wid))
+        return {"deleted":bid}
+
+    def add_board_item(self,wid,bid,data):
+        self.board(wid,bid)
+        require(isinstance(data,dict) and set(data)<={"kind","content","media_id","entity_id","color","x","y","w","h","z"},"Invalid board card")
+        kind=data.get("kind")
+        require(kind in ("note","image","entry","swatch"),"Invalid board card kind")
+        content=data.get("content","")
+        require(isinstance(content,str) and len(content)<=5000,"Invalid board card text")
+        mid=data.get("media_id");eid=data.get("entity_id");color=data.get("color")
+        if mid is not None:require(self.one("SELECT 1 FROM media WHERE world_id=? AND id=?",(wid,mid)),"Image not found in this world",404)
+        if eid is not None:self.check_entity(wid,eid)
+        require((kind=="image" and mid is not None and eid is None) or
+                (kind=="entry" and eid is not None and mid is None) or
+                (kind in ("note","swatch") and mid is None and eid is None),"Invalid card reference")
+        if kind=="swatch":require(isinstance(color,str) and HEX.fullmatch(color),"Invalid swatch color")
+        else:require(color is None or isinstance(color,str) and HEX.fullmatch(color),"Invalid card color")
+        values={key:data.get(key,default) for key,default in (("x",60),("y",60),("w",240),("h",190),("z",0))}
+        self._validate_board_geometry(values)
+        iid=str(uuid4())
+        with self.lock,self.db:
+            self.db.execute("""INSERT INTO moodboard_items
+              (id,board_id,kind,content,media_id,entity_id,color,x,y,w,h,z,created_at)
+              VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+              (iid,bid,kind,content,mid,eid,color,*(values[k] for k in ("x","y","w","h","z")),now()))
+            self.db.execute("UPDATE moodboards SET updated_at=? WHERE id=?",(now(),bid))
+        return self.board(wid,bid)
+
+    def _validate_board_geometry(self,values):
+        for k in ("x","y","w","h","z"):
+            require(type(values[k]) is int,"Board positions must be integers")
+        require(-20000<=values["x"]<=20000 and -20000<=values["y"]<=20000,"Board position out of bounds")
+        require(120<=values["w"]<=1200 and 95<=values["h"]<=1200,"Board size out of bounds")
+        require(0<=values["z"]<=100000,"Board layer out of bounds")
+
+    def update_board_item(self,wid,bid,iid,data):
+        self.board(wid,bid)
+        require(self.one("SELECT 1 FROM moodboard_items WHERE id=? AND board_id=?",(iid,bid)),
+                "Board card not found",404)
+        require(isinstance(data,dict) and set(data)<={"content","color","x","y","w","h","z"},
+                "Invalid card update")
+        if "content" in data:require(isinstance(data["content"],str) and len(data["content"])<=5000,"Invalid card text")
+        if "color" in data:require(data["color"] is None or isinstance(data["color"],str) and HEX.fullmatch(data["color"]),"Invalid card color")
+        values=dict(self.one("SELECT x,y,w,h,z FROM moodboard_items WHERE id=?",(iid,)))
+        values.update({k:v for k,v in data.items() if k in values})
+        self._validate_board_geometry(values)
+        if data:
+            with self.lock,self.db:
+                self.db.execute("UPDATE moodboard_items SET "+",".join(k+"=?" for k in data)+" WHERE id=? AND board_id=?",
+                                (*data.values(),iid,bid))
+                self.db.execute("UPDATE moodboards SET updated_at=? WHERE id=?",(now(),bid))
+        return self.board(wid,bid)
+
+    def delete_board_item(self,wid,bid,iid):
+        self.board(wid,bid)
+        with self.lock,self.db:
+            cur=self.db.execute("DELETE FROM moodboard_items WHERE id=? AND board_id=?",(iid,bid))
+            require(cur.rowcount==1,"Board card not found",404)
+            self.db.execute("UPDATE moodboards SET updated_at=? WHERE id=?",(now(),bid))
+        return self.board(wid,bid)
 
     def publication(self, wid, eid, publish):
         """Publishing is separate from canon status; unpublished records remain editable."""
@@ -585,6 +712,8 @@ class Store:
         relations = payload.get("relations")
         require(isinstance(source_world, dict) and isinstance(entities, list) and isinstance(relations, list),
                 "Malformed export")
+        require(not payload.get("moodboards") and not payload.get("moodboard_items"),
+                "Moodboard archives require a full database/media backup",409)
         require(not payload.get("media_metadata") and not payload.get("media_uses"),
                 "Export references images. Restore the original .worldbible directory instead.", 409)
         require(len(entities) <= 20000 and len(relations) <= 100000, "Import exceeds limit")
@@ -678,10 +807,14 @@ class Store:
             relations = self.relation_list(wid)
             media = self.media_list(wid)
             uses = self.rows("SELECT * FROM media_uses WHERE world_id=?", (wid,))
+            boards = self.rows("SELECT * FROM moodboards WHERE world_id=? ORDER BY id",(wid,))
+            board_items = self.rows("""SELECT i.* FROM moodboard_items i JOIN moodboards b ON b.id=i.board_id
+                        WHERE b.world_id=? ORDER BY i.id""",(wid,))
             published = self.rows("""SELECT p.entity_id,p.published_at FROM publications p
                     JOIN entities e ON e.id=p.entity_id WHERE e.world_id=?""",(wid,))
         return {"format":"world-bible-export-v1","world":world,"entities":entries,
                 "relations":relations,"media_metadata":media,"media_uses":uses,
+                "moodboards":boards,"moodboard_items":board_items,
                 "publications":published,
                 "notice":"Image binaries are not included. Back up the .worldbible/media folder separately."}
 
@@ -761,6 +894,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(blob)
                 return
+            if route == "/api/boards":
+                return self.reply(s.boards(self.get_arg(q,"world_id")))
+            if route == "/api/board":
+                return self.reply(s.board(self.get_arg(q,"world_id"),self.get_arg(q,"id")))
             if route == "/api/public/worlds":
                 return self.reply(s.public_worlds())
             if route == "/api/public/entities":
@@ -864,6 +1001,17 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(s.create_world(data),201)
             if route=="/api/world" and verb=="PATCH":
                 return self.reply(s.update_world(wid,data))
+            if route=="/api/boards" and verb=="POST":
+                return self.reply(s.create_board(wid,data),201)
+            if route=="/api/board":
+                bid=self.get_arg(q,"id")
+                if verb=="PATCH":return self.reply(s.update_board(wid,bid,data))
+                if verb=="DELETE":return self.reply(s.delete_board(wid,bid))
+            if route=="/api/board-item":
+                bid=self.get_arg(q,"board_id")
+                if verb=="POST":return self.reply(s.add_board_item(wid,bid,data),201)
+                if verb=="PATCH":return self.reply(s.update_board_item(wid,bid,self.get_arg(q,"id"),data))
+                if verb=="DELETE":return self.reply(s.delete_board_item(wid,bid,self.get_arg(q,"id")))
             if route=="/api/publication" and verb=="POST":
                 require(isinstance(data,dict) and set(data)=={"published"},"Invalid publication payload")
                 return self.reply(s.publication(wid,self.get_arg(q,"id"),data["published"]))
