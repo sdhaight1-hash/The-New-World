@@ -19,16 +19,34 @@ If you want a separate world, choose **+ World** in the header. Entries, links, 
 
 ## Available now
 
-- Multiple independent worlds and search/filterable entries (person, place, event, organization, family, object, source, subject).
+- Multiple independent worlds with editable names/description, search/filterable entries, and custom entity categories (person/place/event/organization/family/source and other user-defined types).
 - Rich long-form Markdown editing, status, aliases, optional year and coordinates.
 - Stable-ID article links (\`[[uuid|visible name]]\`), automatic backlinks, reviewable name-match suggestions.
-- Typed relationships (kinship, membership, geography, trade, claims, governance and other categories) with parent-cycle protection.
+- Typed and custom-named dated relationships (kinship, membership, geography, trade, claims, governance) with parent-cycle protection and a small relationship graph.
 - Individual kinship summary (parents/children/partners) derived from shared relations.
 - Event chronology filtered by time and connected entities; year values are currently **world-relative**, not full uncertain Gregorian/relative conversion.
 - Zoomable/pannable **2D map** with coordinates, OpenStreetMap reference tiles, labels and year filter. Online tiles require internet; historical shapes and advanced GeoJSON editing are not yet available.
-- Image library upload (PNG/JPEG/WebP with validation and previews), reusable article placements, hero and gallery.
+- Image library upload (PNG/JPEG/WebP with validation and previews), reusable article placements, editable alt text, credits, captions, hero and gallery.
 - Per-entry theme selection and accent, optional reorder/visibility of live content sections, responsive reading view.
 - World JSON metadata export, safe restrictive entry deletion, local SQLite transactions.
+
+## Reliable complete backups
+
+**Use a full backup before substantial worldbuilding or upgrading the application.** This includes a consistent database snapshot plus originals and previews from the media library.
+
+Create a complete archive (the studio can be running):
+
+- \`python app/backup.py create my-world-bible-backup.zip\`
+
+Restore the archive (**stop the studio server first**, then use a clean data folder):
+
+- \`python app/backup.py restore my-world-bible-backup.zip\`
+
+If the target \`.worldbible/\` already contains data, restore will refuse to overwrite it. Use \`--force\` only after confirming the server is stopped; the old data directory is moved to a timestamped \`.previous-...\` folder rather than silently deleted. The archive is checked for directory traversal, per-file SHA-256 integrity and SQLite integrity.
+
+The UI **Export** button produces a separate JSON-only interchange format. It does **not** include image binaries, and imports of such image-referencing exports are deliberately rejected to avoid creating broken media links. UI **Import** creates a new isolated world from a data-only archive and remaps entity IDs and links.
+
+**GitHub is not updated automatically when you edit through Studio.** The SQLite database is the live authority. Back up and export deliberately; Git publishing and round-trip Markdown synchronization are a later integration milestone.
 
 ## Limitations and architecture honesty
 
