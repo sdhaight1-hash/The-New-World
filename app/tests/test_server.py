@@ -199,6 +199,9 @@ class StoreTests(unittest.TestCase):
         image = io.BytesIO()
         Image.new("RGB", (6, 8), (12, 48, 75)).save(image, "PNG")
         m = self.store.upload_image(self.a, image.getvalue(), "settlement.png")
+        board=self.store.create_board(self.a,{"title":"Preserved reference collage"})
+        bid=board["board"]["id"]
+        self.store.add_board_item(self.a,bid,{"kind":"image","media_id":m["id"],"x":300,"y":140,"w":360,"h":260})
         archive = Path(self.tmp.name) / "complete.zip"
         details = make_backup(self.store.path, archive)
         self.assertGreaterEqual(details["files"], 3)
@@ -210,6 +213,10 @@ class StoreTests(unittest.TestCase):
             self.assertEqual(len(restored.entries(self.a)), 1)
             self.assertEqual(restored.media_file(self.a, m["id"])[0].read_bytes(), image.getvalue())
             self.assertTrue(restored.media_file(self.a, m["id"],True)[0].is_file())
+            board_items=restored.board(self.a,bid)["items"]
+            self.assertEqual(len(board_items),1)
+            self.assertEqual(board_items[0]["media_id"],m["id"])
+            self.assertEqual((board_items[0]["x"],board_items[0]["y"],board_items[0]["w"],board_items[0]["h"]), (300,140,360,260))
         finally:
             restored.close()
         with self.assertRaises(ValueError):
