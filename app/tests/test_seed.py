@@ -59,6 +59,62 @@ class CanonSeedTests(unittest.TestCase):
             self.assertGreaterEqual(len(backlinks),4)
             self.assertEqual(len(store.boards(WORLD_ID)),0)
 
+    def test_legacy_software_documents_pruned_only_if_untouched(self):
+        seed(self.path)
+        dev_path="bible/15-unified-architecture.md"
+        edited_path="bible/16-ux-and-entry-designer.md"
+        public_path="bible/17-rfc-2d-historical-atlas.md"
+
+        def legacy(store,path):
+            original=(ROOT/path).read_text(encoding="utf-8")
+            title=next(line[2:].strip() for line in original.splitlines() if line.startswith("# "))
+            return store.create_entry(WORLD_ID,{
+                "type":"subject","title":title,"body":original,"status":"working"
+            },specified_id=source_id(path))
+
+        with closing(Store(self.path)) as store:
+            legacy(store,dev_path)
+            edited=legacy(store,edited_path)
+            published=legacy(store,public_path)
+            store.update_entry(WORLD_ID,edited["id"],{"body":"My custom project notes"})
+            store.publication(WORLD_ID,published["id"],True)
+
+        seed(self.path)
+        with closing(Store(self.path)) as store:
+            self.assertFalse(store.one("SELECT id FROM entities WHERE id=?",(source_id(dev_path),)))
+            self.assertEqual(store.check_entity(WORLD_ID,source_id(edited_path))["body"],
+                             "My custom project notes")
+            self.assertTrue(store.is_published(WORLD_ID,source_id(public_path)))
+            backups=list((self.path.parent/"backups").glob("before-lore-cleanup-*.zip"))
+            self.assertEqual(len(backups),1)
+            self.assertGreater(backups[0].stat().st_size,100)
+        seed(self.path)
+        self.assertEqual(len(list((self.path.parent/"backups").glob("*.zip"))),1)
+
+    def test_generated_ledger_reference_is_migrated(self):
+        manifest=load_canon()
+        seed(self.path)
+        entry=next(item for item in manifest["entries"] if item["key"]=="reference-present")
+        ids={item["key"]:source_id(item["reuse_source"]) if item.get("reuse_source") else canon_id(item["key"])
+             for item in manifest["entries"]}
+        old={**entry,"source":"bible/00-foundations.md"}
+        with closing(Store(self.path)) as store:
+            legacy_text=(ROOT/"bible/00-foundations.md").read_text(encoding="utf-8")
+            store.create_entry(WORLD_ID,{
+                "type":"subject","title":"Foundations and canon ledger","body":legacy_text,
+                "aliases":["Foundational Canon"],"status":"working"
+            },specified_id=source_id("bible/00-foundations.md"))
+            store.update_entry(WORLD_ID,ids["reference-present"],
+                               {"body":linked_body(old,manifest,ids)})
+            self.assertEqual(len(store.backlinks(WORLD_ID,source_id("bible/00-foundations.md"))),1)
+        seed(self.path)
+        with closing(Store(self.path)) as store:
+            self.assertNotIn("bible/00-foundations.md",
+                             store.check_entity(WORLD_ID,ids["reference-present"])["body"])
+            self.assertFalse(store.one("SELECT id FROM entities WHERE id=?",
+                                       (source_id("bible/00-foundations.md"),)))
+            self.assertTrue(store.backlinks(WORLD_ID,source_id("bible/01-chronology.md")))
+
     def test_repeat_seed_never_duplicates_or_overwrites_personal_edits(self):
         seed(self.path)
         with closing(Store(self.path)) as store:
