@@ -914,6 +914,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(v2_store.tags(s,self.get_arg(q,"world_id"),True))
             if route == "/api/v2/metadata":
                 return self.reply(v2_store.classifications(s,self.get_arg(q,"world_id"),self.get_arg(q,"id")))
+            if route == "/api/v2/memberships":
+                return self.reply(v2_store.memberships(s,self.get_arg(q,"world_id")))
+            if route == "/api/v2/public/memberships":
+                return self.reply(v2_store.memberships(s,self.get_arg(q,"world_id"),True))
+            if route == "/api/v2/public/metadata":
+                return self.reply(v2_store.public_metadata(s,self.get_arg(q,"world_id"),self.get_arg(q,"id")))
             if route == "/api/v2/mentions":
                 return self.reply(v2_store.mentions(s,self.get_arg(q,"world_id"),self.get_arg(q,"id")))
             if route in ("/api/v2/search","/api/v2/public/search"):
