@@ -226,6 +226,26 @@ class StoreTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             restore_backup(archive,Path(self.tmp.name)/"evil-target"/"worlds.sqlite3")
 
+    def test_world_media_usage_index_is_isolated(self):
+        try:
+            from PIL import Image
+        except ImportError:
+            self.skipTest("Pillow not installed")
+        image = io.BytesIO()
+        Image.new("RGB", (5, 6), (24, 42, 66)).save(image, "PNG")
+        media = self.store.upload_image(self.a, image.getvalue(), "coast.png")
+        subject = self.add(self.a, "A maritime place", "place")
+        self.store.add_media_use(self.a, {
+            "entity_id": subject["id"],
+            "media_id": media["id"],
+            "role": "gallery",
+            "caption": "Coastal reference"})
+        uses = self.store.media_uses(self.a)
+        self.assertEqual(len(uses), 1)
+        self.assertEqual(uses[0]["entity_title"], "A maritime place")
+        self.assertEqual(uses[0]["caption"], "Coastal reference")
+        self.assertEqual(self.store.media_uses(self.b), [])
+
     def test_export_content(self):
         a = self.add(self.a, "River", "place")
         data = self.store.export(self.a)
