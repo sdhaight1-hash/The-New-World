@@ -107,7 +107,7 @@
      <div class="mood-heading"><div><h3 id="boardTitle"></h3><p id="boardDescription" class="muted"></p></div>
        <div class="mood-actions"><button id="boardRename">Details</button><button id="boardDelete" class="danger">Delete board</button></div></div>
      <div class="mood-toolbar">
-       <button id="boardAddNote">+ Note</button><button id="boardAddImage">+ Image</button>
+       <button id="boardAddNote">+ Note</button><button id="boardAddImage">+ Image</button><button id="boardUpload">↑ Upload image</button><input id="boardImageFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
        <button id="boardAddEntry">+ Linked entry</button><button id="boardAddSwatch">+ Color</button>
        <label class="mood-zoom-label">Zoom <input id="boardZoom" type="range" min="50" max="150" step="10" value="100"><span id="boardZoomValue">100%</span></label>
      </div>
@@ -122,4 +122,16 @@
 </main>
 <aside class="inspector"><div class="inspector-heading"><p class="section-overline">SELECTED ENTRY</p><h2>Record context</h2></div><div id="context"><p class="muted">Select an entry to see facts, related records, linked media and sources.</p></div></aside></div>
 <dialog id="createDialog" aria-labelledby="createHeading"><form id="createForm" method="dialog"><h2 id="createHeading">Create an encyclopedia entry</h2><label>Entry name<input id="createTitle" required maxlength="250" autofocus placeholder="Name of person, place or event"></label><label>Entry category<select id="createType"><option value="place">Place / settlement</option><option value="person">Person</option><option value="event">Historical event</option><option value="organization">Faction / organization</option><option value="family">Family / household</option><option value="object">Object / resource</option><option value="source">Source / record</option><option value="subject">General subject</option><option value="custom">Custom category…</option></select></label><label id="customTypeField" hidden>Custom category ID<input id="customType" placeholder="e.g. species, mythology, spacecraft"></label><p id="createTypeHint" class="create-type-hint">Document geography, settlements, sites and their changing history.</p><label class="outline-option"><input type="checkbox" id="createOutline" checked><span>Start with an editable article outline</span></label><div class="form-actions"><button type="submit" class="primary">Create entry</button><button id="cancelCreate" type="button">Cancel</button></div></form></dialog>
-<script src="/app/app.js" defer></script></body></html>
+<script src="/app/app.js" defer></script><dialog id="boardPickerDialog" class="mood-picker" aria-labelledby="boardPickerHeading">
+ <div class="mood-picker-head"><div><p class="section-overline">WORLD ASSET LIBRARY</p><h2 id="boardPickerHeading">Add a visual reference</h2></div><button id="boardPickerClose" aria-label="Close asset picker">✕</button></div>
+ <label for="boardPickerSearch">Find a reference</label><input id="boardPickerSearch" type="search" placeholder="Search by title, category or description…">
+ <div id="boardPickerResults" class="mood-picker-results" role="group" aria-label="Available references"></div>
+</dialog>
+<dialog id="boardCreateDialog" class="mood-create-dialog" aria-labelledby="boardCreateHeading">
+ <form id="boardCreateForm"><p class="section-overline">NEW VISUAL WORKSPACE</p><h2 id="boardCreateHeading">Create a moodboard</h2>
+ <label for="boardNewTitle">Board title<input id="boardNewTitle" required maxlength="180" placeholder="e.g. River valley settlement architecture"></label>
+ <label for="boardNewDescription">Creative direction<textarea id="boardNewDescription" rows="3" maxlength="4000" placeholder="Atmosphere, visual goals, questions, references…"></textarea></label>
+ <label for="boardNewEntry">Associated world entry<select id="boardNewEntry"><option value="">No entry — general world board</option></select></label>
+ <div class="form-actions"><button type="button" id="boardCreateCancel">Cancel</button><button type="submit" class="primary">Create board</button></div></form>
+</dialog>
+</body></html>
