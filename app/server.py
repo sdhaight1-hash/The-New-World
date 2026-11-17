@@ -506,6 +506,8 @@ class Store:
         if not data:
             return current
         merged = {**current, **data}
+        if "type" in data and data["type"]!=current["type"]:
+            v2_store.assert_type_change(self,wid,eid,data["type"])
         validate_entity({k: merged[k] for k in ("type", "title", "aliases", "summary", "body", "status", "start_year", "end_year", "lat", "lon", "theme_id", "accent", "layout")})
         data["updated_at"] = now()
         for k in ("aliases", "layout"):
@@ -520,6 +522,7 @@ class Store:
 
     def delete_entry(self, wid, eid):
         self.check_entity(wid, eid)
+        v2_store.assert_not_property_target(self,wid,eid)
         inbound = self.rows("SELECT source_id FROM content_links WHERE target_id=? AND source_id<>?", (eid, eid))
         rel = self.rows("SELECT id FROM relations WHERE source_id=? OR target_id=?", (eid, eid))
         require(not inbound and not rel, "Entry has incoming references or relationships. Remove or redirect them first.", 409)
