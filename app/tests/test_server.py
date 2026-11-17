@@ -12,6 +12,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from server import Store, Handler, Error
 from backup import make_backup, restore_backup
+from publish_site import build_site
 
 
 class StoreTests(unittest.TestCase):
@@ -297,6 +298,46 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(imported[0]["title"],"Published port")
         self.assertNotEqual(imported[0]["id"], source["id"])
         self.assertEqual(self.store.public_entries(self.b), [])
+
+    def test_static_publication_contains_no_draft_records_or_private_notes(self):
+        from PIL import Image
+        import zipfile
+        published = self.add(self.a, "Published valley", "place", summary="A river valley")
+        draft = self.add(self.a, "Secret faction", "organization", summary="Not released")
+        media_bytes=io.BytesIO()
+        Image.new("RGB",(9,7),(55,86,74)).save(media_bytes,"PNG")
+        asset=self.store.upload_image(self.a,media_bytes.getvalue(),"valley.png")
+        self.store.add_media_use(self.a,{"entity_id":published["id"],"media_id":asset["id"],"role":"hero"})
+        self.store.create_relation(self.a,{"source_id":published["id"],"target_id":draft["id"],
+            "predicate":"related_to","notes":"Confidential historical research"})
+        self.store.publication(self.a,published["id"],True)
+        folder=Path(self.tmp.name)/"public-website"
+        result=build_site(self.store,self.a,folder)
+        self.assertEqual(result["published_entries"],1)
+        self.assertEqual(result["media_assets"],1)
+        self.assertTrue((folder/"index.html").is_file())
+        self.assertIn('name="worldbible-static"',(folder/"index.html").read_text())
+        self.assertTrue((folder/"reader.js").is_file())
+        content=(folder/"site-data.json").read_text()
+        self.assertIn("Published valley",content)
+        self.assertNotIn("Secret faction",content)
+        self.assertNotIn("Confidential historical research",content)
+        bundle=json.loads(content)
+        self.assertEqual(bundle["relations"],[])
+        self.assertEqual(len(bundle["entities"]),1)
+        self.assertEqual(bundle["entities"][0]["hero_media_id"],asset["id"])
+        self.assertTrue((folder/"media"/(asset["id"]+"-preview.webp")).is_file())
+        with self.assertRaises(ValueError):
+            build_site(self.store,self.a,folder)
+
+    def test_public_site_refuses_links_to_unpublished_entries(self):
+        a=self.add(self.a,"A","place")
+        b=self.add(self.a,"Private B","person")
+        self.store.update_entry(self.a,a["id"],{"body":"See [[" + b["id"] + "|B]]."})
+        self.store.publication(self.a,a["id"],True)
+        with self.assertRaises(ValueError):
+            build_site(self.store,self.a,Path(self.tmp.name)/"blocked-site")
+        self.assertFalse((Path(self.tmp.name)/"blocked-site").exists())
 
     def test_export_content(self):
         a = self.add(self.a, "River", "place")
