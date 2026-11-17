@@ -10,7 +10,7 @@ const themes={
 function luminance(hex){const v=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(x=>x<=0.04045?x/12.92:((x+0.055)/1.055)**2.4);return 0.2126*v[0]+0.7152*v[1]+0.0722*v[2];}
 function contrast(a,b){const [hi,lo]=[luminance(a),luminance(b)].sort((x,y)=>y-x);return (hi+0.05)/(lo+0.05);}
 
-const state={worlds:[],world:null,entries:[],entry:null,panel:"home",mode:"read",relations:[],media:[],allMedia:[],incoming:[],outgoing:[],layout:[],dirty:false,designDirty:false,networkFilter:"all",globalMedia:[],mediaUses:[]};
+const state={worlds:[],world:null,entries:[],entry:null,panel:"home",mode:"read",relations:[],media:[],allMedia:[],incoming:[],outgoing:[],layout:[],dirty:false,designDirty:false,networkFilter:"all",globalMedia:[],mediaUses:[],published:false};
 const escapeHTML=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const el=(tag,text,cls)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;if(cls)x.className=cls;return x;};
 const byId=id=>state.entries.find(e=>e.id===id);
@@ -111,6 +111,7 @@ function workspaceChrome(){
  $("spaceEmblem").textContent=meta.icon;
  $("workspaceScope").textContent=p==="article"&&state.entry?displayType(state.entry.type)+" · "+state.entry.status:"WORLD · "+(state.world?.name||"");
  $("entryToolbar").hidden=p!=="article"||!state.entry;
+ renderPublication();
  $("modeNav").hidden=p!=="article"||!state.entry;
  $("welcome").hidden=p!=="article"||!!state.entry;
  document.querySelectorAll("[data-panel]").forEach(b=>{
@@ -212,8 +213,30 @@ function renderHome(){
 
 async function context(){
  if(!state.entry)return;const id=state.entry.id,p={world_id:wid(),entity_id:id};
- const [r,m,all,i,o]=await Promise.all([api(q("/api/relations",p)),api(q("/api/media",p)),api(q("/api/media",{world_id:wid()})),api(q("/api/backlinks",p)),api(q("/api/outgoing",p))]);
- if(state.entry?.id===id)Object.assign(state,{relations:r,media:m,allMedia:all,incoming:i,outgoing:o});
+ const [r,m,all,i,o,pub]=await Promise.all([api(q("/api/relations",p)),api(q("/api/media",p)),api(q("/api/media",{world_id:wid()})),api(q("/api/backlinks",p)),api(q("/api/outgoing",p)),api(q("/api/publication",{world_id:wid(),id}))]);
+ if(state.entry?.id===id){Object.assign(state,{relations:r,media:m,allMedia:all,incoming:i,outgoing:o,published:pub.published});renderPublication();}
+}
+function renderPublication(){
+ const visible=state.panel==="article"&&!!state.entry;
+ $("publishStatus").hidden=!visible;
+ $("publishToggle").hidden=!visible;
+ const published=state.published;
+ $("publishStatus").textContent=published?"Published for readers":"Draft · not published";
+ $("publishStatus").className="publish-status "+(published?"is-published":"is-draft");
+ $("publishToggle").textContent=published?"Unpublish":"Publish";
+ $("viewPublished").hidden=!visible||!published;
+ if(visible&&published)$("viewPublished").href="/read/?world="+encodeURIComponent(wid())+"#/article/"+encodeURIComponent(state.entry.id);
+}
+async function togglePublication(){
+ const e=state.entry;if(!e)return;
+ if(state.dirty||state.designDirty)return notice("Save this entry and its design before changing publication.",true);
+ const next=!state.published;
+ if(!confirm(next?"Publish “"+e.title+"” to the reader-facing encyclopedia? Subsequent edits to this article will be visible immediately.":"Unpublish “"+e.title+"” from the reader-facing encyclopedia?"))return;
+ try{
+  const result=await api(q("/api/publication",{world_id:wid(),id:e.id}),"POST",{published:next});
+  state.published=result.published;renderPublication();
+  notice(next?"Article published for readers.":"Article returned to draft.");
+ }catch(error){notice(error.message,true);}
 }
 async function open(id){
  if(!safeExit())return;
@@ -673,7 +696,7 @@ function setupMap(){
 }
 async function switchWorld(id){
  if(!safeExit()){$("world").value=wid();return;}state.world=state.worlds.find(w=>w.id===id);
- state.entry=null;state.relations=[];state.media=[];state.incoming=[];state.outgoing=[];
+ state.entry=null;state.published=false;state.relations=[];state.media=[];state.incoming=[];state.outgoing=[];
  state.globalMedia=[];state.mediaUses=[];state.networkFilter="all";
  $("search").value="";$("typeFilter").value="";$("mediaSearch").value="";$("mediaFilter").value="all";
  localStorage.setItem("wb-world",id);$("worldDescription").textContent=state.world.description||"";
@@ -718,6 +741,7 @@ async function importWorld(){
  finally{$("importFile").value="";}
 }
 function wire(){
+ $("publishToggle").onclick=togglePublication;
  $("homeNew").onclick=createEntry;
  $("homeBrowse").onclick=()=>panel("article");
  $("homeToAtlas").onclick=()=>panel("atlas");
