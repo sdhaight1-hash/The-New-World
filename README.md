@@ -11,7 +11,7 @@ The project now has two deliberately separate experiences sharing one knowledge 
 
 Run `python app/launch.py` to start locally. The repository also includes a published-only **static website exporter**: `python app/publish_site.py public-site` after selecting which entries to publish.
 
-**[Reader experience research](bible/18-reader-first-ux.md)** · **[Reader publishing and site-export guide](app/README.md#reader-first-world-encyclopedia)**
+**[Reader experience research](bible/18-reader-first-ux.md)** · **[Visual worldbuilding and moodboards](bible/19-visual-worldbuilding-and-moodboards.md)** · **[Reader publishing and site-export guide](app/README.md#reader-first-world-encyclopedia)**
 
 ---
 
