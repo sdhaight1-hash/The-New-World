@@ -2,13 +2,17 @@
 
 This directory contains the **source-grounded population manifest** for the local World Bible Studio.
 
-- [`entries.json`](entries.json) — 62 identified historical concepts, including two reused authoritative catastrophe articles, and 58 reviewed relations. When combined with the 8 in-world historical and regional source articles, a fresh Studio seed creates **68 genuine world-content records**.
+- [`entries.json`](entries.json) — 71 identified historical concepts, including two reused authoritative catastrophe articles, and 75 reviewed relations. When combined with the 9 in-world historical and regional source articles, a fresh Studio seed creates **78 world-content records**.
 - [`../app/seed.py`](../app/seed.py) — deterministic, repeatable importer. Source article content is preserved verbatim, and editing an existing database record never causes a later seed to overwrite it.
 - [`../app/tests/test_seed.py`](../app/tests/test_seed.py) — tests record totals, related entries and backlinks, source fidelity, world isolation by IDs, stable reimports, preservation of edited content and publication state.
 
 ## Quality and scope audit
 
-The original importer accidentally treated 15 editorial/software-design documents as world entries. The [content audit](CONTENT_AUDIT.md) documents every excluded file and flags remaining historical placeholders for review. A fresh seeded encyclopedia contains **68 world-content records**, not the previous 83. Existing local databases receive a backup-first cleanup that preserves edited or published content.
+The original importer accidentally treated 15 editorial/software-design documents as world entries. The [content audit](CONTENT_AUDIT.md) documents every excluded file and flags remaining historical placeholders for review. A fresh seeded encyclopedia contains **68 world-content records at the time of the audit**, rather than the previous 83. The subsequent Age of AI history adds 10 records for a current clean total of **78**. Existing local databases receive a backup-first cleanup that preserves edited or published content.
+
+## Opening historical era
+
+[The Brief Age of AI](../bible/20-brief-age-of-ai.md) now precedes the Great Plague and Cascade. The documented history runs from ChatGPT's public introduction on November 30, 2022 through November 17, 2026; December 2026 marks the fictional AGI announcement, with broad displacement of human labor and rapid automation in the speculative years 2027–2029. The calendar labels of new historical entries are approximate projections onto the still-provisional Cascade-relative year system. This is **not** a claim that the real world announced AGI in December 2026.
 
 ## What counts as canon here?
 
