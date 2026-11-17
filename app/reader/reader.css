@@ -229,3 +229,19 @@ body[data-appearance=light]{--gold:#76512e;--line:#c1c8c1;--surface:#faf8f1;--ra
  .article-heading h1{font-size:clamp(43px,11vw,66px)}
 }
 @media(prefers-reduced-motion:reduce){.reading-route-item{transition:none}}
+
+/* V2 faceted discovery and classified article identity. */
+.v2-collections{margin-top:8px}
+.v2-collections .feature-head{margin-top:56px}
+.v2-collection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.v2-collection-card{padding:25px;background:var(--surface);border:1px solid var(--line);border-radius:3px;min-height:154px;display:flex;flex-direction:column;gap:9px}
+.v2-collection-card:hover{border-color:var(--gold);text-decoration:none}
+.v2-collection-card strong{font:normal 27px/1.2 Georgia,serif}
+.v2-collection-card small{font-size:12px;color:var(--secondary);margin-top:auto}
+.article-taxonomy{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0 4px}
+.v2-taxonomy-pill{display:inline-block;font:650 11px/1.4 system-ui,sans-serif;color:var(--article-accent,var(--accent));border:1px solid var(--line);padding:7px 12px;border-radius:20px}
+.v2-taxonomy-pill:hover{border-color:var(--article-accent,var(--accent));text-decoration:none}
+.browse-tools{flex-wrap:wrap}
+.browse-tools select{max-width:none;flex:1;min-width:140px}
+@media(max-width:900px){.v2-collection-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.v2-collection-grid{grid-template-columns:1fr}.browse-tools{display:grid;grid-template-columns:1fr 1fr}.browse-tools input,.browse-tools span{grid-column:1/-1}}
