@@ -1,5 +1,8 @@
 # RFC 005 — God's-Eye Historical Atlas
 
+> **SUPERSEDED:** The preferred map direction is now a **2D historical atlas**, not a 3D globe. Retained as a research reference for layered navigation and bookmarks. See [RFC 007](17-rfc-2d-historical-atlas.md) and [the unified architecture](15-unified-architecture.md).
+
+
 **Status:** design proposal; no globe implementation yet.
 **Reference:** https://github.com/bilawalsidhu/gods-eye-view (MIT-licensed *code*; third-party assets/data and external services have their own licenses).
 **Dependencies:** [knowledge core](10-rfc-historical-knowledge-core.md), [location/faction architecture](11-rfc-location-faction-systems.md), [timeline](12-rfc-timeline-engine.md), [media](13-rfc-media-image-handling.md).
