@@ -214,6 +214,39 @@ def search(store,wid,needle="",typ=None,category=None,tag=None,public=False,offs
         module = sys.modules["__main__"]
     return [module.canonical(r) for r in store.rows(sql,params)]
 
+
+def memberships(store,wid,public=False):
+    store.check_world(wid)
+    constraint="JOIN publications p ON p.entity_id=e.id" if public else ""
+    rows=store.rows("""SELECT ec.entity_id,ec.category_id FROM entity_categories ec
+         JOIN entities e ON e.id=ec.entity_id """+constraint+"""
+         JOIN categories c ON c.id=ec.category_id AND c.world_id=e.world_id
+         WHERE e.world_id=?""",(wid,))
+    tag_rows=store.rows("""SELECT et.entity_id,et.tag_id FROM entity_tags et
+         JOIN entities e ON e.id=et.entity_id """+constraint+"""
+         JOIN tags t ON t.id=et.tag_id AND t.world_id=e.world_id
+         WHERE e.world_id=?""",(wid,))
+    answer={}
+    for row in rows: answer.setdefault(row["entity_id"],{"categories":[],"tags":[]})["categories"].append(row["category_id"])
+    for row in tag_rows: answer.setdefault(row["entity_id"],{"categories":[],"tags":[]})["tags"].append(row["tag_id"])
+    return answer
+
+def public_metadata(store,wid,eid):
+    store.check_world(wid)
+    if not store.one("""SELECT 1 FROM entities e JOIN publications p ON p.entity_id=e.id
+                         WHERE e.id=? AND e.world_id=?""",(eid,wid)):
+        raise error("Published article not found",404)
+    result=classifications(store,wid,eid)
+    from knowledge_v2 import TYPE_FIELDS
+    entry=store.check_entity(wid,eid)
+    props=result["properties"]
+    for key,kind in TYPE_FIELDS.get(entry["type"],{}).items():
+        if kind=="entry" and props.get(key):
+            if not store.one("""SELECT 1 FROM entities e JOIN publications p ON p.entity_id=e.id
+                               WHERE e.id=? AND e.world_id=?""",(props[key],wid)):
+                props.pop(key)
+    return result
+
 def enrich_public(store,wid,entries):
     # Batch enrich only published entries. No draft references are exposed.
     items=[]
