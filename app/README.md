@@ -42,6 +42,28 @@ Use **Ctrl+K** to jump to library search or **Alt+1–6** for workspace navigati
 - Per-entry theme selection and accent, optional reorder/visibility of live content sections, responsive reading view.
 - World JSON metadata export, safe restrictive entry deletion, local SQLite transactions.
 
+## Reader-first World Encyclopedia
+
+**Visitors start at the reader, not the editor.** The local application's landing URL is now **http://127.0.0.1:8765/read/**. The authoring Studio remains at **http://127.0.0.1:8765/app/**.
+
+The reader has an editorial world homepage, subject browsing, published-only encyclopedia articles with headings and related reading, media galleries, a 2D atlas, historical chronology, search, and reading preferences. It has **no authoring navigation or editing controls**.
+
+**Publishing is explicit:** selecting an entry in the Studio exposes **Publish/Unpublish**, independent of its editorial canon status. The reader sees only published entries and links between published entries. A published article updates immediately when edited. Drafts remain in the Studio; review prose and image rights before publishing.
+
+### Publish a reader-only static website
+
+After publishing articles, from the repository root:
+
+1. \`python app/publish_site.py public-site\`
+2. \`python -m http.server 8000 --directory public-site\`
+3. Open **http://127.0.0.1:8000/** to preview the standalone website.
+
+You can host the resulting static directory on an appropriate static host. It includes **only published articles and the media those published articles use**; it does not include the SQLite database, Studio UI, draft articles, or authoring API. The exporter refuses to overwrite an existing non-empty directory and refuses links to unpublished entities until resolved. Multiple worlds with published content require \`--world-id <UUID>\`.
+
+This step **builds** a public-safe static directory; it does **not** upload or deploy your site automatically. Offline maps still require network tiles from OpenStreetMap, and hash-based article URLs are not yet search-engine-optimized. For now, do **not expose the local application server to the public Internet**: it has no authentication and its general authoring endpoints are not a privacy boundary.
+
+See [reader-first UX research and architecture](../bible/18-reader-first-ux.md).
+
 ## Reliable complete backups
 
 **Use a full backup before substantial worldbuilding or upgrading the application.** This includes a consistent database snapshot plus originals and previews from the media library.
