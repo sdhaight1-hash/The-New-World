@@ -198,3 +198,15 @@ body[data-space=article][data-mode=explore] .form-shell{border-top-color:#b8a7ce
 .create-type-hint{border-left:3px solid var(--space-accent);background:var(--raised);color:var(--muted);padding:9px 12px;font-size:12px;border-radius:0 6px 6px 0;line-height:1.55}
 dialog label.outline-option{display:flex;gap:10px;align-items:center;padding:10px 0;color:var(--text);font-weight:600}
 dialog .outline-option input{flex:0 0 auto;margin:0}
+
+/* Editorial publishing controls are separate from canon status and design tools. */
+.reader-preview-link{display:inline-flex;align-items:center;border-radius:7px;border:1px solid var(--accent);color:var(--accent);font-size:12px;font-weight:750;padding:8px 12px;white-space:nowrap;text-decoration:none}
+.reader-preview-link:hover{background:var(--raised);text-decoration:none}
+.publication-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
+.publication-tools #publishToggle{padding:7px 10px;font-size:11px;font-weight:700}
+.publish-status{font-size:11px;font-weight:750;white-space:nowrap;padding:5px 9px;border-radius:30px;border:1px solid var(--line)}
+.publish-status.is-published{color:#abdbbb;border-color:#548967;background:#22402b}
+.publish-status.is-draft{color:var(--muted);background:var(--raised)}
+#viewPublished{font-size:11px;color:var(--accent);font-weight:750}
+@media(max-width:1360px){.page-head{flex-wrap:wrap}.publication-tools{margin-left:0}.mode-nav{margin-left:auto}}
+@media(max-width:700px){.publication-tools{width:100%}.reader-preview-link{padding:6px 8px}}
