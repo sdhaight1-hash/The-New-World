@@ -70,10 +70,12 @@ button,input,select{font:inherit}button,input,select{color:var(--ink);border:1px
 
 
 /* Editorial reading experience: clearer visual hierarchy and less dashboard chrome. */
-.cover{min-height:610px;background:
+.cover{min-height:610px;background-image:
+  linear-gradient(90deg,#142127dd,#14212766),var(--cover-art,none),
   radial-gradient(ellipse at 88% 14%,#6c806b33,transparent 45%),
   radial-gradient(ellipse at 81% 75%,#9b805035,transparent 39%),
-  linear-gradient(120deg,#101b21 0%,#223e3e 58%,#16242c 100%)}
+  linear-gradient(120deg,#101b21 0%,#223e3e 58%,#16242c 100%);
+  background-size:cover;background-position:center}
 .cover-inner{padding-top:135px;padding-bottom:115px}
 .cover h1{max-width:850px;text-wrap:balance;text-shadow:0 4px 24px #0003}
 .cover-summary{max-width:620px}
