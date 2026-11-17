@@ -27,11 +27,13 @@ def digest(data: bytes):
 
 
 def make_backup(db_path: Path, output: Path) -> dict:
-    db_path = Path(db_path)
-    output = Path(output)
+    db_path, output = Path(db_path), Path(output)
     if not db_path.is_file():
         raise ValueError("Database not found. Start and seed the studio first.")
     output.parent.mkdir(parents=True, exist_ok=True)
+    media = db_path.parent / "media"
+    if media.exists() and output.resolve().is_relative_to(media.resolve()):
+        raise ValueError("Backup archive must not be stored inside the media library")
     with tempfile.TemporaryDirectory() as d:
         snapshot = Path(d) / "database.sqlite3"
         with sqlite3.connect(f"file:{db_path}?mode=ro", uri=True) as source:
@@ -40,34 +42,38 @@ def make_backup(db_path: Path, output: Path) -> dict:
                 check = target.execute("PRAGMA integrity_check").fetchone()[0]
                 if check != "ok":
                     raise ValueError("Database integrity check failed: " + check)
-        files = {"database.sqlite3": snapshot.read_bytes()}
-        media = db_path.parent / "media"
+        candidates = [("database.sqlite3", snapshot)]
         if media.exists():
             for path in sorted(media.rglob("*")):
                 if path.is_symlink():
                     raise ValueError("Refusing symbolic link in media library")
                 if path.is_file():
-                    rel = "media/" + path.relative_to(media).as_posix()
-                    if len(files) >= MAX_ARCHIVE_FILES:
+                    candidates.append(("media/" + path.relative_to(media).as_posix(), path))
+                    if len(candidates) > MAX_ARCHIVE_FILES:
                         raise ValueError("Too many media files")
-                    files[rel] = path.read_bytes()
-        manifest = {
-            "format": "world-bible-complete-backup-v1",
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "files": {name: {"size":len(data), "sha256":digest(data)} for name,data in files.items()},
-        }
+        manifest = {"format":"world-bible-complete-backup-v1",
+                    "created_at":datetime.now(timezone.utc).isoformat(),"files":{}}
+        total = 0
         tmp_zip = output.with_suffix(output.suffix + ".tmp")
         try:
-            with zipfile.ZipFile(tmp_zip, "w", compression=zipfile.ZIP_DEFLATED,
-                                 compresslevel=5) as archive:
-                for name, data in files.items():
-                    archive.writestr(name, data)
-                archive.writestr("manifest.json", json.dumps(manifest, indent=2))
-            os.replace(tmp_zip, output)
+            with zipfile.ZipFile(tmp_zip,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=5) as archive:
+                for name,path in candidates:
+                    h = hashlib.sha256()
+                    size = 0
+                    with path.open("rb") as src:
+                        for chunk in iter(lambda: src.read(1024*1024), b""):
+                            h.update(chunk)
+                            size += len(chunk)
+                    total += size
+                    if total > MAX_UNPACKED_BYTES:
+                        raise ValueError("Backup exceeds size limit")
+                    manifest["files"][name] = {"size":size,"sha256":h.hexdigest()}
+                    archive.write(path,arcname=name)
+                archive.writestr("manifest.json",json.dumps(manifest,indent=2))
+            os.replace(tmp_zip,output)
         finally:
             tmp_zip.unlink(missing_ok=True)
-    return {"files":len(files), "bytes":sum(len(v) for v in files.values()),
-            "archive":str(output.resolve())}
+    return {"files":len(candidates),"bytes":total,"archive":str(output.resolve())}
 
 
 def restore_backup(archive_path: Path, db_path: Path, force=False) -> dict:
@@ -111,14 +117,17 @@ def restore_backup(archive_path: Path, db_path: Path, force=False) -> dict:
         with tempfile.TemporaryDirectory(dir=target_dir.parent, prefix=".wb-restore-") as staging_name:
             staging = Path(staging_name)
             for name in expected:
-                data = archive.read(name)
-                if digest(data) != expected[name]["sha256"]:
-                    raise ValueError("SHA-256 verification failed: " + name)
-                destination = staging / name
-                if name == "database.sqlite3":
-                    destination = staging / "worlds.sqlite3"
+                destination = staging / ("worlds.sqlite3" if name=="database.sqlite3" else name)
                 destination.parent.mkdir(parents=True, exist_ok=True)
-                destination.write_bytes(data)
+                checksum = hashlib.sha256()
+                count = 0
+                with archive.open(name, "r") as source, destination.open("wb") as target:
+                    for chunk in iter(lambda: source.read(1024*1024), b""):
+                        target.write(chunk)
+                        checksum.update(chunk)
+                        count += len(chunk)
+                if count != expected[name]["size"] or checksum.hexdigest() != expected[name]["sha256"]:
+                    raise ValueError("SHA-256 verification failed: " + name)
             with sqlite3.connect(staging/"worlds.sqlite3") as test:
                 if test.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                     raise ValueError("Restored SQLite database is corrupt")
