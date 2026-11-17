@@ -271,8 +271,21 @@ async function createWorld(){
 async function exportWorld(){
  try{const data=await api(q("/api/export",{world_id:wid()})),blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=el("a");a.href=url;a.download="world-bible-export.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);notice("Data exported; back up image originals separately.");}catch(err){notice(err.message,true);}
 }
+async function importWorld(){
+ const file=$("importFile").files[0];if(!file)return;
+ try{
+  if(file.size>25000000)throw Error("Archive exceeds 25 MB.");
+  const contents=JSON.parse(await file.text());
+  if(contents.media_metadata?.length||contents.media_uses?.length)throw Error("This export includes image references. Restore the .worldbible folder to preserve originals.");
+  if(!confirm("Import into a NEW isolated world? Existing worlds will not be overwritten."))return;
+  const outcome=await api("/api/import","POST",contents);
+  state.worlds.push(outcome.world);$("world").add(new Option(outcome.world.name,outcome.world.id));
+  await switchWorld(outcome.world.id);notice("Imported "+outcome.entries+" entries and "+outcome.relations+" relationships.");
+ }catch(err){notice("Import failed: "+err.message,true);}
+ finally{$("importFile").value="";}
+}
 function wire(){
- $("world").onchange=e=>switchWorld(e.target.value);$("addWorld").onclick=createWorld;$("newEntry").onclick=createEntry;$("welcomeNew").onclick=createEntry;$("export").onclick=exportWorld;
+ $("world").onchange=e=>switchWorld(e.target.value);$("importWorld").onclick=()=>$("importFile").click();$("importFile").onchange=importWorld;$("addWorld").onclick=createWorld;$("newEntry").onclick=createEntry;$("welcomeNew").onclick=createEntry;$("export").onclick=exportWorld;
  $("welcomeTimeline").onclick=()=>panel("timeline");$("welcomeAtlas").onclick=()=>panel("atlas");
  $("search").oninput=renderList;$("typeFilter").onchange=renderList;
  document.querySelectorAll("[data-panel]").forEach(b=>b.onclick=()=>panel(b.dataset.panel));
