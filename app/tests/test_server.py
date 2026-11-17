@@ -11,6 +11,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from server import Store, Handler, Error
+from backup import make_backup, restore_backup
 
 
 class StoreTests(unittest.TestCase):
@@ -190,6 +191,40 @@ class StoreTests(unittest.TestCase):
         with self.assertRaises(Error):
             self.store.create_relation(self.a, {
                 "source_id":a["id"],"target_id":b["id"],"predicate":"evil predicate;"})
+
+    def test_complete_media_backup_and_restore(self):
+        from PIL import Image
+        self.add(self.a, "Archived settlement", "place")
+        image = io.BytesIO()
+        Image.new("RGB", (6, 8), (12, 48, 75)).save(image, "PNG")
+        m = self.store.upload_image(self.a, image.getvalue(), "settlement.png")
+        archive = Path(self.tmp.name) / "complete.zip"
+        details = make_backup(self.store.path, archive)
+        self.assertGreaterEqual(details["files"], 3)
+        restore_db = Path(self.tmp.name) / "restored" / "worlds.sqlite3"
+        outcome = restore_backup(archive, restore_db)
+        self.assertEqual(outcome["files"], details["files"])
+        restored = Store(restore_db)
+        try:
+            self.assertEqual(len(restored.entries(self.a)), 1)
+            self.assertEqual(restored.media_file(self.a, m["id"])[0].read_bytes(), image.getvalue())
+            self.assertTrue(restored.media_file(self.a, m["id"],True)[0].is_file())
+        finally:
+            restored.close()
+        with self.assertRaises(ValueError):
+            restore_backup(archive,restore_db)
+
+    def test_restore_rejects_invalid_paths(self):
+        import zipfile
+        archive = Path(self.tmp.name) / "evil.zip"
+        with zipfile.ZipFile(archive,"w") as z:
+            z.writestr("database.sqlite3", b"fake")
+            z.writestr("media/../../escape.txt", b"bad")
+            z.writestr("manifest.json", json.dumps({"format":"world-bible-complete-backup-v1",
+                "files":{"database.sqlite3":{"size":4,"sha256":"x"},
+                         "media/../../escape.txt":{"size":3,"sha256":"x"}}}))
+        with self.assertRaises(ValueError):
+            restore_backup(archive,Path(self.tmp.name)/"evil-target"/"worlds.sqlite3")
 
     def test_export_content(self):
         a = self.add(self.a, "River", "place")
