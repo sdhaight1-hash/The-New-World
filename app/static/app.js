@@ -228,7 +228,17 @@ function explore(){
  }else family.append(el("p","Select a person to view family connections.","muted"));
  const refs=$("referenceView");refs.replaceChildren();for(const r of state.incoming)refs.append(el("p","Linked from "+r.title));for(const r of state.outgoing)refs.append(el("p","Links to "+r.title));
  const s=$("mediaSelect");optionList(s,state.allMedia.map(m=>({id:m.id,title:m.title,type:m.mime})));
- const g=$("mediaCards");g.replaceChildren();for(const m of state.media){const f=el("figure",undefined,"media-item"),img=el("img");img.src="/media/"+wid()+"/"+m.media_id+"-preview";img.alt=m.alt||m.title;f.append(img,el("figcaption",m.title+" · "+m.role),button("Unlink",async()=>{
+ const g=$("mediaCards");g.replaceChildren();for(const m of state.media){const f=el("figure",undefined,"media-item"),img=el("img");img.src="/media/"+wid()+"/"+m.media_id+"-preview";img.alt=m.alt||m.title;f.append(img,el("figcaption",m.title+" · "+m.role),button("Edit image",async()=>{
+  const title=prompt("Image title",m.title);if(title===null)return;
+  const alt=prompt("Descriptive alternative text",m.alt||"");if(alt===null)return;
+  const credit=prompt("Credit / source attribution",m.credit||"");if(credit===null)return;
+  const caption=prompt("Caption on this article",m.caption||"");if(caption===null)return;
+  try{
+    await api(q("/api/media",{world_id:wid(),id:m.media_id}),"PATCH",{title,alt,credit});
+    await api(q("/api/media-use",{world_id:wid(),id:m.use_id}),"PATCH",{caption});
+    await context();render();notice("Image details saved.");
+  }catch(err){notice(err.message,true);}
+ }),button("Unlink",async()=>{
   try{await api(q("/api/media-use",{world_id:wid(),id:m.use_id}),"DELETE");await context();render();}catch(err){notice(err.message,true);}
  }));g.append(f);}
 }
