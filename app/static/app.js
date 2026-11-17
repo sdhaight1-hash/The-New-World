@@ -434,7 +434,8 @@ function design(){
 }
 function layoutControls(){
  const root=$("layoutBlocks");root.replaceChildren();
- for(const name of blocks){
+ const displayOrder=[...state.layout,...blocks.filter(name=>!state.layout.includes(name))];
+ for(const name of displayOrder){
   const row=el("div",undefined,"layout-row design-block");
   row.dataset.block=name;
   const included=state.layout.includes(name);
