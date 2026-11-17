@@ -419,26 +419,97 @@ async function attachImage(){
  const media_id=$("mediaSelect").value;if(!media_id)return;
  try{await api(q("/api/media-use",{world_id:wid()}),"POST",{entity_id:state.entry.id,media_id,role:$("mediaRole").value});await context();render();notice("Image attached.");}catch(err){notice(err.message,true);}
 }
+const BLOCK_LABELS={
+ body:"Article body",facts:"Record details",relationships:"Relationships",
+ backlinks:"References",timeline:"Associated history",map:"Geography",gallery:"Image gallery",sources:"Sources & status"
+};
 function design(){
- const e=state.entry;state.layout=[...(e.layout.length?e.layout:blocks)];
- $("dTheme").value=e.theme_id;$("dAccent").value=e.accent||"#77B7AE";layoutControls();
+ const e=state.entry;
+ state.layout=[...(e.layout.length?e.layout:blocks)];
+ $("dTheme").value=e.theme_id;
+ $("dOverrideAccent").checked=!!e.accent;
+ $("dAccent").disabled=!e.accent;
+ $("dAccent").value=e.accent||"#77B7AE";
+ layoutControls();
 }
 function layoutControls(){
  const root=$("layoutBlocks");root.replaceChildren();
- for(const name of blocks){const row=el("div",undefined,"layout-row"),check=el("input");check.type="checkbox";check.checked=state.layout.includes(name);
-  check.onchange=()=>{state.layout=check.checked?[...state.layout,name]:state.layout.filter(x=>x!==name);state.designDirty=true;layoutControls();};
-  row.append(check,el("span",name,"layout-name"));const i=state.layout.indexOf(name);
-  if(i>=0){row.append(button("↑",()=>{if(i>0){[state.layout[i-1],state.layout[i]]=[state.layout[i],state.layout[i-1]];state.designDirty=true;}layoutControls();}),button("↓",()=>{if(i<state.layout.length-1){[state.layout[i+1],state.layout[i]]=[state.layout[i],state.layout[i+1]];state.designDirty=true;}layoutControls();}));}root.append(row);
+ for(const name of blocks){
+  const row=el("div",undefined,"layout-row design-block");
+  row.dataset.block=name;
+  const included=state.layout.includes(name);
+  const check=el("input");check.type="checkbox";check.checked=included;
+  check.setAttribute("aria-label","Show "+BLOCK_LABELS[name]);
+  check.onchange=()=>{
+   state.layout=check.checked?[...state.layout,name]:state.layout.filter(x=>x!==name);
+   state.designDirty=true;layoutControls();
+  };
+  const handle=el("span","⠿","drag-handle");handle.title="Drag to change section order";
+  row.append(handle,check,el("span",BLOCK_LABELS[name],"layout-name"));
+  const i=state.layout.indexOf(name);
+  if(i>=0){
+   row.draggable=true;row.title="Drag to rearrange this section";
+   row.addEventListener("dragstart",e=>{
+    e.dataTransfer.setData("text/plain",name);e.dataTransfer.effectAllowed="move";row.classList.add("dragging");
+   });
+   row.addEventListener("dragend",()=>row.classList.remove("dragging"));
+   row.addEventListener("dragover",e=>{e.preventDefault();e.dataTransfer.dropEffect="move";row.classList.add("drag-over");});
+   row.addEventListener("dragleave",()=>row.classList.remove("drag-over"));
+   row.addEventListener("drop",e=>{
+    e.preventDefault();row.classList.remove("drag-over");
+    const source=e.dataTransfer.getData("text/plain");
+    if(!state.layout.includes(source)||source===name)return;
+    const next=state.layout.filter(x=>x!==source);
+    next.splice(next.indexOf(name),0,source);
+    state.layout=next;state.designDirty=true;layoutControls();
+   });
+   row.append(
+    button("↑",()=>{if(i>0){[state.layout[i-1],state.layout[i]]=[state.layout[i],state.layout[i-1]];state.designDirty=true;}layoutControls();}),
+    button("↓",()=>{if(i<state.layout.length-1){[state.layout[i+1],state.layout[i]]=[state.layout[i],state.layout[i+1]];state.designDirty=true;}layoutControls();})
+   );
+  }else{
+   row.classList.add("design-block-hidden");
+   row.append(el("small","Hidden"));
+  }
+  root.append(row);
  }
  previewDesign();
 }
 function previewDesign(){
- const root=$("designPreview");root.replaceChildren();setTheme(root,{...state.entry,theme_id:$("dTheme").value,accent:$("dAccent").value});
- root.append(el("h3",state.entry.title),el("p","Visible sections: "+(state.layout.join(" → ")||"none")));
+ const root=$("designPreview");root.replaceChildren();
+ const e={...state.entry,theme_id:$("dTheme").value,accent:$("dOverrideAccent").checked?$("dAccent").value:null};
+ setTheme(root,e);
+ const header=el("header",undefined,"preview-header");
+ header.append(el("span",displayType(e.type)+" · "+e.status,"preview-kicker"),el("h3",e.title));
+ header.append(el("p",e.summary||"No summary yet.","preview-summary"));
+ root.append(header);
+ if(!state.layout.length)root.append(el("p","Choose at least one section to display.","preview-empty"));
+ for(const name of state.layout){
+  const area=el("section",undefined,"preview-section");
+  area.append(el("h4",BLOCK_LABELS[name]));
+  let value;
+  if(name==="body")value=e.body?e.body.replace(/^#+\s*/gm,"").replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,"$2").slice(0,460):"An article body will appear here.";
+  if(name==="facts")value=displayType(e.type)+" · "+e.status+" · "+when(e);
+  if(name==="relationships")value=state.relations.length+" recorded connection(s)";
+  if(name==="backlinks")value=state.incoming.length+" incoming references, "+state.outgoing.length+" outgoing";
+  if(name==="timeline")value="Events related to this entry are drawn from the shared chronology.";
+  if(name==="map")value=e.lat!==null&&e.lon!==null?"Mapped at "+e.lat+", "+e.lon:"No verified location coordinates";
+  if(name==="gallery")value=state.media.length+" attached image(s)";
+  if(name==="sources")value="Editorial status: "+e.status+" · source and research records";
+  area.append(el("p",value,"preview-copy"));root.append(area);
+ }
 }
 async function saveDesign(){
- try{state.entry=await api(q("/api/entity",{world_id:wid(),id:state.entry.id}),"PATCH",{theme_id:$("dTheme").value,accent:$("dAccent").value,layout:state.layout});state.designDirty=false;
- await refresh();await context();render();notice("Design saved.");}catch(err){notice(err.message,true);}
+ if(!state.layout.length)return notice("Select at least one visible section before saving.",true);
+ try{
+  state.entry=await api(q("/api/entity",{world_id:wid(),id:state.entry.id}),"PATCH",{
+   theme_id:$("dTheme").value,
+   accent:$("dOverrideAccent").checked?$("dAccent").value:null,
+   layout:state.layout
+  });
+  state.designDirty=false;
+  await refresh();await context();render();notice("Page design saved.");
+ }catch(err){notice(err.message,true);}
 }
 async function network(){
  if(!state.world)return;
@@ -655,7 +726,10 @@ function wire(){
  $("editForm").onsubmit=e=>{e.preventDefault();save();};$("editForm").oninput=()=>dirty(true);
  $("deleteEntry").onclick=remove;$("findLinks").onclick=discover;$("addRelation").onclick=addRelation;
  $("uploadImage").onclick=uploadImage;$("attachImage").onclick=attachImage;
- $("dTheme").onchange=()=>{state.designDirty=true;previewDesign();};$("dAccent").oninput=()=>{state.designDirty=true;previewDesign();};$("saveDesign").onclick=saveDesign;
+ $("dTheme").onchange=()=>{state.designDirty=true;previewDesign();};
+ $("dOverrideAccent").onchange=()=>{$("dAccent").disabled=!$("dOverrideAccent").checked;state.designDirty=true;previewDesign();};
+ $("dAccent").oninput=()=>{state.designDirty=true;previewDesign();};
+ $("saveDesign").onclick=saveDesign;
  $("resetDesign").onclick=()=>{state.layout=[...blocks];state.designDirty=true;layoutControls();};
  $("timelineScope").onchange=timeline;$("timelineAll").onchange=timeline;
  setupMap();window.addEventListener("beforeunload",e=>{if(state.dirty||state.designDirty){e.preventDefault();e.returnValue="";}});
