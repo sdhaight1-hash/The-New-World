@@ -145,3 +145,25 @@ body[data-appearance=high-contrast] .category-chip.active{outline:2px solid var(
  .global-media-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:420px){.home-columns,.network-layout,.global-media-grid{grid-template-columns:1fr}.space-item{min-width:83px}}
+
+/* Entry workspace task separation: the reading layout keeps references visible,
+   while composing, designing and connecting use a wider single-task canvas. */
+.entry-mode-banner{display:flex;align-items:center;gap:13px;background:color-mix(in srgb,var(--space-accent) 7%,var(--surface));border:1px solid var(--line);border-left:4px solid var(--space-accent);border-radius:8px;padding:13px 17px;margin:0 0 18px}
+.entry-mode-banner .entry-mode-icon{display:flex;align-items:center;justify-content:center;width:38px;height:38px;flex:0 0 38px;background:var(--raised);color:var(--space-accent);border-radius:8px;font-size:22px}
+.entry-mode-banner strong{font-size:13px}.entry-mode-banner p{margin:2px 0 0;font-size:11px;color:var(--muted)}
+.entry-mode-context{margin-left:auto;color:var(--space-accent);font-size:10px;font-weight:800;letter-spacing:.08em;white-space:nowrap}
+body[data-space=article]:not([data-mode=read]) .inspector{display:none}
+body[data-space=article]:not([data-mode=read]) .workspace{grid-template-columns:262px minmax(460px,1fr)}
+body[data-space=article]:not([data-mode=read]) .form-shell{max-width:1120px}
+body[data-space=article][data-mode=write] .entry-mode-banner{--space-accent:#a5c2d7}
+body[data-space=article][data-mode=design] .entry-mode-banner{--space-accent:#d3ac85}
+body[data-space=article][data-mode=explore] .entry-mode-banner{--space-accent:#b8a7ce}
+body[data-space=article][data-mode=design] .form-shell{border-top-color:#d3ac85}
+body[data-space=article][data-mode=explore] .form-shell{border-top-color:#b8a7ce}
+@media(max-width:1320px){body[data-space=article]:not([data-mode=read]) .workspace{grid-template-columns:235px minmax(360px,1fr)}}
+@media(max-width:980px){body[data-space=article]:not([data-mode=read]) .workspace{grid-template-columns:230px minmax(330px,1fr)}}
+@media(max-width:680px){
+ body[data-space=article]:not([data-mode=read]) .workspace{display:block}
+ .entry-mode-banner{padding:10px;gap:9px}
+ .entry-mode-context{display:none}
+}
