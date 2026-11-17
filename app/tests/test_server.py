@@ -444,7 +444,7 @@ class StoreTests(unittest.TestCase):
     def test_export_content(self):
         a = self.add(self.a, "River", "place")
         data = self.store.export(self.a)
-        self.assertEqual(data["format"], "world-bible-export-v1")
+        self.assertEqual(data["format"], "world-bible-export-v2")
         self.assertEqual(data["entities"][0]["id"], a["id"])
         self.assertEqual(len(self.store.export(self.b)["entities"]), 0)
 

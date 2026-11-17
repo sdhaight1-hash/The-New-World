@@ -11,6 +11,7 @@ function luminance(hex){const v=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255
 function contrast(a,b){const [hi,lo]=[luminance(a),luminance(b)].sort((x,y)=>y-x);return (hi+0.05)/(lo+0.05);}
 
 const state={worlds:[],world:null,entries:[],entry:null,panel:"home",mode:"read",relations:[],media:[],allMedia:[],incoming:[],outgoing:[],layout:[],dirty:false,designDirty:false,networkFilter:"all",globalMedia:[],mediaUses:[],published:false,boards:[],board:null,boardZoom:1};
+state.v2={types:[],categories:[],tags:[],memberships:{},metadata:null};
 const escapeHTML=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const el=(tag,text,cls)=>{const x=document.createElement(tag);if(text!==undefined)x.textContent=text;if(cls)x.className=cls;return x;};
 const byId=id=>state.entries.find(e=>e.id===id);
@@ -65,6 +66,7 @@ async function worlds(){
  $("world").replaceChildren(...state.worlds.map(w=>new Option(w.name,w.id)));
  $("world").value=wid();localStorage.setItem("wb-world",wid());
  $("worldDescription").textContent=state.world.description||"Separate worldbuilding workspace.";
+ state.v2.types=await api("/api/v2/types");
  await refresh();workspaceChrome();
 }
 const ENTRY_MODES={
@@ -128,6 +130,13 @@ function workspaceChrome(){
 }
 async function refresh(){
  state.entries=await api(q("/api/entities",{world_id:wid()}));
+ const [categories,tags,memberships]=await Promise.all([
+  api(q("/api/v2/categories",{world_id:wid()})),
+  api(q("/api/v2/tags",{world_id:wid()})),
+  api(q("/api/v2/memberships",{world_id:wid()}))
+ ]);
+ Object.assign(state.v2,{categories,tags,memberships});
+ populateV2Filters();
  const filter=$("typeFilter"),before=filter.value;
  filter.replaceChildren(new Option("All entries",""));
  for(const [type] of categoryCounts())filter.add(new Option(displayType(type),type));
@@ -141,6 +150,26 @@ async function refresh(){
  if(state.panel==="boards")boardsWorkspace();
  if(state.entry){state.entry=byId(state.entry.id)||null;if(state.panel==="article")render();}
  workspaceChrome();
+}
+function v2CategoryLabel(category){
+ const segments=[category.name],visited=new Set([category.id]);
+ let parent=category.parent_id;
+ while(parent&&!visited.has(parent)){
+  visited.add(parent);
+  const found=state.v2.categories.find(x=>x.id===parent);if(!found)break;
+  segments.unshift(found.name);parent=found.parent_id;
+ }
+ return segments.join(" / ");
+}
+function populateV2Filters(){
+ const category=$("v2CategoryFilter"),tag=$("v2TagFilter");
+ const priorCategory=category.value,priorTag=tag.value;
+ category.replaceChildren(new Option("All collections",""),
+  ...state.v2.categories.map(c=>new Option(v2CategoryLabel(c),c.id)));
+ tag.replaceChildren(new Option("All tags",""),
+  ...state.v2.tags.map(t=>new Option(t.name,t.id)));
+ category.value=[...category.options].some(o=>o.value===priorCategory)?priorCategory:"";
+ tag.value=[...tag.options].some(o=>o.value===priorTag)?priorTag:"";
 }
 function categoryControls(){
  const root=$("categoryChips");root.replaceChildren();
@@ -157,7 +186,10 @@ function categoryControls(){
 function renderList(){
  if(!state.world)return;
  const search=$("search").value.toLowerCase().trim(),type=$("typeFilter").value;
- const entries=state.entries.filter(e=>(!type||e.type===type)&&
+ const categoryId=$("v2CategoryFilter").value,tagId=$("v2TagFilter").value;
+ const entries=state.entries.filter(e=>(!type||e.type===type)
+  &&(!categoryId||(state.v2.memberships[e.id]?.categories||[]).includes(categoryId))
+  &&(!tagId||(state.v2.memberships[e.id]?.tags||[]).includes(tagId))&&
   (!search||[e.title,e.summary,e.body,...e.aliases].some(t=>String(t).toLowerCase().includes(search))));
  const root=$("entryList");root.replaceChildren();
  $("entryCount").textContent=String(entries.length);
@@ -215,8 +247,8 @@ function renderHome(){
 
 async function context(){
  if(!state.entry)return;const id=state.entry.id,p={world_id:wid(),entity_id:id};
- const [r,m,all,i,o,pub]=await Promise.all([api(q("/api/relations",p)),api(q("/api/media",p)),api(q("/api/media",{world_id:wid()})),api(q("/api/backlinks",p)),api(q("/api/outgoing",p)),api(q("/api/publication",{world_id:wid(),id}))]);
- if(state.entry?.id===id){Object.assign(state,{relations:r,media:m,allMedia:all,incoming:i,outgoing:o,published:pub.published});renderPublication();}
+ const [r,m,all,i,o,pub,metadata]=await Promise.all([api(q("/api/relations",p)),api(q("/api/media",p)),api(q("/api/media",{world_id:wid()})),api(q("/api/backlinks",p)),api(q("/api/outgoing",p)),api(q("/api/publication",{world_id:wid(),id})),api(q("/api/v2/metadata",{world_id:wid(),id}))]);
+ if(state.entry?.id===id){Object.assign(state,{relations:r,media:m,allMedia:all,incoming:i,outgoing:o,published:pub.published});renderPublication();state.v2.metadata=metadata;}
 }
 function renderPublication(){
  const visible=state.panel==="article"&&!!state.entry;
@@ -243,7 +275,7 @@ async function togglePublication(){
 async function open(id){
  if(!safeExit())return;
  const target=byId(id);if(!target)return;
- state.entry=target;dirty(false);state.designDirty=false;state.mode="read";
+ state.entry=target;state.v2.metadata=null;dirty(false);state.designDirty=false;state.mode="read";
  state.panel="article";
  await context();
  panel("article");render();
@@ -303,7 +335,11 @@ function read(){
  for(const block of (e.layout.length?e.layout:blocks)){
   const s=el("section",undefined,"entry-section");
   if(block==="body"){const a=el("article",undefined,"prose");a.innerHTML=prose(e.body||"This article has not been written yet.");bindLinks(a);s.append(a);}
-  if(block==="facts"){s.append(el("h2","Details"));const grid=el("div",undefined,"facts");for(const [k,v] of [["Type",e.type],["Status",e.status],["Period",when(e)],["Aliases",e.aliases.join(", ")||"None"],["Coordinates",e.lat===null?"Not recorded":e.lat+", "+e.lon]])grid.append(el("p",k+": "+v));s.append(grid);}
+  if(block==="facts"){s.append(el("h2","Details"));const grid=el("div",undefined,"facts");
+  const md=state.v2.metadata||{properties:{},categories:[],tags:[]};
+  const named=(ids,items)=>ids.map(id=>items.find(x=>x.id===id)?.name).filter(Boolean).join(", ");
+  const props=Object.entries(md.properties||{}).filter(([,value])=>value!==null&&value!=="").map(([key,value])=>[key.replaceAll("_"," "),byId(value)?.title||value]);
+  for(const [k,v] of [["Type",e.type],["Subtype",md.subtype||""],["Status",e.status],["Period",when(e)],["Collections",named(md.categories,state.v2.categories)],["Tags",named(md.tags,state.v2.tags)],["Aliases",e.aliases.join(", ")||"None"],["Coordinates",e.lat===null?"Not recorded":e.lat+", "+e.lon],...props])if(v)grid.append(el("p",k+": "+v));s.append(grid);}
   if(block==="relationships"){s.append(el("h2","Relationships"));for(const r of state.relations.filter(relationActive)){const other=byId(r.source_id===e.id?r.target_id:r.source_id);if(other){s.append(el("span",r.predicate.replaceAll("_"," ")+(r.source_id===e.id?" → ":" ← ")));s.append(linkTo(other));}}}
   if(block==="backlinks"){s.append(el("h2","Cross-references"));for(const r of state.incoming){s.append(el("span","Linked from: "));const other=byId(r.id);if(other)s.append(linkTo(other));}for(const r of state.outgoing){const other=byId(r.id);if(other)s.append(linkTo(other));}}
   if(block==="timeline"){s.append(el("h2","Linked historical events"));for(const ev of state.entries.filter(x=>x.type==="event"&&(x.id===e.id||state.relations.some(r=>[r.source_id,r.target_id].includes(e.id)&&[r.source_id,r.target_id].includes(x.id))))){s.append(el("span",when(ev)+" "));s.append(linkTo(ev));}}
@@ -319,7 +355,7 @@ function write(){
  const typeSelect=$("eType");
  if(![...typeSelect.options].some(x=>x.value===e.type))typeSelect.add(new Option("Custom: "+e.type,e.type));
  typeSelect.value=e.type;$("editCustomTypeField").hidden=true;$("editCustomType").value="";
- $("suggestions").hidden=true;dirty(false);
+ $("suggestions").hidden=true;dirty(false);renderV2Editor();
 }
 async function save(){
  const e=state.entry;
@@ -362,25 +398,95 @@ async function remove(){
  if(!confirm("Delete this entry? Referenced entries cannot be deleted without resolving their links."))return;
  try{await api(q("/api/entity",{world_id:wid(),id:state.entry.id}),"DELETE");state.entry=null;await refresh();render();notice("Deleted.");}catch(err){notice(err.message,true);}
 }
-function discover(){
- const body=$("eBody").value,found=[];
- for(const e of state.entries.filter(e=>e.id!==state.entry.id))for(const alias of new Set([e.title,...e.aliases])){
-  if(alias.length<4)continue;const low=body.toLowerCase(),needle=alias.toLowerCase();let start=0;
-  while((start=low.indexOf(needle,start))!==-1){
-   const prev=body[start-1]||"",next=body[start+needle.length]||"";
-   if(!/[\p{L}\p{N}_]/u.test(prev)&&!/[\p{L}\p{N}_]/u.test(next)&&!body.slice(Math.max(0,start-50),start+needle.length+20).includes("[["))found.push({start,alias,e});
-   start+=needle.length;
-  }
+function renderV2Editor(){
+ const entry=state.entry,md=state.v2.metadata||{subtype:null,properties:{},categories:[],tags:[]};
+ if(!entry)return;
+ const def=state.v2.types.find(t=>t.key===entry.type);
+ const sub=$("v2Subtype");sub.replaceChildren(new Option("No subtype",""),
+  ...(def?.subtypes||[]).map(t=>new Option(t.replaceAll("_"," "),t)));
+ sub.value=md.subtype||"";
+ const cat=$("v2Categories"),tags=$("v2Tags");
+ cat.replaceChildren(...state.v2.categories.map(c=>new Option(c.name,c.id)));
+ tags.replaceChildren(...state.v2.tags.map(t=>new Option(t.name,t.id)));
+ for(const opt of cat.options)opt.selected=md.categories.includes(opt.value);
+ for(const opt of tags.options)opt.selected=md.tags.includes(opt.value);
+ const root=$("v2PropertyFields");root.replaceChildren();
+ for(const field of def?.fields||[]){
+  const label=el("label",field.key.replaceAll("_"," ").replace(/\\b\\w/g,c=>c.toUpperCase()));
+  let control;
+  if(field.kind==="choice"){
+   control=el("select");control.add(new Option("Not recorded",""));
+   for(const value of field.options||[])control.add(new Option(value,value));
+  }else if(field.kind==="entry"){
+   control=el("select");control.add(new Option("Not recorded",""));
+   for(const e of state.entries.filter(x=>x.id!==entry.id))control.add(new Option(e.title+" · "+e.type,e.id));
+  }else{control=el("input");control.maxLength=2000;control.placeholder="Not recorded";}
+  control.dataset.property=field.key;control.value=md.properties[field.key]||"";
+  label.append(control);root.append(label);
  }
- const root=$("suggestions");root.hidden=false;root.replaceChildren(el("h3","Potential references · review before linking"));
- for(const x of found.slice(0,40)){const row=el("div",undefined,"suggestion-row");row.append(el("span",'"'+x.alias+'" → '));
- row.append(button(x.e.title+" ("+x.e.type+")",()=>{
-  const text=$("eBody").value;if(text.slice(x.start,x.start+x.alias.length).toLowerCase()!==x.alias.toLowerCase())return notice("Text changed; scan again.",true);
-  $("eBody").value=text.slice(0,x.start)+"[["+x.e.id+"|"+text.slice(x.start,x.start+x.alias.length)+"]]"+text.slice(x.start+x.alias.length);
-  dirty(true);discover();
- },"pill"));root.append(row);}
- if(!found.length)root.append(el("p","No additional unlinked names found.","muted"));
+ $("v2MetaStatus").textContent=def?"Type-aware properties":"Custom type · no property schema";
 }
+async function saveV2Metadata(){
+ if(!state.entry)return;
+ if(state.dirty||state.designDirty)return notice("Save article or design edits before saving classification.",true);
+ const subtype=$("v2Subtype").value||null;
+ const props={};
+ for(const element of $("v2PropertyFields").querySelectorAll("[data-property]"))
+  if(element.value.trim())props[element.dataset.property]=element.value.trim();
+ const values=sel=>[...$(sel).selectedOptions].map(o=>o.value);
+ try{
+  const payload={subtype,properties:props,categories:values("v2Categories"),tags:values("v2Tags")};
+  state.v2.metadata=await api(q("/api/v2/metadata",{world_id:wid(),id:state.entry.id}),"POST",payload);
+  await refresh();renderV2Editor();$("v2MetaStatus").textContent="Saved";
+  notice("Entry properties and classifications saved.");
+ }catch(err){$("v2MetaStatus").textContent=err.message;notice(err.message,true);}
+}
+async function createV2Classification(kind){
+ if(state.dirty||state.designDirty)return notice("Save article edits before creating a collection or tag.",true);
+ const field=$(kind==="category"?"v2NewCategory":"v2NewTag");
+ const name=field.value.trim();if(!name)return;
+ try{
+  await api(q(kind==="category"?"/api/v2/categories":"/api/v2/tags",{world_id:wid()}),"POST",
+   kind==="category"?{name,parent_id:$("v2CategoryFilter").value||null}:{name});
+  field.value="";await refresh();
+  if(state.entry)renderV2Editor();
+  notice((kind==="category"?"Collection":"Tag")+" created.");
+ }catch(err){notice(err.message,true);}
+}
+async function discover(){
+ const e=state.entry;if(!e)return;
+ if(state.dirty||$("eBody").value!==e.body)return notice("Save article changes before discovering references.",true);
+ try{
+  const response=await api(q("/api/v2/mentions",{world_id:wid(),id:e.id}));
+  const root=$("suggestions");root.hidden=false;root.replaceChildren(el("h3","Unlinked references · author review"));
+  const list=response.suggestions;
+  if(!list.length){root.append(el("p","No unlinked names found in the saved article.","muted"));return;}
+  for(const candidate of list){
+   const row=el("div",undefined,"suggestion-row");
+   const snippet=e.body.slice(Math.max(0,candidate.start-45),Math.min(e.body.length,candidate.end+55)).replace(/\\s+/g," ");
+   row.append(el("span",snippet,"v2-mention-excerpt"));
+   for(const target of candidate.candidates){
+    const payload={revision:response.revision,start:candidate.start,end:candidate.end,
+      fingerprint:candidate.fingerprint,target_id:target.id};
+    row.append(button("Link → "+target.title+" ("+target.type+")",async()=>{
+     try{
+      state.entry=await api(q("/api/v2/mentions/approve",{world_id:wid(),id:e.id}),"POST",payload);
+      await refresh();await context();render();await discover();
+      notice("Approved permanent link.");
+     }catch(err){notice(err.message,true);}
+    },"pill"));
+    row.append(button("Ignore "+target.title,async()=>{
+     try{
+      await api(q("/api/v2/mentions/ignore",{world_id:wid(),id:e.id}),"POST",payload);
+      await discover();
+     }catch(err){notice(err.message,true);}
+    },"pill"));
+   }
+   root.append(row);
+  }
+ }catch(err){notice(err.message,true);}
+}
+
 function inspector(){
  const root=$("context");root.replaceChildren();const e=state.entry;if(!e)return;
  root.append(el("h3",e.title),el("p",e.type+" · "+e.status,"muted"),el("h3","Backlinks"));
@@ -1012,7 +1118,8 @@ async function switchWorld(id){
  if(!safeExit()){$("world").value=wid();return;}state.world=state.worlds.find(w=>w.id===id);
  state.entry=null;state.published=false;state.relations=[];state.media=[];state.incoming=[];state.outgoing=[];
  state.globalMedia=[];state.mediaUses=[];state.networkFilter="all";state.boards=[];state.board=null;
- $("search").value="";$("typeFilter").value="";$("mediaSearch").value="";$("mediaFilter").value="all";
+ state.v2.metadata=null;
+ $("search").value="";$("typeFilter").value="";$("v2CategoryFilter").value="";$("v2TagFilter").value="";$("mediaSearch").value="";$("mediaFilter").value="all";
  localStorage.setItem("wb-world",id);$("worldDescription").textContent=state.world.description||"";
  await refresh();panel("home");render();
 }
@@ -1056,6 +1163,12 @@ async function importWorld(){
 }
 function wire(){
  $("publishToggle").onclick=togglePublication;
+ $("v2SaveMetadata").onclick=saveV2Metadata;
+ $("v2AddCategory").onclick=()=>createV2Classification("category");
+ $("v2AddTag").onclick=()=>createV2Classification("tag");
+ $("v2MetadataEditor").addEventListener("input",event=>event.stopPropagation());
+ $("v2CategoryFilter").onchange=renderList;
+ $("v2TagFilter").onchange=renderList;
  $("newBoard").onclick=newBoard;
  $("boardEmptyCreate").onclick=newBoard;
  $("boardRename").onclick=boardDetails;
@@ -1101,6 +1214,7 @@ function wire(){
  $("appearance").onchange=()=>{document.body.dataset.appearance=$("appearance").value;localStorage.setItem("wb-mode",$("appearance").value);if(state.mode==="read"&&state.entry)read();if(state.mode==="design"&&state.entry)previewDesign();};
  $("createType").onchange=updateCreateHint;
  $("eType").onchange=()=>{$("editCustomTypeField").hidden=$("eType").value!=="custom";};
+ $("eType").addEventListener("change",()=>{if(state.v2.metadata)renderV2Editor();});
  $("relType").onchange=()=>{$("relCustom").hidden=$("relType").value!=="custom";};
  $("editForm").onsubmit=e=>{e.preventDefault();save();};$("editForm").oninput=()=>dirty(true);
  $("deleteEntry").onclick=remove;$("findLinks").onclick=discover;$("addRelation").onclick=addRelation;

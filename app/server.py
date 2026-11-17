@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit, unquote
 from uuid import uuid4
+import v2_store
 
 ROOT = Path(__file__).resolve().parent
 DB_DEFAULT = ROOT.parent / ".worldbible" / "worlds.sqlite3"
@@ -192,10 +193,10 @@ class Store:
         self.db.execute("PRAGMA journal_mode=WAL")
         self.db.execute("PRAGMA synchronous=FULL")
         version = self.db.execute("PRAGMA user_version").fetchone()[0]
-        require(version <= 1, "Database schema is newer than this application", 409)
+        require(version <= 2, "Database schema is newer than this application", 409)
         self.db.executescript(SCHEMA)
-        self.db.execute("PRAGMA user_version=1")
         self.db.commit()
+        v2_store.initialize(self, version)
 
     def close(self):
         self.db.close()
@@ -505,6 +506,8 @@ class Store:
         if not data:
             return current
         merged = {**current, **data}
+        if "type" in data and data["type"]!=current["type"]:
+            v2_store.assert_type_change(self,wid,eid,data["type"])
         validate_entity({k: merged[k] for k in ("type", "title", "aliases", "summary", "body", "status", "start_year", "end_year", "lat", "lon", "theme_id", "accent", "layout")})
         data["updated_at"] = now()
         for k in ("aliases", "layout"):
@@ -519,6 +522,7 @@ class Store:
 
     def delete_entry(self, wid, eid):
         self.check_entity(wid, eid)
+        v2_store.assert_not_property_target(self,wid,eid)
         inbound = self.rows("SELECT source_id FROM content_links WHERE target_id=? AND source_id<>?", (eid, eid))
         rel = self.rows("SELECT id FROM relations WHERE source_id=? OR target_id=?", (eid, eid))
         require(not inbound and not rel, "Entry has incoming references or relationships. Remove or redirect them first.", 409)
@@ -709,7 +713,7 @@ class Store:
 
         Image metadata without original blobs cannot be faithfully restored.
         """
-        require(isinstance(payload, dict) and payload.get("format") == "world-bible-export-v1",
+        require(isinstance(payload, dict) and payload.get("format") in ("world-bible-export-v1","world-bible-export-v2"),
                 "Unsupported export format")
         source_world = payload.get("world")
         entities = payload.get("entities")
@@ -801,6 +805,8 @@ class Store:
                 self.db.execute("INSERT INTO relations VALUES(?,?,?,?,?,?,?,?,?,?)",
                     (str(uuid4()), world_id, old_new[rel["source_id"]], old_new[rel["target_id"]],
                      rel["predicate"], rel["status"], start, end, note, now()))
+            if payload.get("format")=="world-bible-export-v2":
+                v2_store.import_tables(self,world_id,payload,old_new)
         return {"world": self.one_world(world_id), "entries": len(entities), "relations": len(relations)}
 
     def export(self, wid):
@@ -816,7 +822,8 @@ class Store:
                         WHERE b.world_id=? ORDER BY i.id""",(wid,))
             published = self.rows("""SELECT p.entity_id,p.published_at FROM publications p
                     JOIN entities e ON e.id=p.entity_id WHERE e.world_id=?""",(wid,))
-        return {"format":"world-bible-export-v1","world":world,"entities":entries,
+        return {"format":"world-bible-export-v2","world":world,"entities":entries,
+                **v2_store.export_tables(self,wid),
                 "relations":relations,"media_metadata":media,"media_uses":uses,
                 "moodboards":boards,"moodboard_items":board_items,
                 "publications":published,
@@ -898,6 +905,31 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(blob)
                 return
+            if route == "/api/v2/types":
+                return self.reply(v2_store.types())
+            if route == "/api/v2/categories":
+                return self.reply(v2_store.categories(s,self.get_arg(q,"world_id")))
+            if route == "/api/v2/tags":
+                return self.reply(v2_store.tags(s,self.get_arg(q,"world_id")))
+            if route == "/api/v2/public/categories":
+                return self.reply(v2_store.categories(s,self.get_arg(q,"world_id"),True))
+            if route == "/api/v2/public/tags":
+                return self.reply(v2_store.tags(s,self.get_arg(q,"world_id"),True))
+            if route == "/api/v2/metadata":
+                return self.reply(v2_store.classifications(s,self.get_arg(q,"world_id"),self.get_arg(q,"id")))
+            if route == "/api/v2/memberships":
+                return self.reply(v2_store.memberships(s,self.get_arg(q,"world_id")))
+            if route == "/api/v2/public/memberships":
+                return self.reply(v2_store.memberships(s,self.get_arg(q,"world_id"),True))
+            if route == "/api/v2/public/metadata":
+                return self.reply(v2_store.public_metadata(s,self.get_arg(q,"world_id"),self.get_arg(q,"id")))
+            if route == "/api/v2/mentions":
+                return self.reply(v2_store.mentions(s,self.get_arg(q,"world_id"),self.get_arg(q,"id")))
+            if route in ("/api/v2/search","/api/v2/public/search"):
+                return self.reply(v2_store.search(s,self.get_arg(q,"world_id"),
+                    q.get("search",[""])[0],q.get("type",[None])[0],
+                    q.get("category",[None])[0],q.get("tag",[None])[0],
+                    route=="/api/v2/public/search",int(q.get("offset",[0])[0])))
             if route == "/api/boards":
                 return self.reply(s.boards(self.get_arg(q,"world_id")))
             if route == "/api/board":
@@ -999,6 +1031,16 @@ class Handler(BaseHTTPRequestHandler):
                 filename=unquote(self.headers.get("X-File-Name","image"))[:180]
                 return self.reply(s.upload_image(wid,raw,filename),201)
             data=self.json_body() if verb in ("POST","PATCH") else {}
+            if route=="/api/v2/categories" and verb=="POST":
+                return self.reply(v2_store.create_category(s,wid,data),201)
+            if route=="/api/v2/tags" and verb=="POST":
+                return self.reply(v2_store.create_tag(s,wid,data),201)
+            if route=="/api/v2/metadata" and verb=="POST":
+                return self.reply(v2_store.update_metadata(s,wid,self.get_arg(q,"id"),data))
+            if route=="/api/v2/mentions/approve" and verb=="POST":
+                return self.reply(v2_store.decide(s,wid,self.get_arg(q,"id"),data,True))
+            if route=="/api/v2/mentions/ignore" and verb=="POST":
+                return self.reply(v2_store.decide(s,wid,self.get_arg(q,"id"),data,False))
             if route=="/api/import" and verb=="POST":
                 return self.reply(s.import_data(data),201)
             if route=="/api/worlds" and verb=="POST":

@@ -9,8 +9,10 @@ page.on("pageerror",error=>errors.push(error.message));
 try{
  await page.goto(base,{waitUntil:"domcontentloaded"});
  await page.locator("#homeWorldTitle").waitFor({state:"visible",timeout:15000});
+ await page.locator('body[data-space="home"]').waitFor({state:"visible",timeout:15000});
  assert.match(await page.locator("#spaceHeading").innerText(),/World Overview/);
- assert.equal(await page.locator("body").getAttribute("data-space"),"home");
+ assert.equal(await page.locator("body").getAttribute("data-space"),"home",
+  JSON.stringify({errors,notice:await page.locator("#notice").textContent(),body:await page.evaluate(()=>({space:document.body.dataset.space,outer:document.body.outerHTML.slice(0,360)}))}));
  const nav=page.locator(".space-rail button[data-panel]");
  assert.equal(await nav.count(),7);
  for(const [space,heading] of [["article","Encyclopedia"],["timeline","Chronology"],["atlas","Historical Atlas"],["network","Connections"],["media","Media Library"],["home","World Overview"]]){
@@ -38,6 +40,16 @@ try{
  await page.locator("#createType").selectOption("place");
  await page.locator("#createForm button[type=submit]").click();
  await page.locator("#writePanel").waitFor({state:"visible"});
+ await page.locator("#v2NewCategory").fill("Smoke-test collection");
+ await page.locator("#v2AddCategory").click();
+ await page.locator("#v2Categories option").filter({hasText:"Smoke-test collection"}).waitFor({state:"attached"});
+ const collectionOption=await page.locator("#v2Categories option").filter({hasText:"Smoke-test collection"}).getAttribute("value");
+ await page.locator("#v2Categories").selectOption(collectionOption);
+ await page.locator("#v2Subtype").selectOption("settlement");
+ await page.locator('#v2PropertyFields [data-property="kind"]').selectOption("settlement");
+ await page.locator("#v2SaveMetadata").click();
+ await page.waitForFunction(()=>document.querySelector("#v2MetaStatus")?.textContent==="Saved");
+
  assert.equal(await page.locator("#breadcrumb").innerText(),"Locations / Navigation Test Settlement");
  assert.match(await page.locator("#eBody").inputValue(),/Geography and setting/);
  await page.locator("#eSummary").fill("A deliberately created sample record.");
@@ -84,6 +96,7 @@ try{
  await reader.locator("#articleContent h1").waitFor({state:"visible"});
  assert.equal(await reader.locator("#articleContent h1").innerText(),"Navigation Test Settlement");
  assert.match(await reader.locator("#articleContent .reader-prose").innerText(),/Initial data entry/);
+ assert.match(await reader.locator("#articleContent .article-taxonomy").innerText(),/Smoke-test collection/);
  assert.equal(await reader.locator("#editForm").count(),0);
  await reader.locator('a[href="#/browse"]').first().click();
  await reader.locator("#browseCards .article-card").first().waitFor({state:"visible"});

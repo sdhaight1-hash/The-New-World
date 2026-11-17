@@ -21,6 +21,12 @@ The server listens on **127.0.0.1 only**. It is not authenticated or designed fo
 
 If you want a separate world, choose **+ World** in the header. Entries, links, relationships and images never cross world boundaries.
 
+## Connected encyclopedia v2
+
+The v2 knowledge layer adds type-aware properties, hierarchical collections, tags, reviewed keyword-link discovery and published-only Reader facets without replacing your original entity IDs or article bodies. The existing SQLite database is upgraded automatically on startup, with a complete pre-migration backup for v1 databases.
+
+See [v2 features, migration and API guide](V2.md) for the authoring flow, publication boundaries, supported field types and deliberate scope limits.
+
 ## Navigate the Studio
 
 The interface is organized into **seven clearly distinguished workspaces**: Overview, Encyclopedia, Atlas, Chronology, Connections, Media Library, and Moodboards. The selected world is always shown in the top bar; the entry explorer groups entries by type and highlights the current record.

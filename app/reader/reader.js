@@ -1,7 +1,7 @@
 "use strict";
 // Reader uses published-only API endpoints. It never requests the Studio's full entity store.
 const $=id=>document.getElementById(id);
-const state={worlds:[],world:null,entries:[],relations:[],current:null,media:[],related:[],incoming:[],outgoing:[],font:17,appearance:"dark",staticBundle:null,map:{lon:0,lat:25,zoom:2,drag:null}};
+const state={worlds:[],world:null,entries:[],relations:[],current:null,media:[],related:[],incoming:[],outgoing:[],font:17,appearance:"dark",staticBundle:null,categories:[],tags:[],memberships:{},map:{lon:0,lat:25,zoom:2,drag:null}};
 const CATEGORY={
  place:{label:"Places & geography",short:"Places",symbol:"◇",description:"Settlements, landscapes and regions"},
  organization:{label:"Factions & societies",short:"Societies",symbol:"⚑",description:"Institutions, governments and communities"},
@@ -41,6 +41,10 @@ function staticRequest(path){
  const req=new URL(path,location.origin),q=req.searchParams,b=state.staticBundle;
  if(req.pathname==="/api/public/worlds")return Promise.resolve([b.world]);
  if(q.get("world_id")!==b.world.id)throw Error("Unknown published world");
+ if(req.pathname==="/api/v2/public/categories")return Promise.resolve(b.v2?.categories||[]);
+ if(req.pathname==="/api/v2/public/tags")return Promise.resolve(b.v2?.tags||[]);
+ if(req.pathname==="/api/v2/public/memberships")return Promise.resolve(b.v2?.memberships||{});
+ if(req.pathname==="/api/v2/public/metadata")return Promise.resolve(b.v2?.metadata?.[q.get("id")]||{categories:[],tags:[],properties:{},subtype:null});
  if(req.pathname==="/api/public/entities"){
   const type=q.get("type"),search=(q.get("search")||"").toLowerCase();
   return Promise.resolve(b.entities.filter(e=>(!type||e.type===type)&&
@@ -79,6 +83,16 @@ function renderCard(e){
   node("span","Read article →","article-open"));
  a.append(cover,info);return a;
 }
+function v2CategoryLabel(category){
+ const names=[category.name],seen=new Set([category.id]);
+ let pid=category.parent_id;
+ while(pid&&!seen.has(pid)){
+  seen.add(pid);
+  const p=state.categories.find(c=>c.id===pid);if(!p)break;
+  names.unshift(p.name);pid=p.parent_id;
+ }
+ return names.join(" / ");
+}
 function renderHome(){
  syncWorld();
  const route=$("readingRoute");route.replaceChildren();
@@ -112,6 +126,16 @@ function renderHome(){
   grid.append(card);
  }
  if(!ordered.length)grid.append(node("p","Published categories will appear here.","empty-published"));
+ const section=$("readerCollections"),cards=$("collectionCards");
+ cards.replaceChildren();section.hidden=!state.categories.length;
+ for(const c of state.categories){
+  const count=state.entries.filter(e=>(state.memberships[e.id]?.categories||[]).includes(c.id)).length;
+  if(!count)continue;
+  const a=link("","#/browse?category="+encodeURIComponent(c.id),"v2-collection-card");
+  a.append(node("span","WORLD COLLECTION","eyebrow"),node("strong",c.name),
+    node("small",count+" published "+(count===1?"article":"articles")+" →"));cards.append(a);
+ }
+ section.hidden=!cards.childElementCount;
  const frontHero=state.entries.find(e=>e.hero_media_id);
  $("readerHome").style.setProperty("--cover-art",frontHero?'url("'+mediaUrl(frontHero.hero_media_id)+'")':"none");
   const featured=$("featuredCards");featured.replaceChildren();
@@ -122,21 +146,29 @@ function renderHome(){
 }
 function renderBrowse(type=""){
  showRoute("browse");setTitle(type?category({type}).label:"Encyclopedia");
- const input=$("browseSearch"),select=$("browseType");
+ const input=$("browseSearch"),select=$("browseType"),cat=$("browseCategory"),tag=$("browseTag");
  const previously=select.value;
  select.replaceChildren(new Option("All categories",""));
  for(const t of [...new Set(state.entries.map(e=>e.type))].sort())select.add(new Option(category({type:t}).label,t));
  select.value=type||previously;
+ const params=new URLSearchParams(location.hash.split("?")[1]||"");
+ const categorySelected=params.get("category")||cat.value,tagSelected=params.get("tag")||tag.value;
+ cat.replaceChildren(new Option("All collections",""),...state.categories.map(c=>new Option(v2CategoryLabel(c),c.id)));
+ tag.replaceChildren(new Option("All topics",""),...state.tags.map(t=>new Option(t.name,t.id)));
+ cat.value=[...cat.options].some(x=>x.value===categorySelected)?categorySelected:"";
+ tag.value=[...tag.options].some(x=>x.value===tagSelected)?tagSelected:"";
  const fn=()=>{
-  const needle=input.value.toLowerCase().trim(),t=select.value;
-  const list=state.entries.filter(e=>(!t||e.type===t)&&
+  const needle=input.value.toLowerCase().trim(),t=select.value,cid=cat.value,tid=tag.value;
+  const list=state.entries.filter(e=>(!t||e.type===t)
+   &&(!cid||(state.memberships[e.id]?.categories||[]).includes(cid))
+   &&(!tid||(state.memberships[e.id]?.tags||[]).includes(tid))&&
    (!needle||[e.title,e.summary,...e.aliases,e.body].some(x=>String(x||"").toLowerCase().includes(needle))));
   $("browseCount").textContent=list.length+" "+(list.length===1?"article":"articles");
   const root=$("browseCards");root.replaceChildren();
   for(const e of list)root.append(renderCard(e));
   if(!list.length)root.append(node("p","No published articles match that search.","empty-published"));
  };
- input.oninput=fn;select.onchange=fn;fn();
+ input.oninput=fn;select.onchange=fn;cat.onchange=fn;tag.onchange=fn;fn();
 }
 function markup(src){
  let code=false,inList=false;const out=[];
@@ -190,11 +222,12 @@ async function renderArticle(id){
  const entry=byId(id);
  if(!entry)return missing("Article unavailable","This article is not currently published.");
  const world=currentId();
- const [media,relations,incoming,outgoing]=await Promise.all([
+ const [media,relations,incoming,outgoing,metadata]=await Promise.all([
   get(url("/api/public/media",{world_id:world,entity_id:id})),
   get(url("/api/public/relations",{world_id:world,entity_id:id})),
   get(url("/api/public/backlinks",{world_id:world,entity_id:id})),
-  get(url("/api/public/outgoing",{world_id:world,entity_id:id}))
+  get(url("/api/public/outgoing",{world_id:world,entity_id:id})),
+  get(url("/api/v2/public/metadata",{world_id:world,id}))
  ]);
  if(world!==currentId()||location.hash!=="#/article/"+id)return;
  Object.assign(state,{current:entry,media,relations,incoming,outgoing});
@@ -213,6 +246,16 @@ async function renderArticle(id){
  const heroHeading=node("header",undefined,"article-heading");
  heroHeading.append(node("p",category(entry).label.toUpperCase(),"eyebrow"),node("h1",entry.title));
  if(entry.summary)heroHeading.append(node("p",entry.summary));
+ const taxonomy=node("div",undefined,"article-taxonomy");
+ for(const cid of metadata.categories||[]){
+  const name=state.categories.find(c=>c.id===cid)?.name;
+  if(name)taxonomy.append(link(name,"#/browse?category="+encodeURIComponent(cid),"v2-taxonomy-pill"));
+ }
+ for(const tid of metadata.tags||[]){
+  const name=state.tags.find(t=>t.id===tid)?.name;
+  if(name)taxonomy.append(link("#"+name,"#/browse?tag="+encodeURIComponent(tid),"v2-taxonomy-pill"));
+ }
+ if(taxonomy.childElementCount)heroHeading.append(taxonomy);
  wrap.append(heroHeading);
  const hero=media.find(m=>m.role==="hero"||m.role==="portrait");
  if(hero){const fig=makeMedia(hero);fig.className="article-hero";fig.querySelector("img").loading="eager";wrap.append(fig);}
@@ -275,6 +318,11 @@ async function renderArticle(id){
    const section=contentSection("At a glance"),facts=node("dl",undefined,"reader-facts");
    const add=(term,value)=>{facts.append(node("dt",term),node("dd",value));};
    add("Subject",category(entry).label);
+   if(metadata.subtype)add("Subtype",humanize(metadata.subtype));
+   for(const [key,value] of Object.entries(metadata.properties||{})){
+    if(value===null||value==="")continue;
+    add(humanize(key),byId(value)?.title||value);
+   }
    if(entry.start_year!==null||entry.end_year!==null)add("Period",readableDate(entry));
    if(entry.aliases?.length)add("Also known as",entry.aliases.join(", "));
    if(entry.lat!==null&&entry.lon!==null)add("Location",entry.lat+", "+entry.lon);
@@ -417,15 +465,25 @@ function setupTools(){
  $("readingAppearance").value=state.appearance;document.body.dataset.appearance=state.appearance;
  mapHandlers();
 }
+async function loadTaxonomy(){
+ if(!state.world)return;
+ const id=currentId();
+ const [categories,tags,memberships]=await Promise.all([
+  get(url("/api/v2/public/categories",{world_id:id})),
+  get(url("/api/v2/public/tags",{world_id:id})),
+  get(url("/api/v2/public/memberships",{world_id:id}))
+ ]);
+ if(currentId()===id)Object.assign(state,{categories,tags,memberships});
+}
 async function changeWorld(id){
  const found=state.worlds.find(w=>w.id===id);if(!found)return;
  state.world=found;localStorage.setItem("reader-world",id);
  state.entries=await get(url("/api/public/entities",{world_id:id}));
- syncWorld();renderHome();await navigate();
+ await loadTaxonomy();syncWorld();renderHome();await navigate();
 }
 async function navigate(){
  const hash=decodeURIComponent(location.hash||"#/");
- const parts=hash.replace(/^#\/?/,"").split("/");const route=parts[0]||"home";
+ const parts=hash.split("?")[0].replace(/^#\/?/,"").split("/");const route=parts[0]||"home";
  $("searchPanel").hidden=true;$("readingPanel").hidden=true;
  if(route==="home"){showRoute("home");renderHome();setTitle("Discover");}
  else if(route==="browse")renderBrowse(parts[1]||"");
@@ -456,7 +514,7 @@ async function init(){
   const picker=$("readerWorld");picker.replaceChildren(...state.worlds.map(w=>new Option(w.name,w.id)));
   picker.hidden=state.worlds.length<2;
   picker.onchange=async()=>{history.replaceState(null,"",location.pathname+"?world="+encodeURIComponent(picker.value)+"#/");await changeWorld(picker.value);};
-  if(state.world){picker.value=state.world.id;state.entries=await get(url("/api/public/entities",{world_id:currentId()}));}
+  if(state.world){picker.value=state.world.id;state.entries=await get(url("/api/public/entities",{world_id:currentId()}));await loadTaxonomy();}
   syncWorld();window.addEventListener("hashchange",navigate);await navigate();
  }catch(e){console.error("Reader initialization failed",e);missing("Unable to load the encyclopedia","Please verify the local server is running.");}
 }
