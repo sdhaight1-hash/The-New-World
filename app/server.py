@@ -111,6 +111,9 @@ def canonical(row):
     for key in ("aliases", "layout"):
         if key in d:
             d[key] = json.loads(d[key])
+            if isinstance(d[key], str):
+                # Accept records written by early prototype with double-serialized defaults.
+                d[key] = json.loads(d[key])
     return d
 
 
@@ -223,9 +226,9 @@ class Store:
         eid = specified_id or str(uuid4())
         stamp = now()
         base = dict(id=eid, world_id=wid, type=data["type"], title=data["title"].strip(),
-                    aliases="[]", summary="", body="", status="working",
+                    aliases=[], summary="", body="", status="working",
                     start_year=None, end_year=None, lat=None, lon=None,
-                    theme_id="archive", accent=None, layout="[]",
+                    theme_id="archive", accent=None, layout=[],
                     created_at=stamp, updated_at=stamp)
         base.update(data)
         for field in ("aliases", "layout"):
@@ -499,7 +502,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.send_header("Content-Type", mimetypes.guess_type(f.name)[0] or "application/octet-stream")
                 self.send_header("Content-Length", str(len(data)))
                 self.send_header("X-Content-Type-Options", "nosniff")
-                self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'")
+                self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data: https://tile.openstreetmap.org; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'")
                 self.end_headers()
                 self.wfile.write(data)
                 return
