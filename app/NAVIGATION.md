@@ -11,7 +11,7 @@
 
 Every workspace has a distinctive icon, heading, subtitle, accent and active rail state; the article’s optional theme never alters global navigation. World and selected year are always visible.
 
-## The six main workspaces
+## The seven main workspaces
 
 | Workspace | Purpose | Typical actions |
 |---|---|---|
@@ -21,6 +21,7 @@ Every workspace has a distinctive icon, heading, subtitle, accent and active rai
 | **Chronology** | Historical events | Filter events by an entry and time window, open the canonical event article |
 | **Connections** | World-scale relationship inventory | Browse relationship types, most-connected records, and individual typed connections |
 | **Media Library** | Reusable image inventory | Search images, review placement counts, navigate to associated entries |
+| **Moodboards** | Visual research and art direction | Build boards with drag-and-drop notes, referenced images, linked entries and color palettes; upload and resize |
 
 The right **Record Context** panel is visible only when reading an entry. Writing, Design and Explore expand the central canvas to avoid repeating controls. Other workspaces use their own dedicated panels.
 
@@ -41,7 +42,7 @@ Click **+ New** in the Entity Explorer or **Create entry** on Overview. Choose a
 - A selected entry remains clear in the library and breadcrumb; switching workspaces does not alter its identity or factual contents.
 - Switching worlds resets search/media filters so the new world never silently inherits the previous world's empty result set.
 - **Ctrl+K / Cmd+K** focuses library search.
-- **Alt+1–6** navigates Overview, Encyclopedia, Atlas, Chronology, Connections, Media Library. Browser/OS shortcuts can sometimes take precedence.
+- **Alt+1–7** navigates Overview, Encyclopedia, Atlas, Chronology, Connections, Media Library. Browser/OS shortcuts can sometimes take precedence.
 - Dark, light and high-contrast global appearance choices do not overwrite per-entry themes.
 - Unconfirmed historical knowledge is clearly editorially marked. A modern OSM basemap is a geographic reference, not a Year X historical photograph.
 - Data-only JSON export is not a complete media backup. Use [the complete archive utility](README.md#reliable-complete-backups).
@@ -63,3 +64,11 @@ GitHub Actions tests backend integrity (multi-world isolation, image reuse, stab
 Visitors enter the editorial encyclopedia at `/read/`, without a creator navigation rail or authoring controls. The Studio remains at `/app/`. Publishing a record is a deliberate action separate from marking its canon status; the reader displays published records and linked published relationships only.
 
 A standalone reader-only website can be generated using `python app/publish_site.py public-site` after publishing at least one entry. It contains only approved public records and their referenced images; no Studio API or draft database. See the [reader-first research](../bible/18-reader-first-ux.md) and [static publishing guide](README.md#reader-first-world-encyclopedia).
+
+## Visual composition workflow
+
+In the Studio, open **Moodboards** from the world rail. Create a board with a descriptive name, optionally associate it with an existing canon entry, then compose with **Note**, **Image**, **Upload image**, **Linked entry**, and **Color**. Search for existing assets in the visual picker rather than duplicating them. Rearrange cards by dragging their headers; resize with the corner handle or set exact width and height through **Edit**. Colors, captions, and locations are board-specific; canonical article prose and reusable image originals are unaffected.
+
+For a board specific to a place, faction or character, open its entry → **Explore** → **Visual research boards**, where associated boards can be opened or created.
+
+Boards are working material and are not automatically reader-visible. Full database-and-media backup preserves them. See [the visual development research](../bible/19-visual-worldbuilding-and-moodboards.md).
