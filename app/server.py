@@ -424,6 +424,31 @@ class Store:
         require(path.is_file(), "Image blob missing", 404)
         return path, ("image/webp" if preview else m["mime"])
 
+    def update_media(self, wid, aid, data):
+        current = self.one("SELECT * FROM media WHERE world_id=? AND id=?", (wid, aid))
+        require(current, "Image not found", 404)
+        require(isinstance(data, dict) and set(data) <= {"title", "alt", "credit"}, "Invalid media details")
+        for key, value in data.items():
+            require(isinstance(value, str) and len(value) <= (250 if key=="title" else 2000), "Invalid media field: "+key)
+            if key == "title":
+                require(value.strip(), "Image title required")
+        if data:
+            with self.lock, self.db:
+                self.db.execute("UPDATE media SET " + ",".join(k+"=?" for k in data)+" WHERE id=? AND world_id=?",
+                                (*data.values(),aid,wid))
+        return dict(self.one("SELECT * FROM media WHERE id=?", (aid,)))
+
+    def update_media_use(self, wid, uid, data):
+        use = self.one("SELECT * FROM media_uses WHERE id=? AND world_id=?", (uid, wid))
+        require(use, "Image placement not found", 404)
+        require(isinstance(data, dict) and set(data) <= {"caption"}, "Invalid placement details")
+        if "caption" in data:
+            require(isinstance(data["caption"],str) and len(data["caption"])<=2000, "Invalid caption")
+            with self.lock,self.db:
+                self.db.execute("UPDATE media_uses SET caption=? WHERE id=? AND world_id=?",
+                                (data["caption"],uid,wid))
+        return dict(self.one("SELECT * FROM media_uses WHERE id=?", (uid,)))
+
     def add_media_use(self, wid, data):
         require(isinstance(data, dict) and set(data) <= {"entity_id","media_id","role","caption"}, "Invalid media use")
         entity = data.get("entity_id")
@@ -677,6 +702,10 @@ class Handler(BaseHTTPRequestHandler):
             if route=="/api/relation" and verb=="DELETE":
                 s.delete_relation(wid,self.get_arg(q,"id"))
                 return self.reply({"ok":True})
+            if route=="/api/media" and verb=="PATCH":
+                return self.reply(s.update_media(wid,self.get_arg(q,"id"),data))
+            if route=="/api/media-use" and verb=="PATCH":
+                return self.reply(s.update_media_use(wid,self.get_arg(q,"id"),data))
             if route=="/api/media-use" and verb=="POST":
                 return self.reply(s.add_media_use(wid,data),201)
             if route=="/api/media-use" and verb=="DELETE":
