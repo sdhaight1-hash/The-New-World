@@ -339,6 +339,65 @@ class StoreTests(unittest.TestCase):
             build_site(self.store,self.a,Path(self.tmp.name)/"blocked-site")
         self.assertFalse((Path(self.tmp.name)/"blocked-site").exists())
 
+    def test_moodboards_link_shared_images_and_canon_entries(self):
+        from PIL import Image
+        raw=io.BytesIO()
+        Image.new("RGB",(10,10),(20,50,80)).save(raw,"PNG")
+        media=self.store.upload_image(self.a,raw.getvalue(),"coast.png")
+        place=self.add(self.a,"Shoreline","place")
+        board=self.store.create_board(self.a,{"title":"Coastal architecture","description":"Visual references","entity_id":place["id"]})
+        bid=board["board"]["id"]
+        board=self.store.add_board_item(self.a,bid,{"kind":"note","content":"Weathered cedar",
+            "x":145,"y":80,"w":280,"h":190,"z":1})
+        note=board["items"][0]
+        self.store.add_board_item(self.a,bid,{"kind":"image","media_id":media["id"],"x":400,"y":60})
+        self.store.add_board_item(self.a,bid,{"kind":"entry","entity_id":place["id"],"x":600,"y":120})
+        self.store.add_board_item(self.a,bid,{"kind":"swatch","color":"#a6c5af","content":"Moss"})
+        current=self.store.board(self.a,bid)
+        self.assertEqual(len(current["items"]),4)
+        self.assertEqual(current["items"][1]["media_id"],media["id"])
+        self.assertEqual(current["items"][2]["entity_title"],"Shoreline")
+        changed=self.store.update_board_item(self.a,bid,note["id"],{"x":300,"content":"Wet cedar"})
+        self.assertEqual(changed["items"][0]["x"],300)
+        self.assertEqual(changed["items"][0]["content"],"Wet cedar")
+        self.assertEqual(self.store.boards(self.a)[0]["item_count"],4)
+        self.assertEqual(self.store.boards(self.b),[])
+        with self.assertRaises(Error):
+            self.store.board(self.b,bid)
+        with self.assertRaises(Error):
+            self.store.add_board_item(self.b,bid,{"kind":"note","content":"Cross-world"})
+        with self.assertRaises(Error):
+            self.store.add_board_item(self.a,bid,{"kind":"image","media_id":"not-found"})
+        with self.assertRaises(Error):
+            self.store.update_board_item(self.a,bid,note["id"],{"x":1000000})
+        with self.assertRaises(Error):
+            self.store.add_board_item(self.a,bid,{"kind":"swatch","color":"background:url(javascript:evil)"})
+        export=self.store.export(self.a)
+        self.assertEqual(len(export["moodboards"]),1)
+        self.assertEqual(len(export["moodboard_items"]),4)
+        with self.assertRaises(Error):
+            self.store.import_data(export)
+        self.assertEqual(self.store.check_entity(self.a,place["id"])["title"],"Shoreline")
+        self.assertEqual(self.store.media_file(self.a,media["id"])[0].read_bytes(),raw.getvalue())
+        self.store.delete_board(self.a,bid)
+        self.assertEqual(self.store.boards(self.a),[])
+        self.assertEqual(self.store.check_entity(self.a,place["id"])["title"],"Shoreline")
+        self.assertTrue(self.store.media_file(self.a,media["id"])[0].exists())
+
+    def test_moodboard_belongs_to_one_world_and_deletions_are_scoped(self):
+        a=self.add(self.a,"Gallery owner")
+        b=self.add(self.b,"Other world")
+        board=self.store.create_board(self.a,{"title":"A","entity_id":a["id"]})
+        bid=board["board"]["id"]
+        self.assertEqual(self.store.board(self.a,bid)["board"]["entity_id"],a["id"])
+        with self.assertRaises(Error):
+            self.store.update_board(self.a,bid,{"entity_id":b["id"]})
+        self.store.add_board_item(self.a,bid,{"kind":"entry","entity_id":a["id"]})
+        self.store.delete_entry(self.a,a["id"])
+        items=self.store.board(self.a,bid)
+        self.assertIsNone(items["board"]["entity_id"])
+        self.assertIsNone(items["items"][0]["entity_id"])
+
     def test_export_content(self):
         a = self.add(self.a, "River", "place")
         data = self.store.export(self.a)
