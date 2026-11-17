@@ -178,6 +178,19 @@ class StoreTests(unittest.TestCase):
             self.store.import_data(exported)
         self.assertEqual(len(self.store.worlds()), count)
 
+    def test_custom_worldbuilding_categories_and_relations(self):
+        a = self.add(self.a, "Mars Ecology", "biosphere")
+        b = self.add(self.a, "Main Planet", "planet")
+        r = self.store.create_relation(self.a, {
+            "source_id":a["id"],"target_id":b["id"],"predicate":"evolves_on"})
+        self.assertEqual(r["predicate"], "evolves_on")
+        self.assertEqual(len(self.store.entries(self.a, typ="biosphere")), 1)
+        with self.assertRaises(Error):
+            self.add(self.a, "Invalid", "bad type; DROP TABLE entities;")
+        with self.assertRaises(Error):
+            self.store.create_relation(self.a, {
+                "source_id":a["id"],"target_id":b["id"],"predicate":"evil predicate;"})
+
     def test_export_content(self):
         a = self.add(self.a, "River", "place")
         data = self.store.export(self.a)
