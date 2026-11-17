@@ -12,3 +12,7 @@ input,select,textarea{padding:9px;width:100%}input[type=checkbox],input[type=col
 @media(max-width:1150px){.workspace{grid-template-columns:240px minmax(350px,1fr)}.inspector{grid-column:1/-1;border-top:1px solid var(--line);border-left:0}.main{padding:16px}}
 @media(max-width:700px){.topbar{height:auto;min-height:60px;flex-wrap:wrap;padding:8px}.top-actions{flex-wrap:wrap}.workspace{display:block}.nav{border-right:0;border-bottom:1px solid var(--line)}.entry-list{max-height:190px}.main{padding:12px}.page-head{flex-wrap:wrap}.form-grid,.facts{grid-template-columns:1fr}.entry-section{margin:0 14px;padding:18px 2px}.entry-hero{padding:24px 17px}.atlas-map{height:380px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);width:min(480px,calc(100vw - 32px));padding:26px;box-shadow:0 15px 70px #0008}
+dialog::backdrop{background:#000a;backdrop-filter:blur(2px)}
+dialog h2{margin-top:0}dialog label{display:block;margin:12px 0;color:var(--muted)}dialog label input,dialog label select{margin-top:4px}
