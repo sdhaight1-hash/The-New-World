@@ -68,7 +68,7 @@ class KnowledgeV2Tests(unittest.TestCase):
 
     def test_reference_match_and_author_approval(self):
         target=self.add("Victor Valley","place",aliases=["the Victor Valley"])
-        source=self.add("Field notes",body="Victor Valley survived. `Victor Valley` was a code label.\n\n[[abc|Victor Valley]]")
+        source=self.add("Field notes",body="Victor Valley survived. `Victor Valley` was a code label.\n\n[Victor Valley](https://example.org)")
         findings=v2_store.mentions(self.store,self.w,source["id"])
         self.assertEqual(len(findings["suggestions"]),1)
         match=findings["suggestions"][0]
