@@ -146,7 +146,7 @@ function renderList(){
  if(!entries.length){root.append(el("p","No matching entries. Try another search or category.","muted"));return;}
  const ordered=[...entries].sort((a,b)=>{
   const ai=groupOrder.indexOf(a.type),bi=groupOrder.indexOf(b.type);
-  return (ai===-1?999:ai)-(bi===-1?999)||a.type.localeCompare(b.type)||a.title.localeCompare(b.title);
+  return (ai===-1?999:ai)-(bi===-1?999:bi)||a.type.localeCompare(b.type)||a.title.localeCompare(b.title);
  });
  let lastType="";
  for(const e of ordered){
