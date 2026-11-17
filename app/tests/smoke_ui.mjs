@@ -42,7 +42,7 @@ try{
  await page.locator("#writePanel").waitFor({state:"visible"});
  await page.locator("#v2NewCategory").fill("Smoke-test collection");
  await page.locator("#v2AddCategory").click();
- await page.locator("#v2Categories option").filter({hasText:"Smoke-test collection"}).waitFor();
+ await page.locator("#v2Categories option").filter({hasText:"Smoke-test collection"}).waitFor({state:"attached"});
  const collectionOption=await page.locator("#v2Categories option").filter({hasText:"Smoke-test collection"}).getAttribute("value");
  await page.locator("#v2Categories").selectOption(collectionOption);
  await page.locator("#v2Subtype").selectOption("settlement");
