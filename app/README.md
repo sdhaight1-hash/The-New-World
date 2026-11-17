@@ -12,9 +12,9 @@ From the repository root:
 
 For individual steps:
 
-1. Install image dependency: \`python -m pip install -r app/requirements.txt\`
-2. Import existing Bible pages once: \`python app/seed.py\`
-3. Run the local application: \`python app/server.py\`
+1. Install image dependency: `python -m pip install -r app/requirements.txt`
+2. Import existing Bible pages once: `python app/seed.py`
+3. Run the local application: `python app/server.py`
 4. Open **http://127.0.0.1:8765/app/** in your browser.
 
 The server listens on **127.0.0.1 only**. It is not authenticated or designed for public Internet hosting. Back up the **.worldbible** folder, including its media directory and SQLite database; the export button currently produces structured JSON **without image binaries**.
@@ -33,7 +33,7 @@ Use **Ctrl+K** to jump to library search or **Alt+1–6** for workspace navigati
 
 - Multiple independent worlds with editable names/description, search/filterable entries, and custom entity categories (person/place/event/organization/family/source and other user-defined types).
 - Rich long-form Markdown editing, status, aliases, optional year and coordinates.
-- Stable-ID article links (\`[[uuid|visible name]]\`), automatic backlinks, reviewable name-match suggestions.
+- Stable-ID article links (`[[uuid|visible name]]`), automatic backlinks, reviewable name-match suggestions.
 - Typed and custom-named dated relationships (kinship, membership, geography, trade, claims, governance) with parent-cycle protection and a small relationship graph.
 - Individual kinship summary (parents/children/partners) derived from shared relations.
 - Event chronology filtered by time and connected entities; year values are currently **world-relative**, not full uncertain Gregorian/relative conversion.
@@ -48,13 +48,13 @@ Use **Ctrl+K** to jump to library search or **Alt+1–6** for workspace navigati
 
 Create a complete archive (the studio can be running):
 
-- \`python app/backup.py create my-world-bible-backup.zip\`
+- `python app/backup.py create my-world-bible-backup.zip`
 
 Restore the archive (**stop the studio server first**, then use a clean data folder):
 
-- \`python app/backup.py restore my-world-bible-backup.zip\`
+- `python app/backup.py restore my-world-bible-backup.zip`
 
-If the target \`.worldbible/\` already contains data, restore will refuse to overwrite it. Use \`--force\` only after confirming the server is stopped; the old data directory is moved to a timestamped \`.previous-...\` folder rather than silently deleted. The archive is checked for directory traversal, per-file SHA-256 integrity and SQLite integrity.
+If the target `.worldbible/` already contains data, restore will refuse to overwrite it. Use `--force` only after confirming the server is stopped; the old data directory is moved to a timestamped `.previous-...` folder rather than silently deleted. The archive is checked for directory traversal, per-file SHA-256 integrity and SQLite integrity.
 
 The UI **Export** button produces a separate JSON-only interchange format. It does **not** include image binaries, and imports of such image-referencing exports are deliberately rejected to avoid creating broken media links. UI **Import** creates a new isolated world from a data-only archive and remaps entity IDs and links.
 
@@ -68,9 +68,9 @@ This is a functional **foundation/MVP**, not yet the complete platform in the RF
 
 ## Development
 
-- \`python -m unittest discover -s app/tests -v\`
+- `python -m unittest discover -s app/tests -v`
 - The repository GitHub Actions workflow runs these tests.
-- Data: \`.worldbible/worlds.sqlite3\`, \`.worldbible/media/\` (gitignored).
+- Data: `.worldbible/worlds.sqlite3`, `.worldbible/media/` (gitignored).
 - All application entities have stable opaque IDs; worlds isolate their data.
 - Article hyperlinks are validated; a missing link target causes save to be rejected instead of silently corrupting backlinks.
 - Deleting referenced entries is blocked until relations and backlinks are deliberately resolved.
