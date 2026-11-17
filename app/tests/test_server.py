@@ -246,6 +246,56 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(uses[0]["caption"], "Coastal reference")
         self.assertEqual(self.store.media_uses(self.b), [])
 
+    def test_publishing_is_independent_of_canon_and_world(self):
+        public = self.add(self.a, "Published settlement", "place", status="working", summary="A known port.")
+        draft = self.add(self.a, "Research notes", "source", status="established", summary="Private working archive")
+        outside = self.add(self.b, "Other world", "place")
+        self.assertEqual(self.store.public_worlds(), [])
+        self.assertEqual(self.store.public_entries(self.a), [])
+        self.store.publication(self.a, public["id"], True)
+        self.assertTrue(self.store.is_published(self.a, public["id"]))
+        self.assertEqual([e["title"] for e in self.store.public_entries(self.a)], ["Published settlement"])
+        self.assertEqual(self.store.public_entries(self.a, search="Private"), [])
+        self.assertEqual(len(self.store.public_worlds()), 1)
+        self.assertEqual(self.store.public_relations(self.a), [])
+        with self.assertRaises(Error):
+            self.store.public_entity(self.a, draft["id"])
+        with self.assertRaises(Error):
+            self.store.public_entity(self.a, outside["id"])
+        with self.assertRaises(Error):
+            self.store.publication(self.a, outside["id"], True)
+        self.store.publication(self.a, public["id"], False)
+        self.assertEqual(self.store.public_entries(self.a), [])
+
+    def test_public_backlinks_and_relations_exclude_drafts(self):
+        subject = self.add(self.a, "Coastal town", "place")
+        reader = self.add(self.a, "River history", "event")
+        hidden = self.add(self.a, "Unpublished family", "family")
+        self.store.update_entry(self.a, reader["id"], {
+            "body":"See [[" + subject["id"] + "|Coastal town]]."})
+        self.store.update_entry(self.a, hidden["id"], {
+            "body":"An unpublished reference to [[" + subject["id"] + "|Coastal town]]."})
+        self.store.create_relation(self.a, {"source_id":reader["id"],"target_id":subject["id"],"predicate":"located_in"})
+        self.store.create_relation(self.a, {"source_id":hidden["id"],"target_id":subject["id"],"predicate":"part_of"})
+        for e in (subject, reader):
+            self.store.publication(self.a, e["id"], True)
+        self.assertEqual(len(self.store.public_relations(self.a, subject["id"])), 1)
+        self.assertEqual([x["title"] for x in self.store.public_links(self.a,subject["id"],incoming=True)],
+                         ["River history"])
+        self.assertEqual(self.store.public_links(self.a,hidden["id"]), [])
+
+    def test_publications_preserved_after_archive_import(self):
+        source = self.add(self.a, "Published port", "place")
+        self.store.publication(self.a, source["id"], True)
+        exported = self.store.export(self.a)
+        self.assertEqual(len(exported["publications"]), 1)
+        target = self.store.import_data(exported)["world"]["id"]
+        imported = self.store.public_entries(target)
+        self.assertEqual(len(imported), 1)
+        self.assertEqual(imported[0]["title"],"Published port")
+        self.assertNotEqual(imported[0]["id"], source["id"])
+        self.assertEqual(self.store.public_entries(self.b), [])
+
     def test_export_content(self):
         a = self.add(self.a, "River", "place")
         data = self.store.export(self.a)
@@ -297,6 +347,30 @@ class ServerTests(unittest.TestCase):
         entity=json.loads(raw)
         self.assertEqual(self.request("/api/entity?world_id="+wid+"&id="+entity["id"])[0],200)
         self.assertEqual(self.request("/api/export?world_id="+wid)[0],200)
+
+    def test_reader_pages_and_published_api(self):
+        status, page, headers = self.request("/")
+        self.assertEqual(status,302)
+        self.assertEqual(headers["Location"],"/read/")
+        status, page, headers = self.request("/read/")
+        self.assertEqual(status,200)
+        self.assertIn(b"Explore the World",page)
+        self.assertIn("Content-Security-Policy",headers)
+        status, data, _ = self.request("/api/worlds","POST",{"name":"New Public World"})
+        world = json.loads(data)["id"]
+        status, data, _ = self.request("/api/entities?world_id="+world,"POST",
+            {"title":"A city","type":"place","summary":"Port on the coast"})
+        eid = json.loads(data)["id"]
+        status, data, _ = self.request("/api/public/entities?world_id="+world)
+        self.assertEqual(json.loads(data),[])
+        status, _, _ = self.request("/api/public/entity?world_id="+world+"&id="+eid)
+        self.assertEqual(status,404)
+        status, data, _ = self.request("/api/publication?world_id="+world+"&id="+eid,"POST",{"published":True})
+        self.assertEqual(status,200)
+        status, data, _ = self.request("/api/public/entities?world_id="+world)
+        self.assertEqual(len(json.loads(data)),1)
+        status, data, _ = self.request("/api/public/media?world_id="+world+"&entity_id="+eid)
+        self.assertEqual(json.loads(data),[])
 
     def test_missing_header_and_cross_origin_refused(self):
         code, _, _ = self.request("/api/worlds","POST",{"name":"X"},headers={"Origin":"http://attacker.invalid"})
