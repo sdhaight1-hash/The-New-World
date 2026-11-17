@@ -29,3 +29,19 @@ jobs:
         with:
           node-version: '22'
       - run: node --check app/static/app.js
+      - name: Install browser test harness
+        run: |
+          npm install --no-save --no-package-lock playwright
+          if ! command -v google-chrome >/dev/null 2>&1; then
+            npx playwright install chromium
+          fi
+      - name: Browser navigation smoke test
+        run: |
+          python app/launch.py --db /tmp/world-bible-ui.sqlite3 --port 8775 --no-browser > /tmp/world-bible-studio.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8775/api/worlds >/dev/null; then break; fi
+            sleep 1
+          done
+          CHROME_BIN="$(command -v google-chrome || true)" node app/tests/smoke_ui.mjs
