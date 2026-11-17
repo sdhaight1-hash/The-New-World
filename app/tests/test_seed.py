@@ -3,6 +3,7 @@
 The repository is an input to the local-first Studio, NOT an instruction to
 overwrite a user's live SQLite files or automatically publish working drafts.
 """
+from contextlib import closing
 from pathlib import Path
 import sys
 import tempfile
@@ -36,7 +37,7 @@ class CanonSeedTests(unittest.TestCase):
     def test_all_existing_sources_structured_records_and_relationships_import(self):
         manifest=load_canon()
         seed(self.path)
-        with Store(self.path) as store:
+        with closing(Store(self.path)) as store:
             docs=sum(1 for folder in ("bible","regions") for _ in (ROOT/folder).glob("*.md"))
             distinct=sum(not x.get("reuse_source") for x in manifest["entries"])
             self.assertEqual(len(store.entries(WORLD_ID)),docs+distinct)
@@ -56,7 +57,7 @@ class CanonSeedTests(unittest.TestCase):
 
     def test_repeat_seed_never_duplicates_or_overwrites_personal_edits(self):
         seed(self.path)
-        with Store(self.path) as store:
+        with closing(Store(self.path)) as store:
             eid=canon_id("seaside")
             plague=source_id("bible/02-great-plague.md")
             store.update_entry(WORLD_ID,eid,{
@@ -68,7 +69,7 @@ class CanonSeedTests(unittest.TestCase):
             count=len(store.entries(WORLD_ID))
             relations=len(store.relation_list(WORLD_ID))
         seed(self.path)
-        with Store(self.path) as store:
+        with closing(Store(self.path)) as store:
             self.assertEqual(len(store.entries(WORLD_ID)),count)
             self.assertEqual(len(store.relation_list(WORLD_ID)),relations)
             self.assertEqual(store.check_entity(WORLD_ID,eid)["body"],
