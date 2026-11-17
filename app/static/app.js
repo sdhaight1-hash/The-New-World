@@ -93,7 +93,9 @@ async function open(id){
  dirty(false);state.designDirty=false;state.mode="read";await context();panel("article");render();
 }
 function panel(p){
+ if(p===state.panel&&state.entry&&(state.dirty||state.designDirty))return;
  if(!safeExit())return;
+ if(p!==state.panel){if(state.dirty)dirty(false);state.designDirty=false;}
  state.panel=p;
  for(const name of ["article","timeline","atlas"])$(name+"Panel").hidden=p!==name;
  $("welcome").hidden=p!=="article"||!!state.entry;
