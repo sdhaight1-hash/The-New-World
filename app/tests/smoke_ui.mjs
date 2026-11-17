@@ -21,14 +21,14 @@ try{
  }
  await page.locator('.space-rail button[data-panel="boards"]').click();
  assert.equal(await page.locator("#spaceHeading").innerText(),"Moodboards");
- const boardPrompts=["Visual survey board","References for a location"];
- const handleBoardPrompt=async dialog=>{await dialog.accept(dialog.type()==="prompt"?boardPrompts.shift()||"Visual note":"");};
- page.on("dialog",handleBoardPrompt);
  await page.locator("#boardEmptyCreate").click();
+ await page.locator("#boardCreateDialog").waitFor({state:"visible"});
+ await page.locator("#boardNewTitle").fill("Visual survey board");
+ await page.locator("#boardNewDescription").fill("Atmosphere and material research");
+ await page.locator("#boardCreateForm button[type=submit]").click();
  await page.locator("#boardEditor").waitFor({state:"visible"});
- boardPrompts.push("A moodboard research note");
+ page.once("dialog",dialog=>dialog.accept("A moodboard research note"));
  await page.locator("#boardAddNote").click();
- page.off("dialog",handleBoardPrompt);
  await page.locator("#boardCanvas .mood-card").first().waitFor({state:"visible"});
  assert.equal(await page.locator("#boardCanvas .mood-card").count(),1);
  await page.locator('.space-rail button[data-panel="home"]').click();
