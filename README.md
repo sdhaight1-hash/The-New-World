@@ -38,7 +38,7 @@ The application supports independent worlds, encyclopedia editing, identity-pres
 
 ## Existing worldbuilding canon — imported into Studio
 
-The first structured canon population is now in [`canon/entries.json`](canon/entries.json), with a [source and provenance guide](canon/README.md). It covers **125 world-content records** in a fresh database (20 source chapters plus 105 distinct structured records), including **159 typed relationships** connecting regions, settlements, catastrophe phases, technology and institutional themes.
+The first structured canon population is now in [`canon/entries.json`](canon/entries.json), with a [source and provenance guide](canon/README.md). It covers **128 world-content records** in a fresh database (22 source chapters plus 106 distinct structured records), including **165 typed relationships** connecting regions, settlements, catastrophe phases, technology and institutional themes.
 
 The normal launcher imports this content automatically, **without replacing existing Studio edits or publishing drafts**. Earlier imports mistakenly included software-design documents; the launcher now removes their untouched copies only after making a complete backup. Edited or published copies are protected and flagged for review. It reuses the original Great Plague and Cascade documents as the authoritative event records rather than duplicating them.
 
@@ -51,6 +51,7 @@ This is an inventory of what the prior source documents actually establish—not
 These documents establish the setting and are the only Markdown sources imported as world content. The [structured canon inventory](canon/entries.json) adds individual places, events, and linked subjects from them.
 
 - [**The Historical Atlas (2018–November 2026)** — world → Western Hemisphere → US → Western US → California/Oregon/Wyoming → starting regions](history/README.md)
+- [Big Bear Valley baseline](history/10-big-bear-valley-2018-2026.md) · [Victor Valley baseline](history/11-victor-valley-2018-2026.md)
 - [Pre-Divergence World (2019–November 2026) — earlier supporting global overview](bible/21-real-world-2019-2026.md)
 - [The Brief Age of AI (2022–2030), documented history and alternate-history divergence](bible/20-brief-age-of-ai.md)
 - [Master historical chronology](bible/01-chronology.md)
