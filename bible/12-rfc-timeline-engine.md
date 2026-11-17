@@ -1,6 +1,6 @@
 # RFC 003 — Historical Timeline and Chronology Engine
 
-**Status:** architecture and staged implementation specification. Not an implemented timeline editor.  
+**Status:** initial event chronology and as-of-year filters implemented in [World Bible Studio](../app/README.md). Uncertain calendar modeling, dependency editor and advanced timeline layout remain planned.  
 **Depends on:** [Historical Knowledge Core](10-rfc-historical-knowledge-core.md), [Locations and Factions](11-rfc-location-faction-systems.md), [Relationship Discovery](09-linking-and-discovery.md).
 
 ## Product principle
