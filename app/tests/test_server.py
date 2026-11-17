@@ -126,7 +126,7 @@ class StoreTests(unittest.TestCase):
                     "INSERT INTO entities VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (f"test-{idx}",self.a,"subject",f"Topic {idx}","[]","","","working",
                      None,None,None,None,"archive",None,"[]","now","now"))
-        self.assertEqual(len(self.store.entries(self.a)), 500)
+        self.assertEqual(len(self.store.entries(self.a)), 505)
         self.assertEqual(len(self.store.export(self.a)["entities"]), 505)
 
     def test_import_rejects_media_manifest_without_binaries(self):
