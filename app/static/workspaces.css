@@ -194,3 +194,7 @@ body[data-space=article][data-mode=explore] .form-shell{border-top-color:#b8a7ce
 .preview-section h4{color:var(--entry-accent);margin:0 0 8px;font-size:14px}
 .preview-copy{white-space:pre-line;line-height:1.65;color:var(--entry-text);opacity:.9;font-size:13px;max-width:75ch}
 .preview-empty{padding:20px;color:var(--entry-text)}
+
+.create-type-hint{border-left:3px solid var(--space-accent);background:var(--raised);color:var(--muted);padding:9px 12px;font-size:12px;border-radius:0 6px 6px 0;line-height:1.55}
+dialog label.outline-option{display:flex;gap:10px;align-items:center;padding:10px 0;color:var(--text);font-weight:600}
+dialog .outline-option input{flex:0 0 auto;margin:0}
