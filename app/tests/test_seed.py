@@ -158,23 +158,63 @@ class CanonSeedTests(unittest.TestCase):
         self.assertEqual(items["covid-emergence-2019"]["start_year"],-15)
         self.assertEqual(items["trade-uncertainty-2026"]["end_year"],-8)
         self.assertEqual(items["agi-announcement-2026"]["start_year"],-8)
-        self.assertEqual(len(manifest["relations"]),112)
-        self.assertEqual(len(manifest["entries"]),99)
+        self.assertEqual(len(manifest["relations"]),143)
+        self.assertEqual(len(manifest["entries"]),109)
         self.assertTrue(all(e["status"]=="established" for e in manifest["entries"]
                             if e["source"]=="bible/21-real-world-2019-2026.md"))
         self.assertNotIn("great plague",items["covid-pandemic-2020"]["title"].lower())
         seed(self.path)
         with closing(Store(self.path)) as store:
-            self.assertEqual(len(store.entries(WORLD_ID)),107)
-            self.assertEqual(len(store.relation_list(WORLD_ID)),112)
+            self.assertEqual(len(store.entries(WORLD_ID)),117)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),143)
             self.assertEqual(store.public_entries(WORLD_ID),[])
             original=(ROOT/"bible/21-real-world-2019-2026.md").read_text(encoding="utf-8")
             self.assertEqual(store.check_entity(WORLD_ID,source_id("bible/21-real-world-2019-2026.md"))["body"],original)
             self.assertGreaterEqual(len(store.backlinks(WORLD_ID,canon_id("covid-pandemic-2020"))),2)
         seed(self.path)
         with closing(Store(self.path)) as store:
-            self.assertEqual(len(store.entries(WORLD_ID)),107)
-            self.assertEqual(len(store.relation_list(WORLD_ID)),112)
+            self.assertEqual(len(store.entries(WORLD_ID)),117)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),143)
+
+    def test_zooming_historical_layers_reuse_original_articles_and_preserve_edits(self):
+        manifest=load_canon()
+        hierarchy={row["key"]:row for row in manifest["entries"] if row["key"].startswith("history-")}
+        self.assertEqual(len(hierarchy),10)
+        for row in hierarchy.values():
+            self.assertEqual(row["reuse_source"],row["source"])
+            self.assertIn(row["source"],WORLD_SOURCE_PATHS)
+            self.assertTrue((ROOT/row["source"]).is_file())
+        required=[
+            ("history-world","history-hemisphere"),
+            ("history-hemisphere","history-us"),
+            ("history-us","history-west"),
+            ("history-west","history-california"),
+            ("history-west","history-oregon"),
+            ("history-west","history-wyoming"),
+            ("history-california","history-so-cal-local"),
+            ("history-oregon","history-clatsop-local"),
+            ("history-wyoming","history-wyoming-local"),
+        ]
+        actual={(r["source"],r["target"]) for r in manifest["relations"] if r["predicate"]=="narrows_to"}
+        self.assertTrue(set(required)<=actual)
+        seed(self.path)
+        with closing(Store(self.path)) as store:
+            for row in hierarchy.values():
+                record=store.check_entity(WORLD_ID,source_id(row["source"]))
+                self.assertEqual(record["body"],(ROOT/row["source"]).read_text(encoding="utf-8"))
+                self.assertEqual(record["type"],"subject")
+                self.assertEqual(record["status"],"established")
+            west=source_id(hierarchy["history-west"]["source"])
+            self.assertEqual(len([r for r in store.relation_list(WORLD_ID,west)
+                 if r["predicate"]=="narrows_to" and r["source_id"]==west]),3)
+            self.assertEqual(store.public_entries(WORLD_ID),[])
+            california=source_id(hierarchy["history-california"]["source"])
+            store.update_entry(WORLD_ID,california,{"body":"My revised California history"})
+        seed(self.path)
+        with closing(Store(self.path)) as store:
+            self.assertEqual(store.check_entity(WORLD_ID,california)["body"],"My revised California history")
+            self.assertEqual(len(store.entries(WORLD_ID)),117)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),143)
 
     def test_repeat_seed_never_duplicates_or_overwrites_personal_edits(self):
         seed(self.path)
