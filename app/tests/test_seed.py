@@ -158,28 +158,30 @@ class CanonSeedTests(unittest.TestCase):
         self.assertEqual(items["covid-emergence-2019"]["start_year"],-15)
         self.assertEqual(items["trade-uncertainty-2026"]["end_year"],-8)
         self.assertEqual(items["agi-announcement-2026"]["start_year"],-8)
-        self.assertEqual(len(manifest["relations"]),159)
-        self.assertEqual(len(manifest["entries"]),117)
+        self.assertEqual(len(manifest["relations"]),165)
+        self.assertEqual(len(manifest["entries"]),120)
         self.assertTrue(all(e["status"]=="established" for e in manifest["entries"]
                             if e["source"]=="bible/21-real-world-2019-2026.md"))
         self.assertNotIn("great plague",items["covid-pandemic-2020"]["title"].lower())
         seed(self.path)
         with closing(Store(self.path)) as store:
-            self.assertEqual(len(store.entries(WORLD_ID)),125)
-            self.assertEqual(len(store.relation_list(WORLD_ID)),159)
+            self.assertEqual(len(store.entries(WORLD_ID)),128)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),165)
             self.assertEqual(store.public_entries(WORLD_ID),[])
             original=(ROOT/"bible/21-real-world-2019-2026.md").read_text(encoding="utf-8")
             self.assertEqual(store.check_entity(WORLD_ID,source_id("bible/21-real-world-2019-2026.md"))["body"],original)
             self.assertGreaterEqual(len(store.backlinks(WORLD_ID,canon_id("covid-pandemic-2020"))),2)
         seed(self.path)
         with closing(Store(self.path)) as store:
-            self.assertEqual(len(store.entries(WORLD_ID)),125)
-            self.assertEqual(len(store.relation_list(WORLD_ID)),159)
+            self.assertEqual(len(store.entries(WORLD_ID)),128)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),165)
 
     def test_zooming_historical_layers_reuse_original_articles_and_preserve_edits(self):
         manifest=load_canon()
         hierarchy={row["key"]:row for row in manifest["entries"] if row["key"].startswith("history-")}
-        self.assertEqual(len(hierarchy),10)
+        self.assertEqual(len(hierarchy),12)
+        self.assertEqual(hierarchy["history-big-bear"]["source"],"history/10-big-bear-valley-2018-2026.md")
+        self.assertEqual(hierarchy["history-victor"]["source"],"history/11-victor-valley-2018-2026.md")
         for row in hierarchy.values():
             self.assertEqual(row["reuse_source"],row["source"])
             self.assertIn(row["source"],WORLD_SOURCE_PATHS)
@@ -194,6 +196,8 @@ class CanonSeedTests(unittest.TestCase):
             ("history-california","history-so-cal-local"),
             ("history-oregon","history-clatsop-local"),
             ("history-wyoming","history-wyoming-local"),
+            ("history-so-cal-local","history-big-bear"),
+            ("history-so-cal-local","history-victor"),
         ]
         actual={(r["source"],r["target"]) for r in manifest["relations"] if r["predicate"]=="narrows_to"}
         self.assertTrue(set(required)<=actual)
@@ -213,8 +217,8 @@ class CanonSeedTests(unittest.TestCase):
         seed(self.path)
         with closing(Store(self.path)) as store:
             self.assertEqual(store.check_entity(WORLD_ID,california)["body"],"My revised California history")
-            self.assertEqual(len(store.entries(WORLD_ID)),125)
-            self.assertEqual(len(store.relation_list(WORLD_ID)),159)
+            self.assertEqual(len(store.entries(WORLD_ID)),128)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),165)
 
     def test_2018_to_2026_year_span_and_regional_event_grounding(self):
         manifest=load_canon()
@@ -231,12 +235,12 @@ class CanonSeedTests(unittest.TestCase):
             self.assertEqual(entries[key]["start_year"],year)
             self.assertTrue((ROOT/entries[key]["source"]).is_file())
             self.assertEqual(entries[key]["type"],"event")
-        self.assertEqual(len(manifest["entries"]),117)
-        self.assertEqual(len(manifest["relations"]),159)
+        self.assertEqual(len(manifest["entries"]),120)
+        self.assertEqual(len(manifest["relations"]),165)
         seed(self.path)
         with closing(Store(self.path)) as store:
-            self.assertEqual(len(store.entries(WORLD_ID)),125)
-            self.assertEqual(len(store.relation_list(WORLD_ID)),159)
+            self.assertEqual(len(store.entries(WORLD_ID)),128)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),165)
             self.assertTrue(store.relation_list(WORLD_ID,canon_id("camp-fire-2018")))
             self.assertEqual(store.public_entries(WORLD_ID),[])
 
