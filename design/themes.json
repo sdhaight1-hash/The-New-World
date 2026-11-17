@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "description": "World-bible semantic entry themes. Reader appearance and contrast constraints take precedence. These are article-canvas themes, not global controls.",
+  "themes": [
+    {
+      "id": "archive",
+      "name": "Archive",
+      "description": "Neutral reference and research",
+      "dark": {
+        "canvas": "#18232D",
+        "surface": "#23333D",
+        "text": "#F0F3F2",
+        "muted": "#BFCDD1",
+        "accent": "#9AD4D0",
+        "border": "#556B73"
+      },
+      "light": {
+        "canvas": "#F7F5EF",
+        "surface": "#FFFFFF",
+        "text": "#213035",
+        "muted": "#435B61",
+        "accent": "#116A6C",
+        "border": "#9BAEB1"
+      }
+    },
+    {
+      "id": "atlas",
+      "name": "Atlas",
+      "description": "Places, environments and infrastructure",
+      "dark": {
+        "canvas": "#142520",
+        "surface": "#233A32",
+        "text": "#EFF5F0",
+        "muted": "#BED3C9",
+        "accent": "#ACDDB0",
+        "border": "#527265"
+      },
+      "light": {
+        "canvas": "#F1F5ED",
+        "surface": "#FFFFFF",
+        "text": "#21352C",
+        "muted": "#496453",
+        "accent": "#226B43",
+        "border": "#A1B5A6"
+      }
+    },
+    {
+      "id": "chronicle",
+      "name": "Chronicle",
+      "description": "Historical narrative and timelines",
+      "dark": {
+        "canvas": "#282019",
+        "surface": "#392C24",
+        "text": "#F7F1E9",
+        "muted": "#DAC9B8",
+        "accent": "#F5C584",
+        "border": "#786452"
+      },
+      "light": {
+        "canvas": "#FBF5EA",
+        "surface": "#FFFDFC",
+        "text": "#372A21",
+        "muted": "#66513E",
+        "accent": "#8A451A",
+        "border": "#C8AF95"
+      }
+    },
+    {
+      "id": "kinship",
+      "name": "Kinship",
+      "description": "People, families and households",
+      "dark": {
+        "canvas": "#251E2B",
+        "surface": "#362B3D",
+        "text": "#F7EFF6",
+        "muted": "#D7C7D9",
+        "accent": "#E9B5CD",
+        "border": "#786279"
+      },
+      "light": {
+        "canvas": "#FCF5FB",
+        "surface": "#FFFFFF",
+        "text": "#36283A",
+        "muted": "#654D68",
+        "accent": "#8E376B",
+        "border": "#C9AECA"
+      }
+    },
+    {
+      "id": "civic",
+      "name": "Civic",
+      "description": "Institutions and organizations",
+      "dark": {
+        "canvas": "#1C2633",
+        "surface": "#2B3847",
+        "text": "#EEF3FA",
+        "muted": "#C3D0E0",
+        "accent": "#A9CCF1",
+        "border": "#60748B"
+      },
+      "light": {
+        "canvas": "#F3F6FB",
+        "surface": "#FFFFFF",
+        "text": "#203347",
+        "muted": "#50657B",
+        "accent": "#245C91",
+        "border": "#A7BCD0"
+      }
+    }
+  ]
+}
