@@ -56,3 +56,14 @@ button,input,select{font:inherit}button,input,select{color:var(--ink);border:1px
 .reader-map-link{color:var(--article-accent);font-size:13px;font-weight:750}
 .reader-history-link time{color:var(--gold)}
 @media(max-width:740px){.reader-data-section .relation-list{grid-template-columns:1fr}}
+
+/* Historical atlas: obvious parent/child wayfinding, not generic unrelated links. */
+.historical-zoom{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:21px;margin:0 0 28px}
+.historical-zoom .eyebrow{margin:0 0 11px}
+.historical-zoom h2{font-family:Georgia,serif;font-weight:400;font-size:24px;margin:11px 0}
+.zoom-parent{display:inline-block;font-size:12px;color:var(--article-accent);margin-bottom:11px}
+.zoom-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px}
+.zoom-child{display:flex;flex-direction:column;gap:8px;padding:14px;border:1px solid var(--line);border-radius:6px;background:var(--raised)}
+.zoom-child strong{font-family:Georgia,serif;font-size:18px;font-weight:500;line-height:1.2}
+.zoom-child span{font-size:11px;color:var(--article-accent)}
+.zoom-child:hover{text-decoration:none;border-color:var(--article-accent)}
