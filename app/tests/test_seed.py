@@ -136,6 +136,46 @@ class CanonSeedTests(unittest.TestCase):
             self.assertIn("November 30, 2022",store.check_entity(
                 WORLD_ID,source_id("bible/20-brief-age-of-ai.md"))["body"])
 
+    def test_2019_to_2026_documented_multidomain_history(self):
+        manifest=load_canon()
+        items={item["key"]:item for item in manifest["entries"]}
+        self.assertIn("bible/21-real-world-2019-2026.md",WORLD_SOURCE_PATHS)
+        fields={
+            "2019":("global-baseline-2019","covid-emergence-2019","hong-kong-2019"),
+            "2020":("covid-pandemic-2020","pandemic-recession-2020","us-election-2020"),
+            "2021":("afghanistan-2021","supply-inflation-2021"),
+            "2022":("ukraine-invasion-2022","chatgpt-public-launch"),
+            "2023":("sudan-war-2023","israel-gaza-2023","nato-enlargement-2023"),
+            "2024":("eu-ai-act-2024","us-election-2024","climate-2024"),
+            "2025":("us-presidency-2025","ai-investment-2025","military-spending-2025"),
+            "2026":("trade-uncertainty-2026","agi-announcement-2026"),
+        }
+        for year,keys in fields.items():
+            for key in keys:
+                self.assertIn(key,items,(year,key))
+                self.assertIn(items[key]["source"],WORLD_SOURCE_PATHS)
+        self.assertEqual(items["global-baseline-2019"]["start_year"],-15)
+        self.assertEqual(items["covid-emergence-2019"]["start_year"],-15)
+        self.assertEqual(items["trade-uncertainty-2026"]["end_year"],-8)
+        self.assertEqual(items["agi-announcement-2026"]["start_year"],-8)
+        self.assertEqual(len(manifest["relations"]),107)
+        self.assertEqual(len(manifest["entries"]),97)
+        self.assertTrue(all(e["status"]=="established" for e in manifest["entries"]
+                            if e["source"]=="bible/21-real-world-2019-2026.md"))
+        self.assertNotIn("great plague",items["covid-pandemic-2020"]["title"].lower())
+        seed(self.path)
+        with closing(Store(self.path)) as store:
+            self.assertEqual(len(store.entries(WORLD_ID)),105)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),107)
+            self.assertEqual(store.public_entries(WORLD_ID),[])
+            original=(ROOT/"bible/21-real-world-2019-2026.md").read_text(encoding="utf-8")
+            self.assertEqual(store.check_entity(WORLD_ID,source_id("bible/21-real-world-2019-2026.md"))["body"],original)
+            self.assertGreaterEqual(len(store.backlinks(WORLD_ID,canon_id("covid-pandemic-2020"))),2)
+        seed(self.path)
+        with closing(Store(self.path)) as store:
+            self.assertEqual(len(store.entries(WORLD_ID)),105)
+            self.assertEqual(len(store.relation_list(WORLD_ID)),107)
+
     def test_repeat_seed_never_duplicates_or_overwrites_personal_edits(self):
         seed(self.path)
         with closing(Store(self.path)) as store:
