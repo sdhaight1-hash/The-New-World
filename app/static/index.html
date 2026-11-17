@@ -127,6 +127,19 @@
  <label for="boardPickerSearch">Find a reference</label><input id="boardPickerSearch" type="search" placeholder="Search by title, category or description…">
  <div id="boardPickerResults" class="mood-picker-results" role="group" aria-label="Available references"></div>
 </dialog>
+<dialog id="boardCardDialog" class="mood-card-dialog" aria-labelledby="boardCardHeading">
+ <form id="boardCardForm">
+  <p class="section-overline">VISUAL BOARD ITEM</p><h2 id="boardCardHeading">Edit board card</h2>
+  <label for="boardCardText">Note or caption<textarea id="boardCardText" rows="5" maxlength="5000"></textarea></label>
+  <label id="boardCardColorField" for="boardCardColor">Color<input id="boardCardColor" type="color" value="#9cb6a0"></label>
+  <div class="form-grid">
+   <label for="boardCardWidth">Width<input id="boardCardWidth" type="number" min="120" max="1200" required></label>
+   <label for="boardCardHeight">Height<input id="boardCardHeight" type="number" min="95" max="1200" required></label>
+  </div>
+  <p class="muted">Changes affect only this board placement, not the underlying image or encyclopedia record.</p>
+  <div class="form-actions"><button type="button" id="boardCardCancel">Cancel</button><button type="submit" class="primary">Save card</button></div>
+ </form>
+</dialog>
 <dialog id="boardCreateDialog" class="mood-create-dialog" aria-labelledby="boardCreateHeading">
  <form id="boardCreateForm"><p class="section-overline">NEW VISUAL WORKSPACE</p><h2 id="boardCreateHeading">Create a moodboard</h2>
  <label for="boardNewTitle">Board title<input id="boardNewTitle" required maxlength="180" placeholder="e.g. River valley settlement architecture"></label>
