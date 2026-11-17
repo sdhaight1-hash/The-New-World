@@ -38,7 +38,7 @@ The application supports independent worlds, encyclopedia editing, identity-pres
 
 ## Existing worldbuilding canon — imported into Studio
 
-The first structured canon population is now in [`canon/entries.json`](canon/entries.json), with a [source and provenance guide](canon/README.md). It covers **68 genuine world-content records** in a fresh database (8 historical/geographical source articles plus 60 structured records), including **58 typed relationships** connecting regions, settlements, catastrophe phases, technology and institutional themes.
+The first structured canon population is now in [`canon/entries.json`](canon/entries.json), with a [source and provenance guide](canon/README.md). It covers **78 world-content records** in a fresh database (9 historical/geographical source articles plus 69 structured records), including **75 typed relationships** connecting regions, settlements, catastrophe phases, technology and institutional themes.
 
 The normal launcher imports this content automatically, **without replacing existing Studio edits or publishing drafts**. Earlier imports mistakenly included software-design documents; the launcher now removes their untouched copies only after making a complete backup. Edited or published copies are protected and flagged for review. It reuses the original Great Plague and Cascade documents as the authoritative event records rather than duplicating them.
 
@@ -50,6 +50,7 @@ This is an inventory of what the prior source documents actually establish—not
 
 These documents establish the setting and are the only Markdown sources imported as world content. The [structured canon inventory](canon/entries.json) adds individual places, events, and linked subjects from them.
 
+- [The Brief Age of AI (2022–2030), documented history and alternate-history divergence](bible/20-brief-age-of-ai.md)
 - [Master historical chronology](bible/01-chronology.md)
 - [The Great Plague and demographic inversion](bible/02-great-plague.md)
 - [The Cascade and the Long Storms](bible/03-cascade.md)
@@ -88,6 +89,8 @@ These are engineering and interface design references for building the program. 
 - [Legacy genealogy prototype](tools/genealogy/index.html)
 
 ## Timekeeping
+
+**The world chronology begins November 30, 2022, with ChatGPT entering public use. Real history is followed through November 17, 2026; a convincing December 2026 AGI announcement marks the alternate-history divergence. Large-scale automation and labor displacement during 2027–2029 are established fictional setting directions, with details still open.**
 
 **Year 0** is the onset of the Cascade, currently *tentatively* placed around **2034–2035**. The plague is tentatively tied to international travel surrounding the **2030 men's World Cup**, with epidemic waves and partial recovery preceding the Cascade. **Year 50 (~2084–2085) is the main reference era**, not a fixed narrative date.
 
