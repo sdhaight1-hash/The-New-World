@@ -469,7 +469,7 @@ class Store:
         self.check_world(wid)
         if eid:
             self.check_entity(wid, eid)
-            return self.rows("""SELECT m.*,u.id as use_id,u.role,u.caption FROM media m JOIN media_uses u ON m.id=u.media_id
+            return self.rows("""SELECT m.*,u.id as use_id,u.media_id,u.role,u.caption FROM media m JOIN media_uses u ON m.id=u.media_id
                WHERE u.world_id=? AND u.entity_id=? ORDER BY m.created_at""", (wid, eid))
         return self.rows("SELECT * FROM media WHERE world_id=? ORDER BY created_at DESC", (wid,))
 
