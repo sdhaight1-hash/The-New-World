@@ -65,6 +65,7 @@ function syncWorld(){
  $("coverTitle").textContent=name;
  $("coverSummary").textContent=state.world?.description||"Explore the lives, geography, communities and history of a richly connected world.";
  $("coverCount").textContent=state.entries.length+" published articles";
+ $("coverArticleNumber").textContent=String(state.entries.length).padStart(2,"0");
 }
 function renderCard(e){
  const a=link("", "#/article/"+encodeURIComponent(e.id),"article-card");
@@ -80,6 +81,25 @@ function renderCard(e){
 }
 function renderHome(){
  syncWorld();
+ const route=$("readingRoute");route.replaceChildren();
+ const shelves=[
+  {title:"The world",label:"01 / ORIENTATION",types:["subject","place","source"]},
+  {title:"The places",label:"02 / GEOGRAPHY",types:["place"]},
+  {title:"The turning points",label:"03 / CHRONICLE",types:["event"]}
+ ];
+ const chosen=new Set();
+ for(const shelf of shelves){
+  const item=state.entries.find(e=>shelf.types.includes(e.type)&&!chosen.has(e.id));
+  if(!item)continue;
+  chosen.add(item.id);
+  const a=link("","#/article/"+encodeURIComponent(item.id),"reading-route-item");
+  a.append(node("span",shelf.label,"route-number"));
+  const content=node("div",undefined,"route-detail");
+  content.append(node("span",shelf.title,"route-category"),node("strong",item.title),
+   node("small",item.summary||category(item).description));
+  a.append(content,node("span","↗","route-arrow"));route.append(a);
+ }
+ if(!chosen.size)route.append(node("p","No published records yet. Articles will appear here when they are ready for readers.","empty-published"));
  const counts=new Map();
  for(const e of state.entries)counts.set(e.type,(counts.get(e.type)||0)+1);
  const ordered=[...counts].sort((a,b)=>b[1]-a[1]);
@@ -199,6 +219,11 @@ async function renderArticle(id){
  const cols=node("div",undefined,"article-columns");
  const main=node("div",undefined,"article-main");
  const aside=node("aside",undefined,"article-aside");
+ const context=node("section",undefined,"aside-panel archive-context");
+ context.append(node("span","THE WORLD ARCHIVE","archive-context-label"),node("strong",category(entry).short),
+  node("p","A published record in "+(state.world?.name||"this world")+"."),
+  link("Browse related subjects →","#/browse/"+encodeURIComponent(entry.type)));
+ aside.append(context);
  const layout=entry.layout?.length?entry.layout:["body","facts","relationships","backlinks","timeline","map","gallery","sources"];
  const body=node("article",undefined,"reader-prose");
  body.innerHTML=markup(entry.body||"This entry has no extended article text yet.");
