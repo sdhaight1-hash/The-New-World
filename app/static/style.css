@@ -16,3 +16,11 @@ input,select,textarea{padding:9px;width:100%}input[type=checkbox],input[type=col
 dialog{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);width:min(480px,calc(100vw - 32px));padding:26px;box-shadow:0 15px 70px #0008}
 dialog::backdrop{background:#000a;backdrop-filter:blur(2px)}
 dialog h2{margin-top:0}dialog label{display:block;margin:12px 0;color:var(--muted)}dialog label input,dialog label select{margin-top:4px}
+
+.year-control{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12px;white-space:nowrap}.year-control input{max-width:80px;width:80px;padding:7px}
+.relationship-graph{border:1px solid var(--line);border-radius:8px;background:var(--raised);padding:8px;min-height:95px;overflow-x:auto}
+.relationship-graph svg{display:block;width:100%;height:auto;min-width:340px;max-height:330px}
+.relationship-graph svg circle{transition:stroke-width .12s ease}
+.relationship-graph svg circle[style*="pointer"]:hover{stroke-width:4px}
+.relation-dates{margin:12px 0 18px}
+@media(max-width:700px){.year-control{order:3}.year-control input{width:65px}.topbar select{max-width:170px}}
