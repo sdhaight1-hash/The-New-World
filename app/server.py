@@ -786,6 +786,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(data)
                 return
+            if route == "/api/publication":
+                world=self.get_arg(q,"world_id")
+                eid=self.get_arg(q,"id")
+                s.check_entity(world,eid)
+                return self.reply({"entity_id":eid,"published":s.is_published(world,eid)})
             if route == "/api/worlds":
                 return self.reply(s.worlds())
             if route == "/api/entities":
