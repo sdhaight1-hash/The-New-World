@@ -48,7 +48,7 @@ class CanonSeedTests(unittest.TestCase):
                              {e["id"] for e in store.entries(WORLD_ID)})
             self.assertEqual(store.public_entries(WORLD_ID),[])
             self.assertEqual(len(store.entries(WORLD_ID,typ="person")),0)
-            for path in ("bible/00-foundations.md","bible/02-great-plague.md","regions/clatsop-county.md"):
+            for path in ("bible/01-chronology.md","bible/02-great-plague.md","regions/clatsop-county.md"):
                 original=(ROOT/path).read_text(encoding="utf-8")
                 self.assertEqual(store.check_entity(WORLD_ID,source_id(path))["body"],original)
             self.assertEqual(store.check_entity(WORLD_ID,canon_id("victor-valley"))["title"],"Victor Valley")
