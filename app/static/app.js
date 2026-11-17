@@ -179,10 +179,10 @@ function renderHome(){
  $("homeWorldDescription").textContent=w.description||"An independent worldbuilding project. Build places, people, events and relationships in one knowledge space.";
  const counts=categoryCounts(),total=state.entries.length,events=counts.find(x=>x[0]==="event")?.[1]||0,places=counts.find(x=>x[0]==="place")?.[1]||0;
  const established=state.entries.filter(e=>e.status==="established").length;
- const metrics=[["All records",total,"Open the encyclopedia","article"],["Locations",places,"Explore mapped and unmapped places","atlas"],["Historical events",events,"View your chronology","timeline"],["Established",established,"Records marked established","article"]];
+ const metrics=[["All records",total,"Open the encyclopedia","article"],["Locations",places,"Browse your geographical records","article"],["Historical events",events,"View your chronology","timeline"],["Established",established,"Records marked established","article"]];
  const grid=$("homeMetrics");grid.replaceChildren();
  for(const [name,value,detail,target] of metrics){
-  const tile=button("",()=>panel(target),"metric-card");
+  const tile=button("",()=>{if(name==="Locations"){$("typeFilter").value="place";renderList();}panel(target);},"metric-card");
   tile.append(el("span",name,"metric-label"),el("strong",String(value),"metric-value"),el("span",detail,"metric-detail"));
   grid.append(tile);
  }
@@ -656,6 +656,8 @@ function setupMap(){
 async function switchWorld(id){
  if(!safeExit()){$("world").value=wid();return;}state.world=state.worlds.find(w=>w.id===id);
  state.entry=null;state.relations=[];state.media=[];state.incoming=[];state.outgoing=[];
+ state.globalMedia=[];state.mediaUses=[];state.networkFilter="all";
+ $("search").value="";$("typeFilter").value="";$("mediaSearch").value="";$("mediaFilter").value="all";
  localStorage.setItem("wb-world",id);$("worldDescription").textContent=state.world.description||"";
  await refresh();panel("home");render();
 }
@@ -677,6 +679,7 @@ async function editWorld(){
   state.worlds=state.worlds.map(w=>w.id===updated.id?updated:w);
   $("world").selectedOptions[0].textContent=updated.name;
   $("worldDescription").textContent=updated.description||"";
+  renderHome();workspaceChrome();
   notice("World settings saved.");
  }catch(err){notice(err.message,true);}
 }
