@@ -28,6 +28,7 @@ ALLOWED_TYPES = {"person", "place", "event", "organization", "family", "object",
 STATUSES = {"working", "established", "disputed", "superseded"}
 THEMES = {"archive", "atlas", "chronicle", "kinship", "civic", "custom"}
 LINK_PATTERN = re.compile(r"\[\[([a-zA-Z0-9:-]{3,100})(?:\|[^\]\n]{1,180})?\]\]")
+TYPE_PATTERN = re.compile(r"^[a-z][a-z0-9_]{1,60}$")
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 VALID_BLOCKS = {"body", "facts", "relationships", "backlinks", "timeline", "map", "gallery", "sources"}
 DEFAULT_BLOCKS = ["body", "facts", "relationships", "backlinks", "timeline", "map", "gallery", "sources"]
@@ -124,7 +125,7 @@ def validate_entity(data, partial=False):
     if not partial:
         require("title" in data and "type" in data, "Title and type required")
     if "type" in data:
-        require(data["type"] in ALLOWED_TYPES, "Unknown entity type")
+        require(isinstance(data["type"], str) and TYPE_PATTERN.fullmatch(data["type"]), "Invalid entity type")
     if "title" in data:
         require(isinstance(data["title"], str) and 0 < len(data["title"].strip()) <= 250, "Invalid title")
     for k in ("summary", "body"):
@@ -238,7 +239,7 @@ class Store:
         sql = "SELECT * FROM entities WHERE world_id=?"
         args = [wid]
         if typ:
-            require(typ in ALLOWED_TYPES, "Unknown type")
+            require(TYPE_PATTERN.fullmatch(typ), "Unknown type")
             sql += " AND type=?"
             args.append(typ)
         if search:
@@ -321,7 +322,7 @@ class Store:
         self.check_entity(wid, src)
         self.check_entity(wid, dst)
         pred = data.get("predicate", "related_to")
-        require(pred in PREDICATES, "Invalid relationship type")
+        require(isinstance(pred, str) and TYPE_PATTERN.fullmatch(pred), "Invalid relationship type")
         require(data.get("status", "working") in STATUSES, "Invalid relationship status")
         notes = data.get("notes", "")
         require(isinstance(notes, str) and len(notes) <= 5000, "Invalid relationship notes")
@@ -554,7 +555,8 @@ class Store:
             for rel in relations:
                 require(isinstance(rel, dict) and rel.get("source_id") in old_new
                         and rel.get("target_id") in old_new, "Invalid imported relationship target")
-                require(rel.get("predicate") in PREDICATES and rel.get("status") in STATUSES,
+                require(isinstance(rel.get("predicate"), str) and TYPE_PATTERN.fullmatch(rel["predicate"])
+                        and rel.get("status") in STATUSES,
                         "Invalid imported relationship type/status")
                 start, end = rel.get("start_year"), rel.get("end_year")
                 require(start is None or type(start) is int, "Invalid relation start")
