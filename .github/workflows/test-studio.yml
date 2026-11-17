@@ -22,6 +22,7 @@ jobs:
           cache-dependency-path: app/requirements.txt
       - run: python -m pip install -r app/requirements.txt
       - run: python -m unittest discover -s app/tests -v
+      - run: python -m py_compile app/server.py app/seed.py app/backup.py app/launch.py
       - run: python app/seed.py --db /tmp/world-bible-seed.sqlite3
       - run: python app/seed.py --db /tmp/world-bible-seed.sqlite3
       - uses: actions/setup-node@v4
