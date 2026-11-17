@@ -285,3 +285,25 @@ dialog.mood-card-dialog{width:min(510px,calc(100vw - 32px))}
 .entry-board-link{display:flex;flex-direction:column;gap:5px;text-align:left;min-height:80px;background:var(--raised)}
 .entry-board-link small{color:var(--muted);font-size:10px}
 .mood-credit{color:var(--muted);font-size:10px;line-height:1.5}
+
+/* V2 knowledge organization: subordinate classification controls and type-aware properties. */
+.v2-library-filters{display:grid;gap:6px;padding:12px 0;border-top:1px solid var(--line)}
+.v2-library-filters label{font-size:10px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.v2-library-filters select{width:100%;max-width:100%;font-size:12px}
+.v2-new-class,.v2-inline-form{display:flex;gap:6px;align-items:center}
+.v2-new-class input,.v2-inline-form input{min-width:0;flex:1}
+.v2-new-class button,.v2-inline-form button{flex:none}
+.v2-metadata{margin:22px 0 28px;padding:22px;border:1px solid var(--line);border-radius:8px;background:var(--raised)}
+.v2-heading{display:flex;align-items:start;justify-content:space-between;gap:16px}
+.v2-heading h3{margin:0 0 6px;font-size:20px}
+.v2-heading p{margin:0 0 12px}
+.v2-metadata select[multiple]{min-height:110px;padding:4px}
+.v2-metadata select[multiple] option{padding:6px}
+.v2-metadata [data-property]{width:100%}
+.v2-metadata .form-grid{gap:8px 18px}
+.v2-metadata label{min-width:0}
+.v2-metadata #v2SaveMetadata{margin-top:15px}
+#v2MetaStatus{font-size:12px;color:var(--muted)}
+.v2-mention-excerpt{display:block;flex-basis:100%;line-height:1.6;font-family:Georgia,serif}
+.suggestion-row{flex-wrap:wrap;gap:8px}
+@media(max-width:720px){.v2-metadata{padding:15px}.v2-metadata .form-grid{grid-template-columns:1fr}.v2-heading{display:block}}
