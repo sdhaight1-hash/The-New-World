@@ -23,11 +23,23 @@ If you want a separate world, choose **+ World** in the header. Entries, links, 
 
 ## Navigate the Studio
 
-The interface is organized into **six clearly distinguished workspaces**: Overview, Encyclopedia, Atlas, Chronology, Connections, and Media Library. The selected world is always shown in the top bar; the entry explorer groups entries by type and highlights the current record.
+The interface is organized into **seven clearly distinguished workspaces**: Overview, Encyclopedia, Atlas, Chronology, Connections, Media Library, and Moodboards. The selected world is always shown in the top bar; the entry explorer groups entries by type and highlights the current record.
 
 Inside the Encyclopedia, each entry has **Read**, **Write**, **Design**, and **Explore** modes, with contextual instructions and a wider focused canvas for editing. Design mode includes sortable sections, a live page preview, theme presets, and optional accent overrides.
 
-Use **Ctrl+K** to jump to library search or **Alt+1–6** for workspace navigation. See the [Navigation and Editing Guide](NAVIGATION.md) for the mental model, capabilities, and limitations.
+Use **Ctrl+K** to jump to library search or **Alt+1–7** for workspace navigation. See the [Navigation and Editing Guide](NAVIGATION.md) for the mental model, capabilities, and limitations.
+
+## Visual development and moodboards
+
+The Studio's **Moodboards** workspace is a dedicated, world-isolated space for visual research, accessible from its main navigation rail (Alt+7), the Overview dashboard, or an encyclopedia entry's **Explore → Visual research boards** section.
+
+A moodboard can be associated with a specific place, person, society, family, event or other world entry. It holds reusable media, linked records, freeform notes and color swatches. Use the visual picker or upload an image directly; drag and resize cards to develop a look and feel. Click **Edit** on a card to change its caption, palette or exact dimensions. Image credits remain attached to source media.
+
+**Key distinction:** adding an entry to a board does not create a new canon relationship, and adding an image does not create a new image copy. Moodboards are private design workspaces, **not published visitor pages**. Publishing curated exhibition boards is a separate planned feature.
+
+Existing full-archive backups include all moodboards and media. JSON-only data interchange lists board metadata, but its current importer refuses boards rather than losing their source references; use the full backup utility for portable board restoration.
+
+[**VVD × Canva × Notion research and moodboard architecture**](../bible/19-visual-worldbuilding-and-moodboards.md)
 
 ## Available now
 
