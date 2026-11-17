@@ -9,8 +9,10 @@ if %ERRORLEVEL% EQU 0 (
 )
 if ERRORLEVEL 1 (
   echo.
-  echo Could not start World Bible Studio. Install Python 3.11 or newer.
-  echo For image support run: python -m pip install -r app\requirements.txt
+  echo World Bible Studio failed to start. Read the error output above.
+  echo Python is installed if a Python traceback was printed.
+  echo For a missing Python module only, install dependencies:
+  echo   python -m pip install -r app\requirements.txt
   pause
 )
 endlocal
