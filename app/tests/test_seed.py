@@ -46,7 +46,7 @@ class CanonSeedTests(unittest.TestCase):
                              {e["id"] for e in store.entries(WORLD_ID)})
             self.assertNotIn(source_id("bible/00-foundations.md"),
                              {e["id"] for e in store.entries(WORLD_ID)})
-            self.assertEqual(store.public_entries(WORLD_ID),[])
+            self.assertEqual(len(store.public_entries(WORLD_ID)),len(WORLD_SOURCE_PATHS))
             self.assertEqual(len(store.entries(WORLD_ID,typ="person")),0)
             for path in ("bible/01-chronology.md","bible/02-great-plague.md","regions/clatsop-county.md"):
                 original=(ROOT/path).read_text(encoding="utf-8")
@@ -58,6 +58,18 @@ class CanonSeedTests(unittest.TestCase):
             backlinks=store.backlinks(WORLD_ID,canon_id("victor-valley"))
             self.assertGreaterEqual(len(backlinks),4)
             self.assertEqual(len(store.boards(WORLD_ID)),0)
+
+    def test_starter_publication_is_one_time_and_preserves_unpublishing(self):
+        seed(self.path)
+        chosen=source_id("bible/01-chronology.md")
+        with closing(Store(self.path)) as store:
+            self.assertTrue(store.is_published(WORLD_ID,chosen))
+            self.assertEqual(len(store.public_entries(WORLD_ID)),len(WORLD_SOURCE_PATHS))
+            store.publication(WORLD_ID,chosen,False)
+        seed(self.path)
+        with closing(Store(self.path)) as store:
+            self.assertFalse(store.is_published(WORLD_ID,chosen))
+            self.assertEqual(len(store.public_entries(WORLD_ID)),len(WORLD_SOURCE_PATHS)-1)
 
     def test_legacy_software_documents_pruned_only_if_untouched(self):
         seed(self.path)
@@ -131,7 +143,7 @@ class CanonSeedTests(unittest.TestCase):
             self.assertEqual(store.check_entity(WORLD_ID,canon_id("chatgpt-public-launch"))["start_year"],-12)
             self.assertEqual(store.check_entity(WORLD_ID,canon_id("agi-announcement-2026"))["start_year"],-8)
             self.assertEqual(store.check_entity(WORLD_ID,canon_id("automation-boom-2028"))["start_year"],-6)
-            self.assertEqual(store.public_entries(WORLD_ID),[])
+            self.assertEqual(len(store.public_entries(WORLD_ID)),len(WORLD_SOURCE_PATHS))
             self.assertGreaterEqual(len(store.relation_list(WORLD_ID)),75)
             self.assertIn("November 30, 2022",store.check_entity(
                 WORLD_ID,source_id("bible/20-brief-age-of-ai.md"))["body"])
@@ -167,7 +179,7 @@ class CanonSeedTests(unittest.TestCase):
         with closing(Store(self.path)) as store:
             self.assertEqual(len(store.entries(WORLD_ID)),128)
             self.assertEqual(len(store.relation_list(WORLD_ID)),165)
-            self.assertEqual(store.public_entries(WORLD_ID),[])
+            self.assertEqual(len(store.public_entries(WORLD_ID)),len(WORLD_SOURCE_PATHS))
             original=(ROOT/"bible/21-real-world-2019-2026.md").read_text(encoding="utf-8")
             self.assertEqual(store.check_entity(WORLD_ID,source_id("bible/21-real-world-2019-2026.md"))["body"],original)
             self.assertGreaterEqual(len(store.backlinks(WORLD_ID,canon_id("covid-pandemic-2020"))),2)
@@ -211,7 +223,7 @@ class CanonSeedTests(unittest.TestCase):
             west=source_id(hierarchy["history-west"]["source"])
             self.assertEqual(len([r for r in store.relation_list(WORLD_ID,west)
                  if r["predicate"]=="narrows_to" and r["source_id"]==west]),3)
-            self.assertEqual(store.public_entries(WORLD_ID),[])
+            self.assertEqual(len(store.public_entries(WORLD_ID)),len(WORLD_SOURCE_PATHS))
             california=source_id(hierarchy["history-california"]["source"])
             store.update_entry(WORLD_ID,california,{"body":"My revised California history"})
         seed(self.path)
@@ -242,7 +254,7 @@ class CanonSeedTests(unittest.TestCase):
             self.assertEqual(len(store.entries(WORLD_ID)),128)
             self.assertEqual(len(store.relation_list(WORLD_ID)),165)
             self.assertTrue(store.relation_list(WORLD_ID,canon_id("camp-fire-2018")))
-            self.assertEqual(store.public_entries(WORLD_ID),[])
+            self.assertEqual(len(store.public_entries(WORLD_ID)),len(WORLD_SOURCE_PATHS))
 
     def test_repeat_seed_never_duplicates_or_overwrites_personal_edits(self):
         seed(self.path)
