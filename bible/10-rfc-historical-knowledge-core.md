@@ -1,6 +1,6 @@
 # RFC 001 — Historical Knowledge Core
 
-**Status:** research-backed architecture proposal; implementation not yet begun.  
+**Status:** foundational SQLite/HTTP core implemented in [World Bible Studio](../app/README.md); advanced provenance, uncertainty, rich linking, FTS5 and full schema migrations remain planned.  
 **Scope:** foundational data, relationships, auto-linking, historical semantics, search, genealogy, maps, timelines and auditing.  
 **Constraint:** minimal maintainable solution; preserve existing Markdown and genealogy exports.
 
