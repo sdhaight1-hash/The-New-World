@@ -21,6 +21,14 @@ The server listens on **127.0.0.1 only**. It is not authenticated or designed fo
 
 If you want a separate world, choose **+ World** in the header. Entries, links, relationships and images never cross world boundaries.
 
+## Navigate the Studio
+
+The interface is organized into **six clearly distinguished workspaces**: Overview, Encyclopedia, Atlas, Chronology, Connections, and Media Library. The selected world is always shown in the top bar; the entry explorer groups entries by type and highlights the current record.
+
+Inside the Encyclopedia, each entry has **Read**, **Write**, **Design**, and **Explore** modes, with contextual instructions and a wider focused canvas for editing. Design mode includes sortable sections, a live page preview, theme presets, and optional accent overrides.
+
+Use **Ctrl+K** to jump to library search or **Alt+1–6** for workspace navigation. See the [Navigation and Editing Guide](NAVIGATION.md) for the mental model, capabilities, and limitations.
+
 ## Available now
 
 - Multiple independent worlds with editable names/description, search/filterable entries, and custom entity categories (person/place/event/organization/family/source and other user-defined types).
