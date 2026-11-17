@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 from datetime import datetime, timezone
 
-from backup import make_backup
+from curate import cleanup_legacy
 from uuid import uuid5, NAMESPACE_URL
 
 from server import Store, DB_DEFAULT
@@ -101,6 +101,44 @@ def load_canon() -> dict:
     return data
 
 
+def linked_body(entry: dict, manifest: dict, ids: dict) -> str:
+    """Reconstruct the exact auto-generated body used by previous imports."""
+    adjacent = set()
+    for relation in manifest["relations"]:
+        if relation["source"] == entry["key"]:
+            adjacent.add(relation["target"])
+        if relation["target"] == entry["key"]:
+            adjacent.add(relation["source"])
+    titles = {item["key"]: item["title"] for item in manifest["entries"]}
+    links = [
+        f"[[{ids[key]}|{titles[key]}]]" for key in sorted(adjacent)
+    ]
+    links.append(f"[[{source_id(entry['source'])}|Original source document]]")
+    return (
+        base_text(entry)
+        + "\n\n## Related records and original source\n\n"
+        + "\n".join("- " + link for link in links)
+    )
+
+
+def update_generated_legacy_source_link(store: Store, manifest: dict, ids: dict) -> int:
+    """Remove erroneous link to the product's editorial ledger if unmodified.
+
+    Never rewrite a published article or a human-edited body.
+    """
+    article = next(e for e in manifest["entries"] if e["key"] == "reference-present")
+    old = {**article, "source": "bible/00-foundations.md"}
+    eid = ids[article["key"]]
+    existing = store.check_entity(WORLD_ID, eid)
+    if (
+        existing["body"] == linked_body(old, manifest, ids)
+        and not store.is_published(WORLD_ID, eid)
+    ):
+        store.update_entry(WORLD_ID, eid, {"body": linked_body(article, manifest, ids)})
+        return 1
+    return 0
+
+
 def seed(path=DB_DEFAULT):
     """Create missing records, preserving all existing edits and publication choices."""
     manifest = load_canon()  # Fail before any DB changes if the manifest is invalid.
@@ -159,31 +197,18 @@ def seed(path=DB_DEFAULT):
             store.create_entry(WORLD_ID, properties, specified_id=eid)
             added_canon += 1
 
-        # Link generated pages only when their bodies still equal the untouched source template.
-        # Never overwrite author edits or reset editorial/publication status on future launches.
-        adjacent = {key:[] for key in ids}
-        for relation in manifest["relations"]:
-            a,b=relation["source"],relation["target"]
-            adjacent[a].append(b)
-            adjacent[b].append(a)
+        # Add generated links only to untouched, newly seeded page templates.
         for entry in manifest["entries"]:
             if entry.get("reuse_source"):
                 continue
             eid = ids[entry["key"]]
             existing = store.check_entity(WORLD_ID, eid)
-            expected = base_text(entry)
-            if existing["body"] != expected:
-                continue
-            peers = sorted(set(adjacent[entry["key"]]))
-            links = [
-                f"[[{ids[key]}|{next(x['title'] for x in manifest['entries'] if x['key']==key)}]]"
-                for key in peers
-            ]
-            links.append(f"[[{source_id(entry['source'])}|Original source document]]")
-            store.update_entry(WORLD_ID, eid, {
-                "body": expected + "\n\n## Related records and original source\n\n"
-                        + "\n".join("- " + value for value in links)
-            })
+            if existing["body"] == base_text(entry):
+                store.update_entry(WORLD_ID, eid, {
+                    "body": linked_body(entry, manifest, ids)
+                })
+
+        repaired_links = update_generated_legacy_source_link(store, manifest, ids)
 
         # Deterministic relationship identity. Existing user-edited relationships are untouched.
         for relation in manifest["relations"]:
@@ -200,8 +225,21 @@ def seed(path=DB_DEFAULT):
             })
             related += 1
 
-        print(f"Seed complete: {added_docs} source documents, {added_canon} distinct canon records, "
-              f"{related} relationships added; {skipped} existing records preserved. World ID: {WORLD_ID}")
+        removed, protected, archive = cleanup_legacy(
+            store, ROOT, Path(path), WORLD_ID, source_id,
+            WORLD_SOURCE_PATHS, alias_by_path
+        )
+        print(
+            f"Seed complete: {added_docs} world source documents, {added_canon} distinct canon records, "
+            f"{related} relationships added; {skipped} existing records preserved; "
+            f"{removed} non-world documents removed; {repaired_links} old source links repaired. "
+            f"World ID: {WORLD_ID}"
+        )
+        if archive:
+            print(f"Pre-cleanup full backup: {archive}")
+        if protected:
+            print("Protected edited, published or referenced non-world entries; manual review needed: "
+                  + ", ".join(protected))
     finally:
         store.close()
 
