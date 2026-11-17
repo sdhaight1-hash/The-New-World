@@ -246,7 +246,7 @@ class Store:
             require(len(search) <= 200, "Search too long")
             sql += " AND (title LIKE ? OR aliases LIKE ? OR body LIKE ? OR summary LIKE ?)"
             args += ["%" + search + "%"] * 4
-        sql += " ORDER BY title COLLATE NOCASE LIMIT 500"
+        sql += " ORDER BY title COLLATE NOCASE"
         with self.lock:
             return [canonical(r) for r in self.db.execute(sql, args)]
 
